@@ -97,60 +97,26 @@ async function parseNode(node, imageRefs, vectorRefs) {
         width: 'width' in node ? node.width : 0,
         height: 'height' in node ? node.height : 0,
     };
-    // 保存原始 Figma API 的 x/y（后面会被 absoluteRenderBounds 重算）
+    // 保存原始 Figma API 的 x/y
     const origX = base.x;
     const origY = base.y;
-    // 获取绝对位置
-    if ('absoluteTransform' in node) {
+    // 获取绝对位置：优先用 absoluteBoundingBox（画布坐标），它对 GROUP 节点也正确
+    // absoluteTransform 对 GROUP 有 bug（返回错误的 y 值）
+    if ('absoluteBoundingBox' in node && node.absoluteBoundingBox) {
+        const bbox = node.absoluteBoundingBox;
+        base.absoluteX = bbox.x;
+        base.absoluteY = bbox.y;
+        // 用 absoluteBoundingBox 的尺寸覆盖（更准确）
+        base.width = bbox.width;
+        base.height = bbox.height;
+    } else if ('absoluteTransform' in node) {
         const transform = node.absoluteTransform;
         base.absoluteX = transform[0][2];
         base.absoluteY = transform[1][2];
     }
-    // GROUP 节点修正：Figma API 的 absoluteTransform 对 GROUP 有 bug。
-    // 所有 GROUP 节点统一用：absoluteY = node.y + FRAME.absoluteY
-    // node.y 始终是从父节点顶部算起的偏移。
-    if (node.type === 'GROUP') {
-        let frameAncestor = null;
-        let p = node.parent;
-        while (p && p.type !== 'PAGE') {
-            if (p.type === 'FRAME' || p.type === 'COMPONENT' || p.type === 'COMPONENT_SET') {
-                frameAncestor = p;
-                break;
-            }
-            p = p.parent;
-        }
-        if (frameAncestor) {
-            const frameAbs = absPosMap.get(frameAncestor.id);
-            if (frameAbs) {
-                // 保存原始 node.x（相对于 FRAME 祖先），子节点需要用它计算相对偏移
-                base._origNodeX = base.x;
-                base._origNodeY = base.y;
-                base.absoluteX = base.x + frameAbs.x;
-                base.absoluteY = base.y + frameAbs.y;
-            }
-        }
-    }
-    // GROUP 子节点修正：node.x/y 相对于 FRAME 祖先，需要减去 GROUP 的 node.x 得到相对于 GROUP 的偏移
-    try {
-        if (node.parent && node.parent.type === 'GROUP') {
-            const parentAbs = absPosMap.get(node.parent.id);
-            if (parentAbs && node.parent._origNodeX !== undefined) {
-                // origX 是相对于 FRAME 祖先的，减去 GROUP 的 node.x 得到相对于 GROUP 的偏移
-                base.x = origX - node.parent._origNodeX;
-                base.y = origY - node.parent._origNodeY;
-                base.absoluteX = base.x + parentAbs.x;
-                base.absoluteY = base.y + parentAbs.y;
-            } else if (parentAbs) {
-                base.absoluteX = origX + parentAbs.x;
-                base.absoluteY = origY + parentAbs.y;
-            }
-        }
-    } catch(e) {
-        // 忽略
-    }
-    // 缓存修正后的位置
+    // 缓存绝对位置
     absPosMap.set(node.id, { x: base.absoluteX, y: base.absoluteY });
-    // 从修正后的绝对坐标重新计算相对父节点的 x/y
+    // 计算相对父节点的偏移
     {
         const parent = node.parent;
         if (parent && parent.type !== 'PAGE') {
@@ -158,6 +124,9 @@ async function parseNode(node, imageRefs, vectorRefs) {
             if (parentAbs) {
                 base.x = base.absoluteX - parentAbs.x;
                 base.y = base.absoluteY - parentAbs.y;
+            } else if ('absoluteBoundingBox' in parent && parent.absoluteBoundingBox) {
+                base.x = base.absoluteX - parent.absoluteBoundingBox.x;
+                base.y = base.absoluteY - parent.absoluteBoundingBox.y;
             } else if ('absoluteTransform' in parent) {
                 base.x = base.absoluteX - parent.absoluteTransform[0][2];
                 base.y = base.absoluteY - parent.absoluteTransform[1][2];

@@ -127,24 +127,17 @@ async function parseNode(node, imageRefs, vectorRefs) {
             }
         }
     }
-    // GROUP 子节点修正
+    // GROUP 子节点修正：用父 GROUP 的修正位置 + node.x/y
     try {
         if (node.parent && node.parent.type === 'GROUP') {
             const parentAbs = absPosMap.get(node.parent.id);
             if (parentAbs) {
-                // 如果子节点与父 GROUP 的原始 node.y 相同，说明在同一位置
-                if (Math.abs(origY - (node.parent.y || 0)) < 0.01) {
-                    base.absoluteX = parentAbs.x;
-                    base.absoluteY = parentAbs.y;
-                } else {
-                    // 否则用父 GROUP 修正位置 + 原始偏移
-                    base.absoluteX = origX + parentAbs.x;
-                    base.absoluteY = origY + parentAbs.y;
-                }
+                base.absoluteX = origX + parentAbs.x;
+                base.absoluteY = origY + parentAbs.y;
             }
         }
     } catch(e) {
-        // 忽略 GROUP 子节点修正错误
+        // 忽略
     }
     // 缓存修正后的位置
     absPosMap.set(node.id, { x: base.absoluteX, y: base.absoluteY });

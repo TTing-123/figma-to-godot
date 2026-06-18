@@ -122,16 +122,25 @@ async function parseNode(node, imageRefs, vectorRefs) {
         if (frameAncestor) {
             const frameAbs = absPosMap.get(frameAncestor.id);
             if (frameAbs) {
+                // 保存原始 node.x（相对于 FRAME 祖先），子节点需要用它计算相对偏移
+                base._origNodeX = base.x;
+                base._origNodeY = base.y;
                 base.absoluteX = base.x + frameAbs.x;
                 base.absoluteY = base.y + frameAbs.y;
             }
         }
     }
-    // GROUP 子节点修正：用父 GROUP 的修正位置 + node.x/y
+    // GROUP 子节点修正：node.x/y 相对于 FRAME 祖先，需要减去 GROUP 的 node.x 得到相对于 GROUP 的偏移
     try {
         if (node.parent && node.parent.type === 'GROUP') {
             const parentAbs = absPosMap.get(node.parent.id);
-            if (parentAbs) {
+            if (parentAbs && node.parent._origNodeX !== undefined) {
+                // origX 是相对于 FRAME 祖先的，减去 GROUP 的 node.x 得到相对于 GROUP 的偏移
+                base.x = origX - node.parent._origNodeX;
+                base.y = origY - node.parent._origNodeY;
+                base.absoluteX = base.x + parentAbs.x;
+                base.absoluteY = base.y + parentAbs.y;
+            } else if (parentAbs) {
                 base.absoluteX = origX + parentAbs.x;
                 base.absoluteY = origY + parentAbs.y;
             }

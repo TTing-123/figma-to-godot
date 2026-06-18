@@ -363,13 +363,10 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	# 获取 Godot 类型
 	var godot_type = TYPE_MAP.get(node_type, "Control")
 
-	# 使用预处理的坐标
-	var abs_x = node.get("_abs_x", 0)
-	var abs_y = node.get("_abs_y", 0)
-	var parent_abs_x = node.get("_parent_abs_x", abs_x)
-	var parent_abs_y = node.get("_parent_abs_y", abs_y)
-	var x = abs_x - parent_abs_x
-	var y = abs_y - parent_abs_y
+	# 直接使用 Figma 的 x/y（相对于父节点的偏移）
+	# 不使用 absoluteX/Y 计算，因为 Figma Plugin API 对 GROUP 节点的 absoluteTransform 有 bug
+	var x = node.get("x", 0)
+	var y = node.get("y", 0)
 	var width = node.get("width", 0)
 	var height = node.get("height", 0)
 

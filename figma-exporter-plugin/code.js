@@ -14,6 +14,7 @@ figma.ui.onmessage = async (msg) => {
 };
 // 主导出函数
 async function handleExport() {
+    absPosMap.clear();
     const selection = figma.currentPage.selection;
     if (selection.length === 0) {
         figma.ui.postMessage({
@@ -81,6 +82,8 @@ async function handleExport() {
     });
 }
 // 解析节点
+// absPosMap: 存储每个节点修正后的绝对位置
+const absPosMap = new Map();
 async function parseNode(node, imageRefs, vectorRefs) {
     var _a, _b;
     const base = {
@@ -95,10 +98,34 @@ async function parseNode(node, imageRefs, vectorRefs) {
         height: 'height' in node ? node.height : 0,
     };
     // 获取绝对位置
-    if ('absoluteTransform' in node) {
+    // - GROUP 节点：absoluteTransform 有 bug，用 absoluteRenderBounds
+    // - GROUP 子节点：absoluteTransform 可能返回与父 GROUP 相同的值，用 absoluteRenderBounds
+    // - 其他节点：absoluteTransform 正确
+    const isGroupChild = node.parent && node.parent.type === 'GROUP';
+    if ((node.type === 'GROUP' || isGroupChild) && 'absoluteRenderBounds' in node && node.absoluteRenderBounds) {
+        const rb = node.absoluteRenderBounds;
+        base.absoluteX = rb.x;
+        base.absoluteY = rb.y;
+    } else if ('absoluteTransform' in node) {
         const transform = node.absoluteTransform;
         base.absoluteX = transform[0][2];
         base.absoluteY = transform[1][2];
+    }
+    // 缓存修正后的位置
+    absPosMap.set(node.id, { x: base.absoluteX, y: base.absoluteY });
+    // 从修正后的绝对坐标重新计算相对父节点的 x/y
+    {
+        const parent = node.parent;
+        if (parent && parent.type !== 'PAGE') {
+            const parentAbs = absPosMap.get(parent.id);
+            if (parentAbs) {
+                base.x = base.absoluteX - parentAbs.x;
+                base.y = base.absoluteY - parentAbs.y;
+            } else if ('absoluteTransform' in parent) {
+                base.x = base.absoluteX - parent.absoluteTransform[0][2];
+                base.y = base.absoluteY - parent.absoluteTransform[1][2];
+            }
+        }
     }
     // 处理自动布局
     if ('layoutMode' in node && node.layoutMode !== 'NONE') {

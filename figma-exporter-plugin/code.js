@@ -114,6 +114,11 @@ async function parseNode(node, imageRefs, vectorRefs) {
         base.absoluteX = transform[0][2];
         base.absoluteY = transform[1][2];
     }
+    // 安全检查：如果无法获取绝对位置，用原始 x/y 作为后备
+    if (base.absoluteX === undefined || base.absoluteY === undefined) {
+        base.absoluteX = base.x;
+        base.absoluteY = base.y;
+    }
     // 缓存绝对位置
     absPosMap.set(node.id, { x: base.absoluteX, y: base.absoluteY });
     // 计算相对父节点的偏移

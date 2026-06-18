@@ -1,0 +1,11 @@
+# Godot
+.godot/
+*.import
+
+# Node
+figma-exporter-plugin/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+.claude/

@@ -97,19 +97,54 @@ async function parseNode(node, imageRefs, vectorRefs) {
         width: 'width' in node ? node.width : 0,
         height: 'height' in node ? node.height : 0,
     };
+    // 保存原始 Figma API 的 x/y（后面会被 absoluteRenderBounds 重算）
+    const origX = base.x;
+    const origY = base.y;
     // 获取绝对位置
-    // - GROUP 节点：absoluteTransform 有 bug，用 absoluteRenderBounds
-    // - GROUP 子节点：absoluteTransform 可能返回与父 GROUP 相同的值，用 absoluteRenderBounds
-    // - 其他节点：absoluteTransform 正确
-    const isGroupChild = node.parent && node.parent.type === 'GROUP';
-    if ((node.type === 'GROUP' || isGroupChild) && 'absoluteRenderBounds' in node && node.absoluteRenderBounds) {
-        const rb = node.absoluteRenderBounds;
-        base.absoluteX = rb.x;
-        base.absoluteY = rb.y;
-    } else if ('absoluteTransform' in node) {
+    if ('absoluteTransform' in node) {
         const transform = node.absoluteTransform;
         base.absoluteX = transform[0][2];
         base.absoluteY = transform[1][2];
+    }
+    // GROUP 节点修正：Figma API 的 absoluteTransform 对 GROUP 有 bug。
+    // 所有 GROUP 节点统一用：absoluteY = node.y + FRAME.absoluteY
+    // node.y 始终是从父节点顶部算起的偏移。
+    if (node.type === 'GROUP') {
+        let frameAncestor = null;
+        let p = node.parent;
+        while (p && p.type !== 'PAGE') {
+            if (p.type === 'FRAME' || p.type === 'COMPONENT' || p.type === 'COMPONENT_SET') {
+                frameAncestor = p;
+                break;
+            }
+            p = p.parent;
+        }
+        if (frameAncestor) {
+            const frameAbs = absPosMap.get(frameAncestor.id);
+            if (frameAbs) {
+                base.absoluteX = base.x + frameAbs.x;
+                base.absoluteY = base.y + frameAbs.y;
+            }
+        }
+    }
+    // GROUP 子节点修正
+    try {
+        if (node.parent && node.parent.type === 'GROUP') {
+            const parentAbs = absPosMap.get(node.parent.id);
+            if (parentAbs) {
+                // 如果子节点与父 GROUP 的原始 node.y 相同，说明在同一位置
+                if (Math.abs(origY - (node.parent.y || 0)) < 0.01) {
+                    base.absoluteX = parentAbs.x;
+                    base.absoluteY = parentAbs.y;
+                } else {
+                    // 否则用父 GROUP 修正位置 + 原始偏移
+                    base.absoluteX = origX + parentAbs.x;
+                    base.absoluteY = origY + parentAbs.y;
+                }
+            }
+        }
+    } catch(e) {
+        // 忽略 GROUP 子节点修正错误
     }
     // 缓存修正后的位置
     absPosMap.set(node.id, { x: base.absoluteX, y: base.absoluteY });

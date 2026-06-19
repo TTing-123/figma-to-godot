@@ -273,17 +273,24 @@ async function parseNode(node, imageRefs, vectorRefs) {
     const vectorTypes = ['VECTOR', 'BOOLEAN', 'STAR', 'LINE', 'ELLIPSE', 'REGULAR_POLYGON'];
     if (vectorTypes.includes(node.type)) {
         try {
-            // useAbsoluteBounds: true 使用节点的 layout bounds（与 Figma UI 显示尺寸一致），
-            // 而非默认的 render bounds（包含描边等额外区域）。
+            // 对有描边的线条节点使用 render bounds（包含描边区域），
+            // 其他节点使用 layout bounds（与 Figma UI 显示尺寸一致）。
+            const hasStroke = node.type === 'VECTOR' && 'strokeWeight' in node && node.strokeWeight > 0;
             const bytes = await node.exportAsync({
                 format: 'PNG',
                 constraint: { type: 'SCALE', value: 3 },
-                useAbsoluteBounds: true
+                useAbsoluteBounds: !hasStroke
             });
             vectorRefs.set(node.id, bytes);
-            // 对有描边的线条节点：如果 width 或 height 为 0，
-            // 用 strokeWeight 补偿（因为 useAbsoluteBounds 不含描边区域）
-            if (node.type === 'VECTOR' && 'strokeWeight' in node && node.strokeWeight > 0) {
+            // 对有描边的线条节点：用 render bounds 的实际尺寸覆盖
+            // （useAbsoluteBounds=false 时 absoluteBoundingBox 包含描边区域）
+            if (hasStroke && 'absoluteRenderBounds' in node && node.absoluteRenderBounds) {
+                const rb = node.absoluteRenderBounds;
+                // render bounds 给出包含描边的实际像素尺寸
+                base.width = rb.width;
+                base.height = rb.height;
+            } else if (hasStroke) {
+                // 后备：用 strokeWeight 补偿
                 if (base.height === 0 && base.width > 0) {
                     base.height = node.strokeWeight;
                 } else if (base.width === 0 && base.height > 0) {

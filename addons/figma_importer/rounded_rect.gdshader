@@ -94,17 +94,15 @@ void fragment() {
 		}
 	}
 
-	// 描边（抗锯齿，渐变填充之后，纹理之前）
+	// 描边（渐变填充之后，纹理之前）
 	if (border_width > 0.0) {
 		vec2 border_center = target_size * 0.5;
 		vec2 border_p = pixel_pos - border_center;
 		vec2 border_half = target_size * 0.5;
 		float border_d = rounded_box_sdf(border_p, border_half, corner_radiuses);
-		// 描边区域: SDF 在 [-border_width, 0] 之间
-		// smoothstep 在边界处产生 1px 抗锯齿
-		float border_mask = smoothstep(-border_width - 1.0, -border_width, border_d);
-		// border_mask: 0=内部深处(显示渐变), 1=描边区域(显示描边)
-		COLOR = mix(COLOR, border_color, border_mask);
+		if (border_d > -border_width && border_d <= 0.0) {
+			COLOR = border_color;
+		}
 	}
 
 	if (use_texture) {

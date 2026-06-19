@@ -15,6 +15,13 @@ float rounded_box_sdf(vec2 p, vec2 b, vec4 r) {
 	return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
+// SDF 胶囊（圆角线段）：沿 line_a→line_b 的线段，两端半径为 radius
+float capsule_sdf(vec2 p, vec2 line_a, vec2 line_b, float radius) {
+	vec2 pa = p - line_a, ba = line_b - line_a;
+	float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+	return length(pa - ba * h) - radius;
+}
+
 void fragment() {
 	// 当前像素在节点中的位置（像素坐标）
 	vec2 pixel_pos = UV * target_size;
@@ -34,13 +41,27 @@ void fragment() {
 	vec2 center = target_size * 0.5;
 	vec2 p = pixel_pos - center;
 	vec2 half_size = target_size * 0.5;
-	// 当 corner_radius 超过节点尺寸的一半时，限制为 half_size
-	// 这样圆角矩形会正确渲染为胶囊形状（平边+圆头，与 Figma 行为一致）
-	vec2 clamped_r = min(vec2(corner_radius), half_size);
-	float d = rounded_box_sdf(p, half_size, vec4(clamped_r.x, clamped_r.y, clamped_r.x, clamped_r.y));
 
-	if (d > 0.0) {
-		discard;
+	// 判断是否需要胶囊模式：corner_radius >= 较小的 half_size
+	float min_half = min(half_size.x, half_size.y);
+	if (corner_radius >= min_half) {
+		// 胶囊 SDF：两端圆头 + 中间平边
+		// 根据宽高比选择方向：竖向(h>w)用竖线段，横向(w>=h)用横线段
+		float d;
+		if (half_size.y > half_size.x) {
+			// 竖向胶囊：竖线段 + 上下半圆头
+			float half_line = half_size.y - min_half;
+			d = capsule_sdf(p, vec2(0.0, -half_line), vec2(0.0, half_line), min_half);
+		} else {
+			// 横向胶囊：横线段 + 左右半圆头
+			float half_line_x = max(half_size.x - min_half, 0.0);
+			d = capsule_sdf(p, vec2(-half_line_x, 0.0), vec2(half_line_x, 0.0), min_half);
+		}
+		if (d > 0.0) { discard; }
+	} else {
+		// 普通圆角矩形 SDF
+		float d = rounded_box_sdf(p, half_size, vec4(corner_radius));
+		if (d > 0.0) { discard; }
 	}
 
 	if (use_texture) {

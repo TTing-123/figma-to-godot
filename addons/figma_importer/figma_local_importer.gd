@@ -316,6 +316,9 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	# 存储根节点大小
 	node["_root_width"] = root_width
 	node["_root_height"] = root_height
+	# 存储节点在根画布中的 UV 位置（用于渐变坐标转换）
+	if root_width > 0 and root_height > 0:
+		node["_canvas_uv"] = Vector2(abs_x / root_width, abs_y / root_height)
 
 	# 存储父节点的裁剪信息和尺寸
 	var parent_clips = parent_pos.get("clips_content", false)
@@ -488,21 +491,37 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var panel_parent_radius = node.get("_parent_corner_radius", 0)
 		var panel_parent_size = node.get("_parent_size", Vector2.ZERO)
 		var panel_offset_in_parent = node.get("_offset_in_parent", Vector2.ZERO)
-		# 当自身有圆角，或父节点有圆角裁剪时，应用 shader
-		if panel_self_radius > 0 or panel_parent_radius > 0:
+		# 当自身有圆角、父节点有圆角裁剪、或有渐变填充时，应用 shader
+		var has_gradient = node.has("_gradient_data")
+		if panel_self_radius > 0 or panel_parent_radius > 0 or has_gradient:
+			var panel_shader_props = {
+				"shader": 'ExtResource("shader_rounded")',
+				"shader_parameter/corner_radius": float(panel_self_radius),
+					"shader_parameter/corner_radiuses": "Vector4(%f, %f, %f, %f)" % [float(bl), float(tr), float(br), float(tl)],
+				"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
+				"shader_parameter/parent_corner_radius": float(panel_parent_radius),
+				"shader_parameter/parent_size": "Vector2(%f, %f)" % [panel_parent_size.x, panel_parent_size.y],
+				"shader_parameter/offset_in_parent": "Vector2(%f, %f)" % [panel_offset_in_parent.x, panel_offset_in_parent.y],
+				"shader_parameter/use_texture": false,
+			}
+			# 渐变填充：传递渐变参数到 shader
+			if node.has("_gradient_data"):
+				var gd = node["_gradient_data"]
+				panel_shader_props["shader_parameter/use_gradient"] = true
+				panel_shader_props["shader_parameter/gradient_color1"] = gd["color1"]
+				panel_shader_props["shader_parameter/gradient_color2"] = gd["color2"]
+				panel_shader_props["shader_parameter/gradient_start"] = gd["start"]
+				panel_shader_props["shader_parameter/gradient_end"] = gd["end"]
+				# 描边：传递到 shader
+				if node.has("_stroke_data"):
+					var sd = node["_stroke_data"]
+					panel_shader_props["shader_parameter/border_width"] = sd["width"]
+					panel_shader_props["shader_parameter/border_color"] = sd["color"]
 			var panel_shader_id = _next_resource_id()
 			_sub_resources.append({
 				"id": panel_shader_id,
 				"type": "ShaderMaterial",
-				"properties": {
-					"shader": 'ExtResource("shader_rounded")',
-					"shader_parameter/corner_radius": float(panel_self_radius),
-					"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
-					"shader_parameter/parent_corner_radius": float(panel_parent_radius),
-					"shader_parameter/parent_size": "Vector2(%f, %f)" % [panel_parent_size.x, panel_parent_size.y],
-					"shader_parameter/offset_in_parent": "Vector2(%f, %f)" % [panel_offset_in_parent.x, panel_offset_in_parent.y],
-					"shader_parameter/use_texture": false,
-				}
+				"properties": panel_shader_props,
 			})
 			properties["material"] = 'SubResource("%d")' % panel_shader_id
 
@@ -620,6 +639,33 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 					var style_id = _create_gradient_style_ex(fill, int(tl), int(tr), int(bl), int(br))
 					if style_id > 0:
 						properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
+					# 存储渐变数据供 shader 使用
+					var stops = fill.get("gradientStops", [])
+					if stops.size() >= 2:
+						var c1 = stops[0].get("color", {})
+						var c2 = stops[stops.size() - 1].get("color", {})
+						# gradientTransform: 2x3 矩阵
+						# canvas_pos = gradient_pos * matrix
+						# gradient (0,0)->(1,0) 映射到 canvas
+						# canvas_x = a*gx + c*gy + e, canvas_y = b*gx + d*gy + f
+						var gt = fill.get("gradientTransform", [[1, 0, 0], [0, 1, 0]])
+						var sx = gt[0][0] * 0 + gt[0][1] * 0 + gt[0][2]
+						var sy = gt[1][0] * 0 + gt[1][1] * 0 + gt[1][2]
+						var ex = gt[0][0] * 1 + gt[0][1] * 0 + gt[0][2]
+						var ey = gt[1][0] * 1 + gt[1][1] * 0 + gt[1][2]
+						# 垂直渐变需要交换 start/end（Figma 垂直渐变方向与 shader 相反）
+						var dx = abs(ex - sx)
+						var dy = abs(ey - sy)
+						if dy > dx:
+							var tmp_x = sx; var tmp_y = sy
+							sx = ex; sy = ey
+							ex = tmp_x; ey = tmp_y
+						node["_gradient_data"] = {
+							"color1": "Color(%f, %f, %f, %f)" % [c1.get("r",0), c1.get("g",0), c1.get("b",0), c1.get("a",1)],
+							"color2": "Color(%f, %f, %f, %f)" % [c2.get("r",0), c2.get("g",0), c2.get("b",0), c2.get("a",1)],
+							"start": "Vector2(%f, %f)" % [sx, sy],
+							"end": "Vector2(%f, %f)" % [ex, ey],
+						}
 
 				"IMAGE":
 					var ref = fill.get("imageRef", "")
@@ -644,13 +690,17 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 		properties["expand_mode"] = 1
 		properties["stretch_mode"] = 6
 
-	# 处理描边（TEXT 跳过：Label 不需要 panel 描边）
+	# 处理描边
 	if not is_text and not strokes.is_empty() and stroke_weight > 0:
 		for stroke in strokes:
 			if stroke.get("type") == "SOLID":
-				var color = _figma_color_to_godot(stroke.get("color", {}))
-				var border_width = stroke_weight if stroke_weight >= 0.5 else 1
-				properties["theme_override_styles/panel"] = _create_border_style_ex(color, border_width, int(tl), int(tr), int(bl), int(br))
+				var stroke_color = _figma_color_to_godot(stroke.get("color", {}))
+				var border_w = stroke_weight if stroke_weight >= 0.5 else 1
+				# 存储描边数据供 shader 使用
+				node["_stroke_data"] = {"color": stroke_color, "width": border_w}
+				# 如果没有 fill 样式，用 StyleBoxFlat 渲染描边
+				if not properties.has("theme_override_styles/panel"):
+					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
 
 	# 处理阴影
 	for effect in effects:
@@ -695,12 +745,22 @@ func _create_gradient_style_ex(fill: Dictionary, tl: int, tr: int, bl: int, br: 
 	if stops.size() < 2:
 		return 0
 
+	# 选择最不透明的 stop 颜色（渐变可能从透明到不透明）
+	var best_color = stops[0].get("color", {})
+	var best_alpha = best_color.get("a", 0)
+	for s in stops:
+		var c = s.get("color", {})
+		var a = c.get("a", 0)
+		if a > best_alpha:
+			best_alpha = a
+			best_color = c
+
 	var style_id = _next_resource_id()
 	_sub_resources.append({
 		"id": style_id,
 		"type": "StyleBoxFlat",
 		"properties": {
-			"bg_color": _figma_color_to_godot(stops[0].get("color", {})),
+			"bg_color": _figma_color_to_godot(best_color),
 			"corner_radius_top_left": tl,
 			"corner_radius_top_right": tr,
 			"corner_radius_bottom_left": bl,

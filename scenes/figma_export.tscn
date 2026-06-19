@@ -1,4 +1,4 @@
-[gd_scene load_steps=188 format=3]
+[gd_scene load_steps=177 format=3]
 
 [ext_resource type="Shader" path="res://addons/figma_importer/rounded_rect.gdshader" id="shader_rounded"]
 [ext_resource type="Texture2D" path="res://figma_export_assets/images/c4fc7a9e29c4b8ec5097fe8e417deafebcf27305.png" id="5"]
@@ -8,73 +8,73 @@
 [ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_846.png" id="10"]
 [ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_849.png" id="12"]
 [ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_850.png" id="14"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_748_23_11710.png" id="29"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_756_23_11935.png" id="36"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_764_23_11253.png" id="43"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_764_23_11254.png" id="45"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_764_23_11255.png" id="47"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_773_23_12207.png" id="54"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_681.png" id="62"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_682.png" id="64"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_683.png" id="66"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_693.png" id="74"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_694.png" id="76"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_695.png" id="78"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_696.png" id="80"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_697.png" id="82"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_700.png" id="85"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_701.png" id="86"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_704.png" id="88"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_705.png" id="90"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_708.png" id="92"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_709.png" id="93"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_712.png" id="95"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_713.png" id="97"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_716.png" id="99"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_717.png" id="100"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_720.png" id="102"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_721.png" id="104"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_724.png" id="106"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_725.png" id="107"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_728.png" id="109"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_729.png" id="111"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_730.png" id="113"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_731.png" id="115"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_732.png" id="117"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_733.png" id="119"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_734.png" id="121"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_735.png" id="123"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_736.png" id="125"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_737.png" id="127"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_738.png" id="129"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_780.png" id="136"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_782.png" id="137"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_785.png" id="138"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_787.png" id="140"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_790.png" id="141"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_792.png" id="143"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_795.png" id="145"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_796.png" id="147"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_797.png" id="149"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_798.png" id="151"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_799.png" id="153"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_800.png" id="155"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_801.png" id="157"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_802.png" id="159"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_803.png" id="161"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_804.png" id="163"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_805.png" id="165"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_806.png" id="167"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_807.png" id="169"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_808.png" id="171"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_810.png" id="173"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_811.png" id="175"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_813.png" id="176"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_814.png" id="178"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_817.png" id="180"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_818.png" id="183"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_820.png" id="184"]
-[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_821.png" id="187"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_748_23_11710.png" id="28"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_756_23_11935.png" id="34"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_764_23_11253.png" id="40"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_764_23_11254.png" id="42"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_764_23_11255.png" id="44"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/I7_773_23_12207.png" id="50"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_681.png" id="56"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_682.png" id="58"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_683.png" id="60"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_693.png" id="65"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_694.png" id="67"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_695.png" id="69"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_696.png" id="71"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_697.png" id="73"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_700.png" id="76"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_701.png" id="77"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_704.png" id="79"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_705.png" id="81"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_708.png" id="83"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_709.png" id="84"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_712.png" id="86"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_713.png" id="88"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_716.png" id="90"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_717.png" id="91"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_720.png" id="93"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_721.png" id="95"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_724.png" id="97"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_725.png" id="98"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_728.png" id="100"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_729.png" id="102"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_730.png" id="104"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_731.png" id="106"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_732.png" id="108"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_733.png" id="110"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_734.png" id="112"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_735.png" id="114"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_736.png" id="116"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_737.png" id="118"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_738.png" id="120"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_780.png" id="125"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_782.png" id="126"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_785.png" id="127"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_787.png" id="129"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_790.png" id="130"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_792.png" id="132"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_795.png" id="134"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_796.png" id="136"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_797.png" id="138"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_798.png" id="140"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_799.png" id="142"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_800.png" id="144"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_801.png" id="146"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_802.png" id="148"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_803.png" id="150"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_804.png" id="152"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_805.png" id="154"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_806.png" id="156"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_807.png" id="158"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_808.png" id="160"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_810.png" id="162"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_811.png" id="164"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_813.png" id="165"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_814.png" id="167"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_817.png" id="169"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_818.png" id="172"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_820.png" id="173"]
+[ext_resource type="Texture2D" path="res://figma_export_assets/vectors/7_821.png" id="176"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0, 0, 0, 0.01)
@@ -86,6 +86,7 @@ corner_radius_bottom_left = 40
 [sub_resource type="ShaderMaterial" id="2"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 40.0
+shader_parameter/corner_radiuses = Vector4(40.000000, 40.000000, 40.000000, 40.000000)
 shader_parameter/target_size = Vector2(375.000000, 812.000000)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(0.000000, 0.000000)
@@ -102,6 +103,7 @@ corner_radius_bottom_right = 20
 [sub_resource type="ShaderMaterial" id="4"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 20.0
+shader_parameter/corner_radiuses = Vector4(20.000000, 20.000000, 20.000000, 20.000000)
 shader_parameter/target_size = Vector2(349.000000, 119.000000)
 shader_parameter/parent_corner_radius = 40.0
 shader_parameter/parent_size = Vector2(375.000000, 812.000000)
@@ -141,6 +143,7 @@ corner_radius_bottom_right = 8
 [sub_resource type="ShaderMaterial" id="16"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 8.0
+shader_parameter/corner_radiuses = Vector4(8.000000, 8.000000, 8.000000, 8.000000)
 shader_parameter/target_size = Vector2(2.949506, 7.510693)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(25.327026, 25.327026)
@@ -157,6 +160,7 @@ corner_radius_bottom_right = 8
 [sub_resource type="ShaderMaterial" id="18"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 8.0
+shader_parameter/corner_radiuses = Vector4(8.000000, 8.000000, 8.000000, 8.000000)
 shader_parameter/target_size = Vector2(2.949506, 7.510693)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(25.327026, 25.327026)
@@ -173,6 +177,7 @@ corner_radius_bottom_right = 6
 [sub_resource type="ShaderMaterial" id="20"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 6.0
+shader_parameter/corner_radiuses = Vector4(6.000000, 6.000000, 6.000000, 6.000000)
 shader_parameter/target_size = Vector2(9.300304, 2.949507)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(25.327026, 25.327026)
@@ -189,6 +194,7 @@ corner_radius_bottom_right = 6
 [sub_resource type="ShaderMaterial" id="22"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 6.0
+shader_parameter/corner_radiuses = Vector4(6.000000, 6.000000, 6.000000, 6.000000)
 shader_parameter/target_size = Vector2(3.080098, 2.949506)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(25.327026, 25.327026)
@@ -202,363 +208,343 @@ corner_radius_top_right = 21
 corner_radius_bottom_left = 21
 corner_radius_bottom_right = 21
 
-[sub_resource type="StyleBoxFlat" id="24"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
-corner_radius_top_left = 21
-corner_radius_top_right = 21
-corner_radius_bottom_left = 21
-corner_radius_bottom_right = 21
-
-[sub_resource type="ShaderMaterial" id="25"]
+[sub_resource type="ShaderMaterial" id="24"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 21.0
+shader_parameter/corner_radiuses = Vector4(21.000000, 21.000000, 21.000000, 21.000000)
 shader_parameter/target_size = Vector2(140.250000, 42.500000)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(289.000000, 93.500008)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.384314, 0.309804, 0.733333, 1.000000)
+shader_parameter/gradient_color2 = Color(0.125490, 0.058824, 0.231373, 1.000000)
+shader_parameter/gradient_start = Vector2(0.015471, 0.237896)
+shader_parameter/gradient_end = Vector2(1.000000, 0.237896)
+shader_parameter/border_width = 0.70833325386047
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
 
-[sub_resource type="StyleBoxFlat" id="26"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 0.000000)
+[sub_resource type="StyleBoxFlat" id="25"]
+bg_color = Color(1.000000, 1.000000, 1.000000, 0.520000)
 corner_radius_top_left = 31
 corner_radius_top_right = 31
 corner_radius_bottom_left = 31
 corner_radius_bottom_right = 31
 
-[sub_resource type="ShaderMaterial" id="27"]
+[sub_resource type="ShaderMaterial" id="26"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 31.0
+shader_parameter/corner_radiuses = Vector4(31.000000, 31.000000, 31.000000, 31.000000)
 shader_parameter/target_size = Vector2(31.166668, 31.166668)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(31.166668, 31.166668)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(1.000000, 1.000000, 1.000000, 0.000000)
+shader_parameter/gradient_color2 = Color(1.000000, 1.000000, 1.000000, 0.520000)
+shader_parameter/gradient_start = Vector2(0.000000, 0.000000)
+shader_parameter/gradient_end = Vector2(0.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="28"]
+[sub_resource type="StyleBoxFlat" id="27"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="30"]
+[sub_resource type="StyleBoxFlat" id="29"]
 bg_color = Color(0.384314, 0.309804, 0.733333, 1.000000)
 corner_radius_top_left = 21
 corner_radius_top_right = 21
 corner_radius_bottom_left = 21
 corner_radius_bottom_right = 21
 
-[sub_resource type="StyleBoxFlat" id="31"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
-corner_radius_top_left = 21
-corner_radius_top_right = 21
-corner_radius_bottom_left = 21
-corner_radius_bottom_right = 21
-
-[sub_resource type="ShaderMaterial" id="32"]
+[sub_resource type="ShaderMaterial" id="30"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 21.0
+shader_parameter/corner_radiuses = Vector4(21.000000, 21.000000, 21.000000, 21.000000)
 shader_parameter/target_size = Vector2(140.250000, 42.500000)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(289.000000, 93.500008)
 shader_parameter/offset_in_parent = Vector2(148.750000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.384314, 0.309804, 0.733333, 1.000000)
+shader_parameter/gradient_color2 = Color(0.125490, 0.058824, 0.231373, 1.000000)
+shader_parameter/gradient_start = Vector2(0.015471, 0.237896)
+shader_parameter/gradient_end = Vector2(1.000000, 0.237896)
+shader_parameter/border_width = 0.70833325386047
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
 
-[sub_resource type="StyleBoxFlat" id="33"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 0.000000)
+[sub_resource type="StyleBoxFlat" id="31"]
+bg_color = Color(1.000000, 1.000000, 1.000000, 0.520000)
 corner_radius_top_left = 31
 corner_radius_top_right = 31
 corner_radius_bottom_left = 31
 corner_radius_bottom_right = 31
 
-[sub_resource type="ShaderMaterial" id="34"]
+[sub_resource type="ShaderMaterial" id="32"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 31.0
+shader_parameter/corner_radiuses = Vector4(31.000000, 31.000000, 31.000000, 31.000000)
 shader_parameter/target_size = Vector2(31.166668, 31.166668)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(31.166668, 31.166668)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(1.000000, 1.000000, 1.000000, 0.000000)
+shader_parameter/gradient_color2 = Color(1.000000, 1.000000, 1.000000, 0.520000)
+shader_parameter/gradient_start = Vector2(0.000000, 0.000000)
+shader_parameter/gradient_end = Vector2(0.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="35"]
+[sub_resource type="StyleBoxFlat" id="33"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="37"]
+[sub_resource type="StyleBoxFlat" id="35"]
 bg_color = Color(0.384314, 0.309804, 0.733333, 1.000000)
 corner_radius_top_left = 21
 corner_radius_top_right = 21
 corner_radius_bottom_left = 21
 corner_radius_bottom_right = 21
 
-[sub_resource type="StyleBoxFlat" id="38"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
-corner_radius_top_left = 21
-corner_radius_top_right = 21
-corner_radius_bottom_left = 21
-corner_radius_bottom_right = 21
-
-[sub_resource type="ShaderMaterial" id="39"]
+[sub_resource type="ShaderMaterial" id="36"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 21.0
+shader_parameter/corner_radiuses = Vector4(21.000000, 21.000000, 21.000000, 21.000000)
 shader_parameter/target_size = Vector2(140.250000, 42.500000)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(289.000000, 93.500008)
 shader_parameter/offset_in_parent = Vector2(0.000000, 51.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.384314, 0.309804, 0.733333, 1.000000)
+shader_parameter/gradient_color2 = Color(0.125490, 0.058824, 0.231373, 1.000000)
+shader_parameter/gradient_start = Vector2(0.015471, 0.237896)
+shader_parameter/gradient_end = Vector2(1.000000, 0.237896)
+shader_parameter/border_width = 0.70833325386047
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
 
-[sub_resource type="StyleBoxFlat" id="40"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 0.000000)
+[sub_resource type="StyleBoxFlat" id="37"]
+bg_color = Color(1.000000, 1.000000, 1.000000, 0.520000)
 corner_radius_top_left = 31
 corner_radius_top_right = 31
 corner_radius_bottom_left = 31
 corner_radius_bottom_right = 31
 
-[sub_resource type="ShaderMaterial" id="41"]
+[sub_resource type="ShaderMaterial" id="38"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 31.0
+shader_parameter/corner_radiuses = Vector4(31.000000, 31.000000, 31.000000, 31.000000)
 shader_parameter/target_size = Vector2(31.166668, 31.166668)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(31.166668, 31.166668)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(1.000000, 1.000000, 1.000000, 0.000000)
+shader_parameter/gradient_color2 = Color(1.000000, 1.000000, 1.000000, 0.520000)
+shader_parameter/gradient_start = Vector2(0.000000, 0.000000)
+shader_parameter/gradient_end = Vector2(0.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="42"]
+[sub_resource type="StyleBoxFlat" id="39"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="44"]
+[sub_resource type="StyleBoxFlat" id="41"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="46"]
+[sub_resource type="StyleBoxFlat" id="43"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="48"]
+[sub_resource type="StyleBoxFlat" id="45"]
 bg_color = Color(0.384314, 0.309804, 0.733333, 1.000000)
 corner_radius_top_left = 21
 corner_radius_top_right = 21
 corner_radius_bottom_left = 21
 corner_radius_bottom_right = 21
 
-[sub_resource type="StyleBoxFlat" id="49"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
-corner_radius_top_left = 21
-corner_radius_top_right = 21
-corner_radius_bottom_left = 21
-corner_radius_bottom_right = 21
-
-[sub_resource type="ShaderMaterial" id="50"]
+[sub_resource type="ShaderMaterial" id="46"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 21.0
+shader_parameter/corner_radiuses = Vector4(21.000000, 21.000000, 21.000000, 21.000000)
 shader_parameter/target_size = Vector2(140.250000, 42.500000)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(289.000000, 93.500008)
 shader_parameter/offset_in_parent = Vector2(148.750000, 51.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.384314, 0.309804, 0.733333, 1.000000)
+shader_parameter/gradient_color2 = Color(0.125490, 0.058824, 0.231373, 1.000000)
+shader_parameter/gradient_start = Vector2(0.015471, 0.237896)
+shader_parameter/gradient_end = Vector2(1.000000, 0.237896)
+shader_parameter/border_width = 0.70833325386047
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 0.500000)
 
-[sub_resource type="StyleBoxFlat" id="51"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 0.000000)
+[sub_resource type="StyleBoxFlat" id="47"]
+bg_color = Color(1.000000, 1.000000, 1.000000, 0.520000)
 corner_radius_top_left = 31
 corner_radius_top_right = 31
 corner_radius_bottom_left = 31
 corner_radius_bottom_right = 31
 
-[sub_resource type="ShaderMaterial" id="52"]
+[sub_resource type="ShaderMaterial" id="48"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 31.0
+shader_parameter/corner_radiuses = Vector4(31.000000, 31.000000, 31.000000, 31.000000)
 shader_parameter/target_size = Vector2(31.166668, 31.166668)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(31.166668, 31.166668)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(1.000000, 1.000000, 1.000000, 0.000000)
+shader_parameter/gradient_color2 = Color(1.000000, 1.000000, 1.000000, 0.520000)
+shader_parameter/gradient_start = Vector2(0.000000, 0.000000)
+shader_parameter/gradient_end = Vector2(0.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="53"]
+[sub_resource type="StyleBoxFlat" id="49"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="55"]
-bg_color = Color(0.190475, 0.226201, 0.357195, 0.000000)
+[sub_resource type="StyleBoxFlat" id="51"]
+bg_color = Color(0.190475, 0.226201, 0.357195, 1.000000)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="56"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="ShaderMaterial" id="57"]
+[sub_resource type="ShaderMaterial" id="52"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 16.0
+shader_parameter/corner_radiuses = Vector4(0.000000, 16.000000, 0.000000, 16.000000)
 shader_parameter/target_size = Vector2(288.157440, 56.451897)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.190475, 0.226201, 0.357195, 0.000000)
+shader_parameter/gradient_color2 = Color(0.190475, 0.226201, 0.357195, 1.000000)
+shader_parameter/gradient_start = Vector2(0.000000, -0.500000)
+shader_parameter/gradient_end = Vector2(0.000000, 0.500000)
+shader_parameter/border_width = 0.84256559610367
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="58"]
+[sub_resource type="StyleBoxFlat" id="53"]
 bg_color = Color(0.190475, 0.226201, 0.357195, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 16
 corner_radius_bottom_right = 16
 
-[sub_resource type="StyleBoxFlat" id="59"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 16
-corner_radius_bottom_right = 16
-
-[sub_resource type="ShaderMaterial" id="60"]
+[sub_resource type="ShaderMaterial" id="54"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 16.0
+shader_parameter/corner_radiuses = Vector4(16.000000, 0.000000, 16.000000, 0.000000)
 shader_parameter/target_size = Vector2(288.157440, 124.699715)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
 shader_parameter/offset_in_parent = Vector2(0.000000, 56.451904)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.190475, 0.226201, 0.357195, 1.000000)
+shader_parameter/gradient_color2 = Color(0.129412, 0.152941, 0.239216, 1.000000)
+shader_parameter/gradient_start = Vector2(0.000000, -0.500000)
+shader_parameter/gradient_end = Vector2(0.000000, 0.500000)
+shader_parameter/border_width = 0.84256559610367
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="61"]
+[sub_resource type="StyleBoxFlat" id="55"]
 bg_color = Color(0.415686, 0.737255, 0.917647, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="63"]
+[sub_resource type="StyleBoxFlat" id="57"]
 bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="65"]
+[sub_resource type="StyleBoxFlat" id="59"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="67"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 3
-border_width_right = 3
-border_width_top = 3
-border_width_bottom = 3
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="68"]
-bg_color = Color(0.190475, 0.226201, 0.357195, 0.000000)
+[sub_resource type="StyleBoxFlat" id="61"]
+bg_color = Color(0.190475, 0.226201, 0.357195, 1.000000)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="69"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="ShaderMaterial" id="70"]
+[sub_resource type="ShaderMaterial" id="62"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 16.0
+shader_parameter/corner_radiuses = Vector4(0.000000, 16.000000, 0.000000, 16.000000)
 shader_parameter/target_size = Vector2(288.157440, 56.451897)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.190475, 0.226201, 0.357195, 0.000000)
+shader_parameter/gradient_color2 = Color(0.190475, 0.226201, 0.357195, 1.000000)
+shader_parameter/gradient_start = Vector2(0.000000, -0.500000)
+shader_parameter/gradient_end = Vector2(0.000000, 0.500000)
+shader_parameter/border_width = 0.84256559610367
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="71"]
+[sub_resource type="StyleBoxFlat" id="63"]
 bg_color = Color(0.190475, 0.226201, 0.357195, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 16
 corner_radius_bottom_right = 16
 
-[sub_resource type="StyleBoxFlat" id="72"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 16
-corner_radius_bottom_right = 16
-
-[sub_resource type="ShaderMaterial" id="73"]
+[sub_resource type="ShaderMaterial" id="64"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 16.0
+shader_parameter/corner_radiuses = Vector4(16.000000, 0.000000, 16.000000, 0.000000)
 shader_parameter/target_size = Vector2(288.157440, 124.699715)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
 shader_parameter/offset_in_parent = Vector2(0.000000, 56.451965)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.190475, 0.226201, 0.357195, 1.000000)
+shader_parameter/gradient_color2 = Color(0.129412, 0.152941, 0.239216, 1.000000)
+shader_parameter/gradient_start = Vector2(0.000000, -0.500000)
+shader_parameter/gradient_end = Vector2(0.000000, 0.500000)
+shader_parameter/border_width = 0.84256559610367
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="75"]
+[sub_resource type="StyleBoxFlat" id="66"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -570,7 +556,7 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="77"]
+[sub_resource type="StyleBoxFlat" id="68"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -582,7 +568,7 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="79"]
+[sub_resource type="StyleBoxFlat" id="70"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -594,7 +580,7 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="81"]
+[sub_resource type="StyleBoxFlat" id="72"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -606,7 +592,7 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="83"]
+[sub_resource type="StyleBoxFlat" id="74"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -618,7 +604,35 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="84"]
+[sub_resource type="StyleBoxFlat" id="75"]
+bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="78"]
+bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="80"]
+bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="82"]
+bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="85"]
 bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
@@ -626,20 +640,20 @@ corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="87"]
-bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="89"]
 bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="91"]
+[sub_resource type="StyleBoxFlat" id="89"]
+bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="92"]
 bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
@@ -647,20 +661,20 @@ corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="94"]
-bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="96"]
 bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="98"]
+[sub_resource type="StyleBoxFlat" id="96"]
+bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="99"]
 bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
@@ -668,160 +682,124 @@ corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="101"]
-bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
+bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="103"]
-bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
+bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="105"]
-bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="108"]
-bg_color = Color(0.000000, 0.000000, 0.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="110"]
-bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="112"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="114"]
+[sub_resource type="StyleBoxFlat" id="107"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="116"]
+[sub_resource type="StyleBoxFlat" id="109"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="118"]
+[sub_resource type="StyleBoxFlat" id="111"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="120"]
+[sub_resource type="StyleBoxFlat" id="113"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="122"]
+[sub_resource type="StyleBoxFlat" id="115"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="124"]
+[sub_resource type="StyleBoxFlat" id="117"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="126"]
+[sub_resource type="StyleBoxFlat" id="119"]
 bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="128"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="130"]
-bg_color = Color(0.190475, 0.226201, 0.357195, 0.000000)
+[sub_resource type="StyleBoxFlat" id="121"]
+bg_color = Color(0.190475, 0.226201, 0.357195, 1.000000)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="131"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="ShaderMaterial" id="132"]
+[sub_resource type="ShaderMaterial" id="122"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 16.0
+shader_parameter/corner_radiuses = Vector4(0.000000, 16.000000, 0.000000, 16.000000)
 shader_parameter/target_size = Vector2(288.157440, 56.451897)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
 shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.190475, 0.226201, 0.357195, 0.000000)
+shader_parameter/gradient_color2 = Color(0.190475, 0.226201, 0.357195, 1.000000)
+shader_parameter/gradient_start = Vector2(0.000000, -0.500000)
+shader_parameter/gradient_end = Vector2(0.000000, 0.500000)
+shader_parameter/border_width = 0.84256559610367
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="133"]
+[sub_resource type="StyleBoxFlat" id="123"]
 bg_color = Color(0.190475, 0.226201, 0.357195, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 16
 corner_radius_bottom_right = 16
 
-[sub_resource type="StyleBoxFlat" id="134"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 1
-border_width_right = 1
-border_width_top = 1
-border_width_bottom = 1
-border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 16
-corner_radius_bottom_right = 16
-
-[sub_resource type="ShaderMaterial" id="135"]
+[sub_resource type="ShaderMaterial" id="124"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 16.0
+shader_parameter/corner_radiuses = Vector4(16.000000, 0.000000, 16.000000, 0.000000)
 shader_parameter/target_size = Vector2(288.157440, 124.699715)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
 shader_parameter/offset_in_parent = Vector2(0.000000, 56.451843)
 shader_parameter/use_texture = false
+shader_parameter/use_gradient = true
+shader_parameter/gradient_color1 = Color(0.190475, 0.226201, 0.357195, 1.000000)
+shader_parameter/gradient_color2 = Color(0.129412, 0.152941, 0.239216, 1.000000)
+shader_parameter/gradient_start = Vector2(0.000000, -0.500000)
+shader_parameter/gradient_end = Vector2(0.000000, 0.500000)
+shader_parameter/border_width = 0.84256559610367
+shader_parameter/border_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 
-[sub_resource type="StyleBoxFlat" id="139"]
+[sub_resource type="StyleBoxFlat" id="128"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 2
 border_width_right = 2
@@ -833,7 +811,7 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="142"]
+[sub_resource type="StyleBoxFlat" id="131"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 2
 border_width_right = 2
@@ -845,143 +823,143 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="144"]
+[sub_resource type="StyleBoxFlat" id="133"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="146"]
+[sub_resource type="StyleBoxFlat" id="135"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="148"]
+[sub_resource type="StyleBoxFlat" id="137"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="150"]
+[sub_resource type="StyleBoxFlat" id="139"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="152"]
+[sub_resource type="StyleBoxFlat" id="141"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="154"]
+[sub_resource type="StyleBoxFlat" id="143"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="156"]
+[sub_resource type="StyleBoxFlat" id="145"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="158"]
+[sub_resource type="StyleBoxFlat" id="147"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="160"]
+[sub_resource type="StyleBoxFlat" id="149"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="162"]
+[sub_resource type="StyleBoxFlat" id="151"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="164"]
+[sub_resource type="StyleBoxFlat" id="153"]
 bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="155"]
+bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="157"]
+bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="159"]
+bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="161"]
+bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
+
+[sub_resource type="StyleBoxFlat" id="163"]
+bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="166"]
-bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.607843, 0.890196, 0.925490, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="168"]
-bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
 [sub_resource type="StyleBoxFlat" id="170"]
-bg_color = Color(0.819608, 0.819608, 0.819608, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="172"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="174"]
-bg_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="177"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 2
-border_width_right = 2
-border_width_top = 2
-border_width_bottom = 2
-border_color = Color(0.607843, 0.890196, 0.925490, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="179"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 2
-border_width_right = 2
-border_width_top = 2
-border_width_bottom = 2
-border_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_left = 0
-corner_radius_bottom_right = 0
-
-[sub_resource type="StyleBoxFlat" id="181"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -993,14 +971,14 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="182"]
+[sub_resource type="StyleBoxFlat" id="171"]
 bg_color = Color(0.607843, 0.890196, 0.925490, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="185"]
+[sub_resource type="StyleBoxFlat" id="174"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_right = 1
@@ -1012,7 +990,7 @@ corner_radius_top_right = 0
 corner_radius_bottom_left = 0
 corner_radius_bottom_right = 0
 
-[sub_resource type="StyleBoxFlat" id="186"]
+[sub_resource type="StyleBoxFlat" id="175"]
 bg_color = Color(0.552941, 0.203922, 0.976471, 1.000000)
 corner_radius_top_left = 0
 corner_radius_top_right = 0
@@ -1056,7 +1034,7 @@ layout_mode = 1
 offset_left = 43.000000
 offset_top = 69.000000
 offset_right = 332.000000
-offset_bottom = 811.512939
+offset_bottom = 811.513000
 
 [node name="Group_15" type="Control" parent="./Frame_4"]
 layout_mode = 1
@@ -1069,8 +1047,8 @@ offset_bottom = 46.556221
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 46.556213
-offset_right = 274.917450
-offset_bottom = 47.734852
+offset_right = 274.917480
+offset_bottom = 47.734863
 texture = ExtResource("10")
 expand_mode = 1
 stretch_mode = 5
@@ -1178,9 +1156,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 140.250000
 offset_bottom = 42.500000
-theme_override_styles/panel = SubResource("24")
+theme_override_styles/panel = SubResource("23")
 clip_contents = true
-material = SubResource("25")
+material = SubResource("24")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form"]
 layout_mode = 1
@@ -1195,9 +1173,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 31.166668
 offset_bottom = 31.166668
-theme_override_styles/panel = SubResource("26")
+theme_override_styles/panel = SubResource("25")
 clip_contents = true
-material = SubResource("27")
+material = SubResource("26")
 
 [node name="fi_br_map_marker_plus" type="Control" parent="./Frame_4/Frame_2/Form/Icon"]
 layout_mode = 1
@@ -1211,10 +1189,10 @@ clip_contents = true
 layout_mode = 1
 offset_left = 0.568848
 offset_top = 0.000092
-offset_right = 12.917690
-offset_bottom = 13.481136
-theme_override_styles/panel = SubResource("28")
-texture = ExtResource("29")
+offset_right = 12.917725
+offset_bottom = 13.481048
+theme_override_styles/panel = SubResource("27")
+texture = ExtResource("28")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1267,9 +1245,9 @@ offset_left = 148.750000
 offset_top = 0.000000
 offset_right = 289.000000
 offset_bottom = 42.500000
-theme_override_styles/panel = SubResource("31")
+theme_override_styles/panel = SubResource("29")
 clip_contents = true
-material = SubResource("32")
+material = SubResource("30")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form_1"]
 layout_mode = 1
@@ -1284,9 +1262,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 31.166668
 offset_bottom = 31.166668
-theme_override_styles/panel = SubResource("33")
+theme_override_styles/panel = SubResource("31")
 clip_contents = true
-material = SubResource("34")
+material = SubResource("32")
 
 [node name="fi_br_rotate_right" type="Control" parent="./Frame_4/Frame_2/Form_1/Icon"]
 layout_mode = 1
@@ -1307,10 +1285,10 @@ offset_bottom = 13.481032
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 13.420309
-offset_bottom = 13.481063
-theme_override_styles/panel = SubResource("35")
-texture = ExtResource("36")
+offset_right = 13.420410
+offset_bottom = 13.481018
+theme_override_styles/panel = SubResource("33")
+texture = ExtResource("34")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1363,9 +1341,9 @@ offset_left = 0.000000
 offset_top = 51.000000
 offset_right = 140.250000
 offset_bottom = 93.500000
-theme_override_styles/panel = SubResource("38")
+theme_override_styles/panel = SubResource("35")
 clip_contents = true
-material = SubResource("39")
+material = SubResource("36")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form_2"]
 layout_mode = 1
@@ -1380,9 +1358,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 31.166668
 offset_bottom = 31.166668
-theme_override_styles/panel = SubResource("40")
+theme_override_styles/panel = SubResource("37")
 clip_contents = true
-material = SubResource("41")
+material = SubResource("38")
 
 [node name="fi_br_comment_alt" type="Control" parent="./Frame_4/Frame_2/Form_2/Icon"]
 layout_mode = 1
@@ -1396,10 +1374,10 @@ clip_contents = true
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 11.333333
-offset_bottom = 11.228078
-theme_override_styles/panel = SubResource("42")
-texture = ExtResource("43")
+offset_right = 11.333252
+offset_bottom = 11.228088
+theme_override_styles/panel = SubResource("39")
+texture = ExtResource("40")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1407,10 +1385,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 2.833252
 offset_top = 2.833344
-offset_right = 5.666585
-offset_bottom = 4.250010
-theme_override_styles/panel = SubResource("44")
-texture = ExtResource("45")
+offset_right = 5.666504
+offset_bottom = 4.250000
+theme_override_styles/panel = SubResource("41")
+texture = ExtResource("42")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1418,10 +1396,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 2.833252
 offset_top = 5.194519
-offset_right = 8.499918
-offset_bottom = 6.611186
-theme_override_styles/panel = SubResource("46")
-texture = ExtResource("47")
+offset_right = 8.500000
+offset_bottom = 6.611176
+theme_override_styles/panel = SubResource("43")
+texture = ExtResource("44")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1486,9 +1464,9 @@ offset_left = 148.750000
 offset_top = 51.000000
 offset_right = 289.000000
 offset_bottom = 93.500000
-theme_override_styles/panel = SubResource("49")
+theme_override_styles/panel = SubResource("45")
 clip_contents = true
-material = SubResource("50")
+material = SubResource("46")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form_3"]
 layout_mode = 1
@@ -1503,9 +1481,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 31.166668
 offset_bottom = 31.166668
-theme_override_styles/panel = SubResource("51")
+theme_override_styles/panel = SubResource("47")
 clip_contents = true
-material = SubResource("52")
+material = SubResource("48")
 
 [node name="fi_br_trophy" type="Control" parent="./Frame_4/Frame_2/Form_3/Icon"]
 layout_mode = 1
@@ -1519,10 +1497,10 @@ clip_contents = true
 layout_mode = 1
 offset_left = 0.000000
 offset_top = -0.000092
-offset_right = 13.481048
-offset_bottom = 13.480979
-theme_override_styles/panel = SubResource("53")
-texture = ExtResource("54")
+offset_right = 13.480957
+offset_bottom = 13.480896
+theme_override_styles/panel = SubResource("49")
+texture = ExtResource("50")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1589,9 +1567,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 288.157440
 offset_bottom = 56.451897
-theme_override_styles/panel = SubResource("56")
+theme_override_styles/panel = SubResource("51")
 clip_contents = true
-material = SubResource("57")
+material = SubResource("52")
 
 [node name="Felicidade_do_Cliente" type="Label" parent="./Frame_4/Group_1/Frame_1/Contents"]
 layout_mode = 1
@@ -1611,9 +1589,9 @@ offset_left = 0.000000
 offset_top = 56.451904
 offset_right = 288.157440
 offset_bottom = 181.151619
-theme_override_styles/panel = SubResource("59")
+theme_override_styles/panel = SubResource("53")
 clip_contents = true
-material = SubResource("60")
+material = SubResource("54")
 
 [node name="Group_11" type="Control" parent="./Frame_4/Group_1/Frame_1/Contents_1"]
 layout_mode = 1
@@ -1626,10 +1604,10 @@ offset_bottom = 112.302574
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 173.568512
-offset_bottom = 86.784256
-theme_override_styles/panel = SubResource("61")
-texture = ExtResource("62")
+offset_right = 173.568604
+offset_bottom = 86.784241
+theme_override_styles/panel = SubResource("55")
+texture = ExtResource("56")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1637,10 +1615,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 142.102631
+offset_right = 142.102539
 offset_bottom = 86.784302
-theme_override_styles/panel = SubResource("63")
-texture = ExtResource("64")
+theme_override_styles/panel = SubResource("57")
+texture = ExtResource("58")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1648,10 +1626,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 140.486572
 offset_top = 35.795715
-offset_right = 157.010380
-offset_bottom = 47.792923
-theme_override_styles/panel = SubResource("67")
-texture = ExtResource("66")
+offset_right = 158.610107
+offset_bottom = 49.996094
+theme_override_styles/panel = SubResource("59")
+texture = ExtResource("60")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1693,10 +1671,10 @@ vertical_alignment = 0
 
 [node name="Group_2" type="Control" parent="./Frame_4"]
 layout_mode = 1
-offset_left = 0.842773
-offset_top = 365.459229
-offset_right = 289.000214
-offset_bottom = 546.610840
+offset_left = 0.842529
+offset_top = 365.459290
+offset_right = 288.999969
+offset_bottom = 546.610901
 
 [node name="Frame_1" type="Control" parent="./Frame_4/Group_2"]
 layout_mode = 1
@@ -1711,9 +1689,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 288.157440
 offset_bottom = 56.451897
-theme_override_styles/panel = SubResource("69")
+theme_override_styles/panel = SubResource("61")
 clip_contents = true
-material = SubResource("70")
+material = SubResource("62")
 
 [node name="Vendas" type="Label" parent="./Frame_4/Group_2/Frame_1/Contents"]
 layout_mode = 1
@@ -1734,9 +1712,9 @@ offset_top = 56.451965
 offset_right = 288.157440
 offset_bottom = 181.151680
 modulate = Color(1, 1, 1, 0.900000)
-theme_override_styles/panel = SubResource("72")
+theme_override_styles/panel = SubResource("63")
 clip_contents = true
-material = SubResource("73")
+material = SubResource("64")
 
 [node name="Group_12" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1"]
 layout_mode = 1
@@ -1749,56 +1727,56 @@ offset_bottom = 109.068787
 layout_mode = 1
 offset_left = 12.562012
 offset_top = 87.737244
-offset_right = 259.510406
-offset_bottom = 88.097993
-texture = ExtResource("74")
+offset_right = 259.510498
+offset_bottom = 88.097961
+texture = ExtResource("65")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("75")
+theme_override_styles/panel = SubResource("66")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 12.562012
 offset_top = 66.092224
-offset_right = 259.510406
-offset_bottom = 66.452973
-texture = ExtResource("76")
+offset_right = 259.510498
+offset_bottom = 66.452942
+texture = ExtResource("67")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("77")
+theme_override_styles/panel = SubResource("68")
 
 [node name="Vector_2" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 12.562012
 offset_top = 44.808044
-offset_right = 259.510406
-offset_bottom = 45.168794
-texture = ExtResource("78")
+offset_right = 259.510498
+offset_bottom = 45.168762
+texture = ExtResource("69")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("79")
+theme_override_styles/panel = SubResource("70")
 
 [node name="Vector_3" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 12.562012
 offset_top = 23.163086
-offset_right = 259.510406
-offset_bottom = 23.523835
-texture = ExtResource("80")
+offset_right = 259.510498
+offset_bottom = 23.523804
+texture = ExtResource("71")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("81")
+theme_override_styles/panel = SubResource("72")
 
 [node name="Vector_4" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 12.562012
 offset_top = 1.518188
-offset_right = 259.510406
-offset_bottom = 1.878938
-texture = ExtResource("82")
+offset_right = 259.510498
+offset_bottom = 1.878906
+texture = ExtResource("73")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("83")
+theme_override_styles/panel = SubResource("74")
 
 [node name="Clip_path_group" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
@@ -1818,10 +1796,10 @@ offset_bottom = 86.050720
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.899384
+offset_right = 246.899414
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("84")
-texture = ExtResource("85")
+theme_override_styles/panel = SubResource("75")
+texture = ExtResource("76")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1831,7 +1809,7 @@ offset_left = 20.309570
 offset_top = 0.030090
 offset_right = 57.057842
 offset_bottom = 85.888405
-texture = ExtResource("86")
+texture = ExtResource("77")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1853,10 +1831,10 @@ offset_bottom = 86.050720
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.899384
+offset_right = 246.899414
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("87")
-texture = ExtResource("88")
+theme_override_styles/panel = SubResource("78")
+texture = ExtResource("79")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1864,10 +1842,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 20.309570
 offset_top = 0.030090
-offset_right = 57.057842
-offset_bottom = 85.888405
-theme_override_styles/panel = SubResource("89")
-texture = ExtResource("90")
+offset_right = 57.057861
+offset_bottom = 85.888428
+theme_override_styles/panel = SubResource("80")
+texture = ExtResource("81")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1889,10 +1867,10 @@ offset_bottom = 86.050720
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.899384
+offset_right = 246.899414
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("91")
-texture = ExtResource("92")
+theme_override_styles/panel = SubResource("82")
+texture = ExtResource("83")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1902,7 +1880,7 @@ offset_left = 77.146973
 offset_top = 21.675049
 offset_right = 113.895245
 offset_bottom = 85.888420
-texture = ExtResource("93")
+texture = ExtResource("84")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1924,10 +1902,10 @@ offset_bottom = 86.050720
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.899384
+offset_right = 246.899414
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("94")
-texture = ExtResource("95")
+theme_override_styles/panel = SubResource("85")
+texture = ExtResource("86")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1935,10 +1913,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 77.146973
 offset_top = 21.675049
-offset_right = 113.895245
-offset_bottom = 85.888420
-theme_override_styles/panel = SubResource("96")
-texture = ExtResource("97")
+offset_right = 113.895264
+offset_bottom = 85.888428
+theme_override_styles/panel = SubResource("87")
+texture = ExtResource("88")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1960,10 +1938,10 @@ offset_bottom = 86.050720
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.899384
+offset_right = 246.899414
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("98")
-texture = ExtResource("99")
+theme_override_styles/panel = SubResource("89")
+texture = ExtResource("90")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1973,7 +1951,7 @@ offset_left = 133.494141
 offset_top = 42.959229
 offset_right = 170.242413
 offset_bottom = 85.888386
-texture = ExtResource("100")
+texture = ExtResource("91")
 expand_mode = 1
 stretch_mode = 5
 
@@ -1995,10 +1973,10 @@ offset_bottom = 86.050720
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.899384
+offset_right = 246.899414
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("101")
-texture = ExtResource("102")
+theme_override_styles/panel = SubResource("92")
+texture = ExtResource("93")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2006,10 +1984,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 133.494141
 offset_top = 3.998230
-offset_right = 170.242413
-offset_bottom = 85.888313
-theme_override_styles/panel = SubResource("103")
-texture = ExtResource("104")
+offset_right = 170.242432
+offset_bottom = 85.888306
+theme_override_styles/panel = SubResource("94")
+texture = ExtResource("95")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2034,8 +2012,8 @@ offset_top = 0.000000
 offset_right = 246.899384
 offset_bottom = 86.050720
 visible = false
-theme_override_styles/panel = SubResource("105")
-texture = ExtResource("106")
+theme_override_styles/panel = SubResource("96")
+texture = ExtResource("97")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2045,15 +2023,15 @@ offset_left = 190.331543
 offset_top = 64.604126
 offset_right = 227.079815
 offset_bottom = 85.888332
-texture = ExtResource("107")
+texture = ExtResource("98")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Clip_path_group_7" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 202.917969
+offset_left = 202.917725
 offset_top = 66.272583
-offset_right = 239.666241
+offset_right = 239.665997
 offset_bottom = 87.556789
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_7"]
@@ -2070,8 +2048,8 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 246.899384
 offset_bottom = 86.050720
-theme_override_styles/panel = SubResource("108")
-texture = ExtResource("109")
+theme_override_styles/panel = SubResource("99")
+texture = ExtResource("100")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2079,10 +2057,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 36.748272
-offset_bottom = 21.284206
-theme_override_styles/panel = SubResource("110")
-texture = ExtResource("111")
+offset_right = 36.748291
+offset_bottom = 21.284180
+theme_override_styles/panel = SubResource("101")
+texture = ExtResource("102")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2090,10 +2068,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 6.461670
 offset_top = 86.050720
-offset_right = 9.202479
-offset_bottom = 89.212913
-theme_override_styles/panel = SubResource("112")
-texture = ExtResource("113")
+offset_right = 9.202393
+offset_bottom = 89.212891
+theme_override_styles/panel = SubResource("103")
+texture = ExtResource("104")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2101,10 +2079,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 2.962891
 offset_top = 64.538025
-offset_right = 9.248378
-offset_bottom = 67.700217
-theme_override_styles/panel = SubResource("114")
-texture = ExtResource("115")
+offset_right = 9.248291
+offset_bottom = 67.700195
+theme_override_styles/panel = SubResource("105")
+texture = ExtResource("106")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2112,10 +2090,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 3.031738
 offset_top = 43.025330
-offset_right = 9.202388
-offset_bottom = 46.187522
-theme_override_styles/panel = SubResource("116")
-texture = ExtResource("117")
+offset_right = 9.202393
+offset_bottom = 46.187500
+theme_override_styles/panel = SubResource("107")
+texture = ExtResource("108")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2123,10 +2101,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 3.062500
 offset_top = 21.563354
-offset_right = 9.248461
-offset_bottom = 24.674817
-theme_override_styles/panel = SubResource("118")
-texture = ExtResource("119")
+offset_right = 9.248535
+offset_bottom = 24.674805
+theme_override_styles/panel = SubResource("109")
+texture = ExtResource("110")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2134,32 +2112,32 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 9.202382
-offset_bottom = 3.162192
-theme_override_styles/panel = SubResource("120")
-texture = ExtResource("121")
+offset_right = 9.202393
+offset_bottom = 3.162170
+theme_override_styles/panel = SubResource("111")
+texture = ExtResource("112")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Vector_10" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 38.365723
-offset_top = 90.751770
-offset_right = 64.380438
-offset_bottom = 93.902689
-theme_override_styles/panel = SubResource("122")
-texture = ExtResource("123")
+offset_top = 90.751709
+offset_right = 64.380371
+offset_bottom = 93.902649
+theme_override_styles/panel = SubResource("113")
+texture = ExtResource("114")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Vector_11" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 94.879150
-offset_top = 90.751770
-offset_right = 120.572309
-offset_bottom = 93.902689
-theme_override_styles/panel = SubResource("124")
-texture = ExtResource("125")
+offset_top = 90.751709
+offset_right = 120.572266
+offset_bottom = 93.902649
+theme_override_styles/panel = SubResource("115")
+texture = ExtResource("116")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2167,30 +2145,30 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 151.392578
 offset_top = 90.700989
-offset_right = 177.491508
-offset_bottom = 93.902638
-theme_override_styles/panel = SubResource("126")
-texture = ExtResource("127")
+offset_right = 177.491455
+offset_bottom = 93.902649
+theme_override_styles/panel = SubResource("117")
+texture = ExtResource("118")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Vector_13" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
 offset_left = 208.151123
-offset_top = 90.751770
-offset_right = 234.173496
-offset_bottom = 93.902689
-theme_override_styles/panel = SubResource("128")
-texture = ExtResource("129")
+offset_top = 90.751709
+offset_right = 234.173584
+offset_bottom = 93.902649
+theme_override_styles/panel = SubResource("119")
+texture = ExtResource("120")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Group_17" type="Control" parent="./Frame_4"]
 layout_mode = 1
 offset_left = 0.509766
-offset_top = 561.361328
+offset_top = 561.361389
 offset_right = 288.999908
-offset_bottom = 742.512939
+offset_bottom = 742.513000
 
 [node name="Group_3" type="Control" parent="./Frame_4/Group_17"]
 layout_mode = 1
@@ -2212,9 +2190,9 @@ offset_left = 0.000000
 offset_top = 0.000000
 offset_right = 288.157440
 offset_bottom = 56.451897
-theme_override_styles/panel = SubResource("131")
+theme_override_styles/panel = SubResource("121")
 clip_contents = true
-material = SubResource("132")
+material = SubResource("122")
 
 [node name="Ado__o" type="Label" parent="./Frame_4/Group_17/Group_3/Frame_1/Contents"]
 layout_mode = 1
@@ -2235,9 +2213,9 @@ offset_top = 56.451843
 offset_right = 288.157440
 offset_bottom = 181.151558
 modulate = Color(1, 1, 1, 0.900000)
-theme_override_styles/panel = SubResource("134")
+theme_override_styles/panel = SubResource("123")
 clip_contents = true
-material = SubResource("135")
+material = SubResource("124")
 
 [node name="Frame" type="Control" parent="./Frame_4/Group_17"]
 layout_mode = 1
@@ -2260,7 +2238,7 @@ offset_left = 0.000000
 offset_top = 0.686340
 offset_right = 155.213409
 offset_bottom = 5.261293
-texture = ExtResource("136")
+texture = ExtResource("125")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2277,7 +2255,7 @@ offset_left = 0.000000
 offset_top = 0.686340
 offset_right = 86.413132
 offset_bottom = 5.261293
-texture = ExtResource("137")
+texture = ExtResource("126")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2304,12 +2282,12 @@ vertical_alignment = 0
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 2.973755
-offset_right = 12.108846
-offset_bottom = 3.980827
-texture = ExtResource("138")
+offset_right = 12.108887
+offset_bottom = 3.980835
+texture = ExtResource("127")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("139")
+theme_override_styles/panel = SubResource("128")
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group"]
 layout_mode = 1
@@ -2324,7 +2302,7 @@ offset_left = 0.000000
 offset_top = 0.686340
 offset_right = 58.893024
 offset_bottom = 5.261293
-texture = ExtResource("140")
+texture = ExtResource("129")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2351,12 +2329,12 @@ vertical_alignment = 0
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 2.973755
-offset_right = 12.108846
-offset_bottom = 3.980827
-texture = ExtResource("141")
+offset_right = 12.108887
+offset_bottom = 3.980835
+texture = ExtResource("130")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("142")
+theme_override_styles/panel = SubResource("131")
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame"]
 layout_mode = 1
@@ -2371,7 +2349,7 @@ offset_left = 14.848877
 offset_top = 3.036133
 offset_right = 261.979446
 offset_bottom = 59.183273
-texture = ExtResource("143")
+texture = ExtResource("132")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2393,10 +2371,10 @@ offset_bottom = 56.147141
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 0.550402
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("144")
-texture = ExtResource("145")
+offset_right = 0.550293
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("133")
+texture = ExtResource("134")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2404,10 +2382,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 41.280029
 offset_top = 0.000000
-offset_right = 41.830431
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("146")
-texture = ExtResource("147")
+offset_right = 41.830322
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("135")
+texture = ExtResource("136")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2415,10 +2393,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 82.010010
 offset_top = 0.000000
-offset_right = 82.560412
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("148")
-texture = ExtResource("149")
+offset_right = 82.560303
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("137")
+texture = ExtResource("138")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2426,10 +2404,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 123.290039
 offset_top = 0.000000
-offset_right = 123.840441
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("150")
-texture = ExtResource("151")
+offset_right = 123.840332
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("139")
+texture = ExtResource("140")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2437,10 +2415,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 164.570313
 offset_top = 0.000000
-offset_right = 165.120715
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("152")
-texture = ExtResource("153")
+offset_right = 165.120605
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("141")
+texture = ExtResource("142")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2448,10 +2426,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 205.300049
 offset_top = 0.000000
-offset_right = 205.850451
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("154")
-texture = ExtResource("155")
+offset_right = 205.850342
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("143")
+texture = ExtResource("144")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2459,21 +2437,21 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 246.580078
 offset_top = 0.000000
-offset_right = 247.130480
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("156")
-texture = ExtResource("157")
+offset_right = 247.130371
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("145")
+texture = ExtResource("146")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Vector_7" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
 offset_left = 0.000000
-offset_top = 55.731079
-offset_right = 247.130569
-offset_bottom = 56.146984
-theme_override_styles/panel = SubResource("158")
-texture = ExtResource("159")
+offset_top = 55.731018
+offset_right = 247.130615
+offset_bottom = 56.146912
+theme_override_styles/panel = SubResource("147")
+texture = ExtResource("148")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2481,10 +2459,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 37.015198
-offset_right = 247.130569
-offset_bottom = 37.431102
-theme_override_styles/panel = SubResource("160")
-texture = ExtResource("161")
+offset_right = 247.130615
+offset_bottom = 37.431091
+theme_override_styles/panel = SubResource("149")
+texture = ExtResource("150")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2492,10 +2470,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 18.715881
-offset_right = 247.130569
-offset_bottom = 19.131786
-theme_override_styles/panel = SubResource("162")
-texture = ExtResource("163")
+offset_right = 247.130615
+offset_bottom = 19.131775
+theme_override_styles/panel = SubResource("151")
+texture = ExtResource("152")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2503,21 +2481,21 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 247.130569
-offset_bottom = 0.415905
-theme_override_styles/panel = SubResource("164")
-texture = ExtResource("165")
+offset_right = 247.130615
+offset_bottom = 0.415894
+theme_override_styles/panel = SubResource("153")
+texture = ExtResource("154")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Vector_11" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
 offset_left = 0.000000
-offset_top = 46.581299
-offset_right = 247.130569
-offset_bottom = 46.997204
-theme_override_styles/panel = SubResource("166")
-texture = ExtResource("167")
+offset_top = 46.581238
+offset_right = 247.130615
+offset_bottom = 46.997131
+theme_override_styles/panel = SubResource("155")
+texture = ExtResource("156")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2525,10 +2503,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 27.865479
-offset_right = 247.130569
-offset_bottom = 28.281383
-theme_override_styles/panel = SubResource("168")
-texture = ExtResource("169")
+offset_right = 247.130615
+offset_bottom = 28.281372
+theme_override_styles/panel = SubResource("157")
+texture = ExtResource("158")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2536,10 +2514,10 @@ stretch_mode = 5
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 9.149597
-offset_right = 247.130569
-offset_bottom = 9.565502
-theme_override_styles/panel = SubResource("170")
-texture = ExtResource("171")
+offset_right = 247.130615
+offset_bottom = 9.565491
+theme_override_styles/panel = SubResource("159")
+texture = ExtResource("160")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2554,21 +2532,21 @@ offset_bottom = 56.147141
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 0.550402
-offset_bottom = 56.147141
-theme_override_styles/panel = SubResource("172")
-texture = ExtResource("173")
+offset_right = 0.550293
+offset_bottom = 56.147156
+theme_override_styles/panel = SubResource("161")
+texture = ExtResource("162")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group_1"]
 layout_mode = 1
 offset_left = 0.000000
-offset_top = 55.731079
-offset_right = 247.130569
-offset_bottom = 56.146984
-theme_override_styles/panel = SubResource("174")
-texture = ExtResource("175")
+offset_top = 55.731018
+offset_right = 247.130615
+offset_bottom = 56.146912
+theme_override_styles/panel = SubResource("163")
+texture = ExtResource("164")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2583,23 +2561,23 @@ offset_bottom = 49.437206
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 246.580170
-offset_bottom = 41.798428
-texture = ExtResource("176")
+offset_right = 246.802246
+offset_bottom = 42.979675
+texture = ExtResource("165")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("177")
+theme_override_styles/panel = SubResource("166")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group_2"]
 layout_mode = 1
 offset_left = 0.000000
-offset_top = 43.656189
-offset_right = 246.580170
-offset_bottom = 49.229316
-texture = ExtResource("178")
+offset_top = 43.656128
+offset_right = 246.659424
+offset_bottom = 50.237915
+texture = ExtResource("167")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("179")
+theme_override_styles/panel = SubResource("168")
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group_1"]
 layout_mode = 1
@@ -2619,50 +2597,50 @@ offset_bottom = 5.406762
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 7.155227
-offset_bottom = 5.406762
-texture = ExtResource("180")
+offset_right = 7.658691
+offset_bottom = 5.910278
+texture = ExtResource("169")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("181")
+theme_override_styles/panel = SubResource("170")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group_1/Group"]
 layout_mode = 1
 offset_left = 1.376221
 offset_top = 1.039917
-offset_right = 5.779438
-offset_bottom = 4.367155
-theme_override_styles/panel = SubResource("182")
-texture = ExtResource("183")
+offset_right = 5.779541
+offset_bottom = 4.367126
+theme_override_styles/panel = SubResource("171")
+texture = ExtResource("172")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_1"]
 layout_mode = 1
 offset_left = 0.000000
-offset_top = 19.505859
+offset_top = 19.505920
 offset_right = 7.155227
-offset_bottom = 24.912621
+offset_bottom = 24.912682
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group_1/Group_1"]
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 7.155227
-offset_bottom = 5.406762
-texture = ExtResource("184")
+offset_right = 7.658691
+offset_bottom = 5.910278
+texture = ExtResource("173")
 expand_mode = 1
 stretch_mode = 5
-theme_override_styles/panel = SubResource("185")
+theme_override_styles/panel = SubResource("174")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group_1/Group_1"]
 layout_mode = 1
 offset_left = 1.376221
 offset_top = 1.040039
-offset_right = 5.779438
-offset_bottom = 4.367277
-theme_override_styles/panel = SubResource("186")
-texture = ExtResource("187")
+offset_right = 5.779541
+offset_bottom = 4.367310
+theme_override_styles/panel = SubResource("175")
+texture = ExtResource("176")
 expand_mode = 1
 stretch_mode = 5
 
@@ -2676,9 +2654,9 @@ offset_bottom = 73.833626
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 1.804688
-offset_top = 61.345825
+offset_top = 61.345886
 offset_right = 28.050142
-offset_bottom = 67.178784
+offset_bottom = 67.178845
 
 [node name="domingo" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group"]
 layout_mode = 1
@@ -2695,9 +2673,9 @@ vertical_alignment = 0
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 35.974121
-offset_top = 68.000610
+offset_top = 68.000671
 offset_right = 76.114227
-offset_bottom = 73.833570
+offset_bottom = 73.833631
 
 [node name="segunda_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_1"]
 layout_mode = 1
@@ -2714,9 +2692,9 @@ vertical_alignment = 0
 [node name="Group_2" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 82.266357
-offset_top = 61.345825
+offset_top = 61.345886
 offset_right = 112.217052
-offset_bottom = 67.178784
+offset_bottom = 67.178845
 
 [node name="ter_a_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_2"]
 layout_mode = 1
@@ -2733,9 +2711,9 @@ vertical_alignment = 0
 [node name="Group_3" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 121.284912
-offset_top = 68.000610
+offset_top = 68.000671
 offset_right = 155.558384
-offset_bottom = 73.833570
+offset_bottom = 73.833631
 
 [node name="quarta_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_3"]
 layout_mode = 1
@@ -2752,9 +2730,9 @@ vertical_alignment = 0
 [node name="Group_4" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 162.727783
-offset_top = 61.345825
+offset_top = 61.345886
 offset_right = 196.074947
-offset_bottom = 67.178784
+offset_bottom = 67.178845
 
 [node name="quinta_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_4"]
 layout_mode = 1
@@ -2771,9 +2749,9 @@ vertical_alignment = 0
 [node name="Group_5" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 204.901123
-offset_top = 68.000610
+offset_top = 68.000671
 offset_right = 235.778124
-offset_bottom = 73.833570
+offset_bottom = 73.833631
 
 [node name="sexta_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_5"]
 layout_mode = 1
@@ -2790,9 +2768,9 @@ vertical_alignment = 0
 [node name="Group_6" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 250.809326
-offset_top = 61.345825
+offset_top = 61.345886
 offset_right = 272.731998
-offset_bottom = 67.178784
+offset_bottom = 67.178845
 
 [node name="s_bado" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_6"]
 layout_mode = 1
@@ -2809,9 +2787,9 @@ vertical_alignment = 0
 [node name="Group_7" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
 offset_left = 3.810059
-offset_top = 55.731079
+offset_top = 55.731018
 offset_right = 7.824069
-offset_bottom = 61.564038
+offset_bottom = 61.563977
 
 [node name="_0" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_7"]
 layout_mode = 1

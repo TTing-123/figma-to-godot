@@ -1,11 +1,23 @@
 shader_type canvas_item;
 
 uniform float corner_radius : hint_range(0.0, 200.0) = 10.0;
+uniform vec4 corner_radiuses = vec4(10.0);  // per-corner: x=br, y=tr, z=bl, w=tl (匹配 rounded_box_sdf)
 uniform vec2 target_size = vec2(375.0, 812.0);
 uniform float parent_corner_radius : hint_range(0.0, 200.0) = 0.0;
 uniform vec2 parent_size = vec2(375.0, 812.0);
 uniform vec2 offset_in_parent = vec2(0.0, 0.0);
 uniform bool use_texture = false;
+
+// 渐变支持
+uniform bool use_gradient = false;
+uniform vec4 gradient_color1 : source_color = vec4(1.0);  // 起始颜色
+uniform vec4 gradient_color2 : source_color = vec4(1.0);  // 结束颜色
+uniform vec2 gradient_start = vec2(0.0);   // 渐变起点
+uniform vec2 gradient_end = vec2(1.0);     // 渐变终点
+
+// 描边支持
+uniform float border_width = 0.0;
+uniform vec4 border_color : source_color = vec4(1.0);
 
 // SDF 圆角矩形
 float rounded_box_sdf(vec2 p, vec2 b, vec4 r) {
@@ -60,8 +72,32 @@ void fragment() {
 		if (d > 0.0) { discard; }
 	} else {
 		// 普通圆角矩形 SDF
-		float d = rounded_box_sdf(p, half_size, vec4(corner_radius));
+		float d = rounded_box_sdf(p, half_size, corner_radiuses);
 		if (d > 0.0) { discard; }
+	}
+
+	// 渐变填充
+	if (use_gradient) {
+		vec2 uv = pixel_pos / target_size;
+		vec2 gradient_dir = gradient_end - gradient_start;
+		float gradient_len = length(gradient_dir);
+		if (gradient_len > 0.001) {
+			float t = clamp(dot(uv - gradient_start, gradient_dir) / (gradient_len * gradient_len), 0.0, 1.0);
+			COLOR = mix(gradient_color1, gradient_color2, t);
+		} else {
+			COLOR = gradient_color1;
+		}
+	}
+
+	// 描边（在渐变填充之后，纹理之前）
+	if (border_width > 0.0) {
+		vec2 border_center = target_size * 0.5;
+		vec2 border_p = pixel_pos - border_center;
+		vec2 border_half = target_size * 0.5;
+		float border_d = rounded_box_sdf(border_p, border_half, corner_radiuses);
+		if (border_d > -border_width) {
+			COLOR = border_color;
+		}
 	}
 
 	if (use_texture) {

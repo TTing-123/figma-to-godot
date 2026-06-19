@@ -143,8 +143,8 @@ shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 8.0
 shader_parameter/target_size = Vector2(2.949506, 7.510693)
 shader_parameter/parent_corner_radius = 0.0
-shader_parameter/parent_size = Vector2(25.327024, 25.327024)
-shader_parameter/offset_in_parent = Vector2(4.511936, 17.584238)
+shader_parameter/parent_size = Vector2(25.327026, 25.327026)
+shader_parameter/offset_in_parent = Vector2(4.543215, 11.978851)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="17"]
@@ -159,8 +159,8 @@ shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 8.0
 shader_parameter/target_size = Vector2(2.949506, 7.510693)
 shader_parameter/parent_corner_radius = 0.0
-shader_parameter/parent_size = Vector2(25.327024, 25.327024)
-shader_parameter/offset_in_parent = Vector2(4.511936, 20.203402)
+shader_parameter/parent_size = Vector2(25.327026, 25.327026)
+shader_parameter/offset_in_parent = Vector2(4.543215, 14.598022)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="19"]
@@ -173,10 +173,10 @@ corner_radius_bottom_right = 6
 [sub_resource type="ShaderMaterial" id="20"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 6.0
-shader_parameter/target_size = Vector2(2.949506, 9.300303)
+shader_parameter/target_size = Vector2(9.300304, 2.949507)
 shader_parameter/parent_corner_radius = 0.0
-shader_parameter/parent_size = Vector2(25.327024, 25.327024)
-shader_parameter/offset_in_parent = Vector2(15.221656, 25.973471)
+shader_parameter/parent_size = Vector2(25.327026, 25.327026)
+shader_parameter/offset_in_parent = Vector2(5.952628, 17.418568)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="21"]
@@ -189,10 +189,10 @@ corner_radius_bottom_right = 6
 [sub_resource type="ShaderMaterial" id="22"]
 shader = ExtResource("shader_rounded")
 shader_parameter/corner_radius = 6.0
-shader_parameter/target_size = Vector2(2.949506, 3.080098)
+shader_parameter/target_size = Vector2(3.080098, 2.949506)
 shader_parameter/parent_corner_radius = 0.0
-shader_parameter/parent_size = Vector2(25.327024, 25.327024)
-shader_parameter/offset_in_parent = Vector2(5.979197, 25.973469)
+shader_parameter/parent_size = Vector2(25.327026, 25.327026)
+shader_parameter/offset_in_parent = Vector2(2.930402, 17.418568)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="23"]
@@ -438,7 +438,7 @@ shader_parameter/corner_radius = 16.0
 shader_parameter/target_size = Vector2(288.157440, 56.451897)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
-shader_parameter/offset_in_parent = Vector2(0.000094, -403.398529)
+shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="58"]
@@ -466,7 +466,7 @@ shader_parameter/corner_radius = 16.0
 shader_parameter/target_size = Vector2(288.157440, 124.699715)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
-shader_parameter/offset_in_parent = Vector2(0.000094, -346.946625)
+shader_parameter/offset_in_parent = Vector2(0.000000, 56.451904)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="61"]
@@ -527,7 +527,7 @@ shader_parameter/corner_radius = 16.0
 shader_parameter/target_size = Vector2(288.157440, 56.451897)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
-shader_parameter/offset_in_parent = Vector2(0.000094, -11.594452)
+shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="71"]
@@ -555,7 +555,7 @@ shader_parameter/corner_radius = 16.0
 shader_parameter/target_size = Vector2(288.157440, 124.699715)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
-shader_parameter/offset_in_parent = Vector2(0.000094, 44.857513)
+shader_parameter/offset_in_parent = Vector2(0.000000, 56.451965)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="75"]
@@ -790,7 +790,7 @@ shader_parameter/corner_radius = 16.0
 shader_parameter/target_size = Vector2(288.157440, 56.451897)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
-shader_parameter/offset_in_parent = Vector2(-0.000028, 380.209717)
+shader_parameter/offset_in_parent = Vector2(0.000000, 0.000000)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="133"]
@@ -818,7 +818,7 @@ shader_parameter/corner_radius = 16.0
 shader_parameter/target_size = Vector2(288.157440, 124.699715)
 shader_parameter/parent_corner_radius = 0.0
 shader_parameter/parent_size = Vector2(288.157440, 181.151611)
-shader_parameter/offset_in_parent = Vector2(-0.000028, 436.661560)
+shader_parameter/offset_in_parent = Vector2(0.000000, 56.451843)
 shader_parameter/use_texture = false
 
 [sub_resource type="StyleBoxFlat" id="139"]
@@ -1060,41 +1060,41 @@ offset_bottom = 811.512939
 
 [node name="Group_15" type="Control" parent="./Frame_4"]
 layout_mode = 1
-offset_left = 14.082464
-offset_top = 742.512954
-offset_right = 288.999914
-offset_bottom = 789.069175
+offset_left = 14.082520
+offset_top = 0.000000
+offset_right = 288.999969
+offset_bottom = 46.556221
 
 [node name="Vector_6" type="TextureRect" parent="./Frame_4/Group_15"]
 layout_mode = 1
-offset_left = 14.082409
-offset_top = 46.556191
-offset_right = 288.999859
-offset_bottom = 46.889425
+offset_left = 0.000000
+offset_top = 46.556213
+offset_right = 274.917450
+offset_bottom = 46.889447
 texture = ExtResource("10")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Frame_3" type="Control" parent="./Frame_4/Group_15"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 38.895020
 offset_top = 0.000000
-offset_right = 190.500885
+offset_right = 229.395905
 offset_bottom = 36.537792
 
 [node name="Group_9" type="Control" parent="./Frame_4/Group_15/Frame_3"]
 layout_mode = 1
-offset_left = -0.031215
-offset_top = 5.605383
-offset_right = 25.295810
-offset_bottom = 30.932407
+offset_left = -0.031252
+offset_top = 5.605377
+offset_right = 25.295774
+offset_bottom = 30.932404
 
 [node name="Ellipse_1" type="TextureRect" parent="./Frame_4/Group_15/Frame_3/Group_9"]
 layout_mode = 1
 offset_left = 0.000000
 offset_top = 0.000000
-offset_right = 25.327024
-offset_bottom = 25.327024
+offset_right = 25.327027
+offset_bottom = 25.327027
 theme_override_styles/panel = SubResource("11")
 texture = ExtResource("12")
 expand_mode = 1
@@ -1103,10 +1103,10 @@ clip_contents = true
 
 [node name="Ellipse_2" type="TextureRect" parent="./Frame_4/Group_15/Frame_3/Group_9"]
 layout_mode = 1
-offset_left = 4.511936
-offset_top = 7.561554
-offset_right = 22.045122
-offset_bottom = 25.094740
+offset_left = 4.543215
+offset_top = 1.956177
+offset_right = 22.076401
+offset_bottom = 19.489363
 theme_override_styles/panel = SubResource("13")
 texture = ExtResource("14")
 expand_mode = 1
@@ -1115,50 +1115,50 @@ clip_contents = true
 
 [node name="Rectangle_1318" type="Panel" parent="./Frame_4/Group_15/Frame_3/Group_9"]
 layout_mode = 1
-offset_left = 4.511936
-offset_top = 17.584238
-offset_right = 7.461442
-offset_bottom = 25.094931
+offset_left = 4.543215
+offset_top = 11.978852
+offset_right = 7.492721
+offset_bottom = 19.489545
 theme_override_styles/panel = SubResource("15")
 clip_contents = true
 material = SubResource("16")
 
 [node name="Rectangle_1321" type="Panel" parent="./Frame_4/Group_15/Frame_3/Group_9"]
 layout_mode = 1
-offset_left = 4.511935
-offset_top = 20.203402
-offset_right = 7.461441
-offset_bottom = 27.714095
+offset_left = 4.543215
+offset_top = 14.598023
+offset_right = 7.492721
+offset_bottom = 22.108716
 theme_override_styles/panel = SubResource("17")
 clip_contents = true
 material = SubResource("18")
 
 [node name="Rectangle_1319" type="Panel" parent="./Frame_4/Group_15/Frame_3/Group_9"]
 layout_mode = 1
-offset_left = 15.221656
-offset_top = 25.973470
-offset_right = 18.171162
-offset_bottom = 35.273773
+offset_left = 5.952628
+offset_top = 17.418567
+offset_right = 15.252932
+offset_bottom = 20.368074
 theme_override_styles/panel = SubResource("19")
 clip_contents = true
 material = SubResource("20")
 
 [node name="Rectangle_1320" type="Panel" parent="./Frame_4/Group_15/Frame_3/Group_9"]
 layout_mode = 1
-offset_left = 5.979197
-offset_top = 25.973470
-offset_right = 8.928703
-offset_bottom = 29.053568
+offset_left = 2.930402
+offset_top = 17.418567
+offset_right = 6.010500
+offset_bottom = 20.368073
 theme_override_styles/panel = SubResource("21")
 clip_contents = true
 material = SubResource("22")
 
 [node name="FigmaDash" type="Label" parent="./Frame_4/Group_15/Frame_3"]
 layout_mode = 1
-offset_left = 71.427301
-offset_top = -742.744063
-offset_right = 229.427301
-offset_bottom = -705.744063
+offset_left = 32.532227
+offset_top = -0.231110
+offset_right = 190.532227
+offset_bottom = 36.768890
 text = "FigmaDash"
 theme_override_font_sizes/font_size = 27.036831
 theme_override_colors/font_color = Color(0.905882, 0.937255, 0.988235, 1.000000)
@@ -1184,10 +1184,10 @@ material = SubResource("25")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form"]
 layout_mode = 1
-offset_left = 5.666702
-offset_top = 36.833336
-offset_right = 36.833370
-offset_bottom = 68.000004
+offset_left = 5.666748
+offset_top = 5.666656
+offset_right = 36.833416
+offset_bottom = 36.833324
 
 [node name="Polygon_3" type="Panel" parent="./Frame_4/Frame_2/Form/Icon"]
 layout_mode = 1
@@ -1201,18 +1201,18 @@ material = SubResource("27")
 
 [node name="fi_br_map_marker_plus" type="Control" parent="./Frame_4/Frame_2/Form/Icon"]
 layout_mode = 1
-offset_left = 14.323699
-offset_top = 14.323602
-offset_right = 27.804746
-offset_bottom = 27.804649
+offset_left = 8.656982
+offset_top = 8.656952
+offset_right = 22.138030
+offset_bottom = 22.138000
 clip_contents = true
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Frame_2/Form/Icon/fi_br_map_marker_plus"]
 layout_mode = 1
-offset_left = -5.097822
-offset_top = -36.833238
-offset_right = 7.251020
-offset_bottom = -23.352193
+offset_left = 0.568848
+offset_top = 0.000092
+offset_right = 12.917690
+offset_bottom = 13.481136
 theme_override_styles/panel = SubResource("28")
 texture = ExtResource("29")
 expand_mode = 1
@@ -1221,9 +1221,9 @@ stretch_mode = 5
 [node name="Text" type="Control" parent="./Frame_4/Frame_2/Form"]
 layout_mode = 1
 offset_left = 42.500000
-offset_top = 35.562510
+offset_top = 6.937500
 offset_right = 125.104218
-offset_bottom = 64.187529
+offset_bottom = 35.562519
 
 [node name="Ado__o" type="Label" parent="./Frame_4/Frame_2/Form/Text"]
 layout_mode = 1
@@ -1239,10 +1239,10 @@ vertical_alignment = 0
 
 [node name="_2_2_mil" type="Label" parent="./Frame_4/Frame_2/Form/Text"]
 layout_mode = 1
-offset_left = 42.499927
-offset_top = 17.562509
-offset_right = 86.499927
-offset_bottom = 35.562509
+offset_left = 0.000000
+offset_top = 10.625031
+offset_right = 44.000000
+offset_bottom = 28.625031
 text = "2,2 mil"
 theme_override_font_sizes/font_size = 12.750001
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1251,10 +1251,10 @@ vertical_alignment = 0
 
 [node name="_55_" type="Label" parent="./Frame_4/Frame_2/Form/Text"]
 layout_mode = 1
-offset_left = 98.104145
-offset_top = 20.395860
-offset_right = 125.104145
-offset_bottom = 34.395860
+offset_left = 55.604248
+offset_top = 13.458374
+offset_right = 82.604248
+offset_bottom = 27.458374
 text = "+55%"
 theme_override_font_sizes/font_size = 9.916667
 theme_override_colors/font_color = Color(0.003922, 0.709804, 0.455686, 1.000000)
@@ -1273,10 +1273,10 @@ material = SubResource("32")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form_1"]
 layout_mode = 1
-offset_left = 5.666672
-offset_top = 36.833336
-offset_right = 36.833340
-offset_bottom = 68.000004
+offset_left = 5.666748
+offset_top = 5.666656
+offset_right = 36.833416
+offset_bottom = 36.833324
 
 [node name="Polygon_3" type="Panel" parent="./Frame_4/Frame_2/Form_1/Icon"]
 layout_mode = 1
@@ -1290,18 +1290,18 @@ material = SubResource("34")
 
 [node name="fi_br_rotate_right" type="Control" parent="./Frame_4/Frame_2/Form_1/Icon"]
 layout_mode = 1
-offset_left = 14.707616
-offset_top = 14.323602
-offset_right = 28.188664
-offset_bottom = 27.804649
+offset_left = 9.041016
+offset_top = 8.656952
+offset_right = 22.522063
+offset_bottom = 22.138000
 clip_contents = true
 
 [node name="Group" type="Control" parent="./Frame_4/Frame_2/Form_1/Icon/fi_br_rotate_right"]
 layout_mode = 1
-offset_left = -20.343836
-offset_top = -8.656896
-offset_right = -6.923527
-offset_bottom = 4.824167
+offset_left = 0.030518
+offset_top = -0.000031
+offset_right = 13.450827
+offset_bottom = 13.481032
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Frame_2/Form_1/Icon/fi_br_rotate_right/Group"]
 layout_mode = 1
@@ -1317,9 +1317,9 @@ stretch_mode = 5
 [node name="Text" type="Control" parent="./Frame_4/Frame_2/Form_1"]
 layout_mode = 1
 offset_left = 42.500000
-offset_top = 35.562510
+offset_top = 6.937500
 offset_right = 121.104218
-offset_bottom = 64.187529
+offset_bottom = 35.562519
 
 [node name="Reten__o" type="Label" parent="./Frame_4/Frame_2/Form_1/Text"]
 layout_mode = 1
@@ -1335,10 +1335,10 @@ vertical_alignment = 0
 
 [node name="_215_0" type="Label" parent="./Frame_4/Frame_2/Form_1/Text"]
 layout_mode = 1
-offset_left = 42.499897
-offset_top = 17.562509
-offset_right = 74.499897
-offset_bottom = 35.562509
+offset_left = 0.000000
+offset_top = 10.625031
+offset_right = 32.000000
+offset_bottom = 28.625031
 text = "215,0"
 theme_override_font_sizes/font_size = 12.750001
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1347,10 +1347,10 @@ vertical_alignment = 0
 
 [node name="_12_" type="Label" parent="./Frame_4/Frame_2/Form_1/Text"]
 layout_mode = 1
-offset_left = 98.104115
-offset_top = 20.395860
-offset_right = 121.104115
-offset_bottom = 34.395860
+offset_left = 55.604004
+offset_top = 13.458374
+offset_right = 78.604004
+offset_bottom = 27.458374
 text = "-12%"
 theme_override_font_sizes/font_size = 9.916667
 theme_override_colors/font_color = Color(0.994687, 0.580312, 0.580312, 1.000000)
@@ -1369,10 +1369,10 @@ material = SubResource("39")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form_2"]
 layout_mode = 1
-offset_left = 5.666702
-offset_top = 36.833327
-offset_right = 36.833370
-offset_bottom = 67.999995
+offset_left = 5.666748
+offset_top = 5.666687
+offset_right = 36.833416
+offset_bottom = 36.833355
 
 [node name="Polygon_3" type="Panel" parent="./Frame_4/Frame_2/Form_2/Icon"]
 layout_mode = 1
@@ -1386,18 +1386,18 @@ material = SubResource("41")
 
 [node name="fi_br_comment_alt" type="Control" parent="./Frame_4/Frame_2/Form_2/Icon"]
 layout_mode = 1
-offset_left = 15.583215
-offset_top = 15.583302
-offset_right = 26.916548
-offset_bottom = 26.916636
+offset_left = 9.916504
+offset_top = 9.916626
+offset_right = 21.249837
+offset_bottom = 21.249959
 clip_contents = true
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Frame_2/Form_2/Icon/fi_br_comment_alt"]
 layout_mode = 1
-offset_left = -5.666665
-offset_top = -36.833317
-offset_right = 5.666668
-offset_bottom = -25.605239
+offset_left = 0.000000
+offset_top = 0.000000
+offset_right = 11.333333
+offset_bottom = 11.228078
 theme_override_styles/panel = SubResource("42")
 texture = ExtResource("43")
 expand_mode = 1
@@ -1405,10 +1405,10 @@ stretch_mode = 5
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Frame_2/Form_2/Icon/fi_br_comment_alt"]
 layout_mode = 1
-offset_left = -2.833413
-offset_top = -33.999973
-offset_right = -0.000080
-offset_bottom = -32.583307
+offset_left = 2.833252
+offset_top = 2.833344
+offset_right = 5.666585
+offset_bottom = 4.250010
 theme_override_styles/panel = SubResource("44")
 texture = ExtResource("45")
 expand_mode = 1
@@ -1416,10 +1416,10 @@ stretch_mode = 5
 
 [node name="Vector_2" type="TextureRect" parent="./Frame_4/Frame_2/Form_2/Icon/fi_br_comment_alt"]
 layout_mode = 1
-offset_left = -2.833413
-offset_top = -31.638798
-offset_right = 2.833253
-offset_bottom = -30.222131
+offset_left = 2.833252
+offset_top = 5.194519
+offset_right = 8.499918
+offset_bottom = 6.611186
 theme_override_styles/panel = SubResource("46")
 texture = ExtResource("47")
 expand_mode = 1
@@ -1427,10 +1427,10 @@ stretch_mode = 5
 
 [node name="_" type="Label" parent="./Frame_4/Frame_2/Form_2/Icon"]
 layout_mode = 1
-offset_left = 17.708370
-offset_top = 14.166655
-offset_right = 25.708370
-offset_bottom = 30.166655
+offset_left = 12.041748
+offset_top = 8.499969
+offset_right = 20.041748
+offset_bottom = 24.499969
 text = "􁇲"
 theme_override_font_sizes/font_size = 12.749999
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1440,9 +1440,9 @@ vertical_alignment = 0
 [node name="Text" type="Control" parent="./Frame_4/Frame_2/Form_2"]
 layout_mode = 1
 offset_left = 42.500000
-offset_top = 35.562498
+offset_top = 6.937500
 offset_right = 123.104218
-offset_bottom = 64.187494
+offset_bottom = 35.562496
 
 [node name="Engajamento" type="Label" parent="./Frame_4/Frame_2/Form_2/Text"]
 layout_mode = 1
@@ -1458,10 +1458,10 @@ vertical_alignment = 0
 
 [node name="_1_6_mil" type="Label" parent="./Frame_4/Frame_2/Form_2/Text"]
 layout_mode = 1
-offset_left = 42.499927
-offset_top = 17.562498
-offset_right = 83.499927
-offset_bottom = 35.562498
+offset_left = 0.000000
+offset_top = 10.625000
+offset_right = 41.000000
+offset_bottom = 28.625000
 text = "1,6 mil"
 theme_override_font_sizes/font_size = 12.750001
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1470,10 +1470,10 @@ vertical_alignment = 0
 
 [node name="_15_" type="Label" parent="./Frame_4/Frame_2/Form_2/Text"]
 layout_mode = 1
-offset_left = 98.104145
-offset_top = 20.395821
-offset_right = 123.104145
-offset_bottom = 34.395821
+offset_left = 55.604248
+offset_top = 13.458313
+offset_right = 80.604248
+offset_bottom = 27.458313
 text = "+15%"
 theme_override_font_sizes/font_size = 9.916667
 theme_override_colors/font_color = Color(0.003922, 0.709804, 0.455686, 1.000000)
@@ -1492,10 +1492,10 @@ material = SubResource("50")
 
 [node name="Icon" type="Control" parent="./Frame_4/Frame_2/Form_3"]
 layout_mode = 1
-offset_left = 5.666672
-offset_top = 36.833327
-offset_right = 36.833340
-offset_bottom = 67.999995
+offset_left = 5.666748
+offset_top = 5.666687
+offset_right = 36.833416
+offset_bottom = 36.833355
 
 [node name="Polygon_3" type="Panel" parent="./Frame_4/Frame_2/Form_3/Icon"]
 layout_mode = 1
@@ -1509,18 +1509,18 @@ material = SubResource("52")
 
 [node name="fi_br_trophy" type="Control" parent="./Frame_4/Frame_2/Form_3/Icon"]
 layout_mode = 1
-offset_left = 14.707616
-offset_top = 14.720085
-offset_right = 28.188664
-offset_bottom = 28.201133
+offset_left = 9.041016
+offset_top = 9.053406
+offset_right = 22.522063
+offset_bottom = 22.534453
 clip_contents = true
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Frame_2/Form_3/Icon/fi_br_trophy"]
 layout_mode = 1
-offset_left = -5.666525
-offset_top = -36.833411
-offset_right = 7.814523
-offset_bottom = -23.352341
+offset_left = 0.000000
+offset_top = -0.000092
+offset_right = 13.481048
+offset_bottom = 13.480979
 theme_override_styles/panel = SubResource("53")
 texture = ExtResource("54")
 expand_mode = 1
@@ -1529,9 +1529,9 @@ stretch_mode = 5
 [node name="Text" type="Control" parent="./Frame_4/Frame_2/Form_3"]
 layout_mode = 1
 offset_left = 42.500000
-offset_top = 35.562498
+offset_top = 6.937500
 offset_right = 125.104218
-offset_bottom = 64.187494
+offset_bottom = 35.562496
 
 [node name="Taxa_de_Sucesso" type="Label" parent="./Frame_4/Frame_2/Form_3/Text"]
 layout_mode = 1
@@ -1547,10 +1547,10 @@ vertical_alignment = 0
 
 [node name="_4_8" type="Label" parent="./Frame_4/Frame_2/Form_3/Text"]
 layout_mode = 1
-offset_left = 42.499897
-offset_top = 17.562498
-offset_right = 63.499897
-offset_bottom = 35.562498
+offset_left = 0.000000
+offset_top = 10.625000
+offset_right = 21.000000
+offset_bottom = 28.625000
 text = "4,8"
 theme_override_font_sizes/font_size = 12.750001
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1559,10 +1559,10 @@ vertical_alignment = 0
 
 [node name="_55_" type="Label" parent="./Frame_4/Frame_2/Form_3/Text"]
 layout_mode = 1
-offset_left = 98.104115
-offset_top = 20.395821
-offset_right = 125.104115
-offset_bottom = 34.395821
+offset_left = 55.604004
+offset_top = 13.458313
+offset_right = 82.604004
+offset_bottom = 27.458313
 text = "+55%"
 theme_override_font_sizes/font_size = 9.916667
 theme_override_colors/font_color = Color(0.003922, 0.709804, 0.455686, 1.000000)
@@ -1571,10 +1571,10 @@ vertical_alignment = 0
 
 [node name="Group_1" type="Control" parent="./Frame_4"]
 layout_mode = 1
-offset_left = 0.842679
-offset_top = 572.955734
-offset_right = 289.000119
-offset_bottom = 754.107346
+offset_left = 0.842773
+offset_top = 169.557190
+offset_right = 289.000214
+offset_bottom = 350.708801
 
 [node name="Frame_1" type="Control" parent="./Frame_4/Group_1"]
 layout_mode = 1
@@ -1585,10 +1585,10 @@ offset_bottom = 181.151611
 
 [node name="Contents" type="Panel" parent="./Frame_4/Group_1/Frame_1"]
 layout_mode = 1
-offset_left = 0.000094
-offset_top = -403.398544
-offset_right = 288.157534
-offset_bottom = -346.946648
+offset_left = 0.000000
+offset_top = 0.000000
+offset_right = 288.157440
+offset_bottom = 56.451897
 theme_override_styles/panel = SubResource("56")
 clip_contents = true
 material = SubResource("57")
@@ -1607,10 +1607,10 @@ vertical_alignment = 1
 
 [node name="Contents_1" type="Panel" parent="./Frame_4/Group_1/Frame_1"]
 layout_mode = 1
-offset_left = 0.000094
-offset_top = -346.946640
-offset_right = 288.157534
-offset_bottom = -222.246925
+offset_left = 0.000000
+offset_top = 56.451904
+offset_right = 288.157440
+offset_bottom = 181.151619
 theme_override_styles/panel = SubResource("59")
 clip_contents = true
 material = SubResource("60")
@@ -1618,9 +1618,9 @@ material = SubResource("60")
 [node name="Group_11" type="Control" parent="./Frame_4/Group_1/Frame_1/Contents_1"]
 layout_mode = 1
 offset_left = 57.294434
-offset_top = 112.903831
+offset_top = 11.795898
 offset_right = 231.527008
-offset_bottom = 213.410506
+offset_bottom = 112.302574
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_1/Frame_1/Contents_1/Group_11"]
 layout_mode = 1
@@ -1646,10 +1646,10 @@ stretch_mode = 5
 
 [node name="Vector_2" type="TextureRect" parent="./Frame_4/Group_1/Frame_1/Contents_1/Group_11"]
 layout_mode = 1
-offset_left = 197.781021
-offset_top = 47.591615
-offset_right = 214.304829
-offset_bottom = 59.588822
+offset_left = 140.486572
+offset_top = 35.795715
+offset_right = 157.010380
+offset_bottom = 47.792923
 theme_override_styles/panel = SubResource("67")
 texture = ExtResource("66")
 expand_mode = 1
@@ -1657,10 +1657,10 @@ stretch_mode = 5
 
 [node name="_72_0" type="Label" parent="./Frame_4/Group_1/Frame_1/Contents_1/Group_11"]
 layout_mode = 1
-offset_left = 116.720867
-offset_top = 66.050427
-offset_right = 172.720867
-offset_bottom = 100.050427
+offset_left = 59.426514
+offset_top = 54.254517
+offset_right = 115.426514
+offset_bottom = 88.254517
 text = "72,0"
 theme_override_font_sizes/font_size = 29.309412
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1669,10 +1669,10 @@ vertical_alignment = 0
 
 [node name="_0" type="Label" parent="./Frame_4/Group_1/Frame_1/Contents_1/Group_11"]
 layout_mode = 1
-offset_left = 57.294433
-offset_top = 101.302560
-offset_right = 63.294433
-offset_bottom = 112.302560
+offset_left = 0.000000
+offset_top = 89.506653
+offset_right = 6.000000
+offset_bottom = 100.506653
 text = "0"
 theme_override_font_sizes/font_size = 9.529252
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1681,10 +1681,10 @@ vertical_alignment = 0
 
 [node name="_100" type="Label" parent="./Frame_4/Group_1/Frame_1/Contents_1/Group_11"]
 layout_mode = 1
-offset_left = 214.527008
-offset_top = 101.302560
-offset_right = 231.527008
-offset_bottom = 112.302560
+offset_left = 157.232666
+offset_top = 89.506653
+offset_right = 174.232666
+offset_bottom = 100.506653
 text = "100"
 theme_override_font_sizes/font_size = 9.529252
 theme_override_colors/font_color = Color(1.000000, 1.000000, 1.000000, 1.000000)
@@ -1693,10 +1693,10 @@ vertical_alignment = 0
 
 [node name="Group_2" type="Control" parent="./Frame_4"]
 layout_mode = 1
-offset_left = 0.842679
-offset_top = 377.053680
-offset_right = 289.000119
-offset_bottom = 558.205292
+offset_left = 0.842773
+offset_top = 365.459229
+offset_right = 289.000214
+offset_bottom = 546.610840
 
 [node name="Frame_1" type="Control" parent="./Frame_4/Group_2"]
 layout_mode = 1
@@ -1707,10 +1707,10 @@ offset_bottom = 181.151611
 
 [node name="Contents" type="Panel" parent="./Frame_4/Group_2/Frame_1"]
 layout_mode = 1
-offset_left = 0.000094
-offset_top = -11.594452
-offset_right = 288.157534
-offset_bottom = 44.857445
+offset_left = 0.000000
+offset_top = 0.000000
+offset_right = 288.157440
+offset_bottom = 56.451897
 theme_override_styles/panel = SubResource("69")
 clip_contents = true
 material = SubResource("70")
@@ -1729,10 +1729,10 @@ vertical_alignment = 1
 
 [node name="Contents_1" type="Panel" parent="./Frame_4/Group_2/Frame_1"]
 layout_mode = 1
-offset_left = 0.000094
-offset_top = 44.857513
-offset_right = 288.157534
-offset_bottom = 169.557228
+offset_left = 0.000000
+offset_top = 56.451965
+offset_right = 288.157440
+offset_bottom = 181.151680
 modulate = Color(1, 1, 1, 0.900000)
 theme_override_styles/panel = SubResource("72")
 clip_contents = true
@@ -1740,17 +1740,17 @@ material = SubResource("73")
 
 [node name="Group_12" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1"]
 layout_mode = 1
-offset_left = 15.166104
-offset_top = 109.533588
-offset_right = 274.676328
-offset_bottom = 203.436237
+offset_left = 15.166016
+offset_top = 15.166138
+offset_right = 274.676239
+offset_bottom = 109.068787
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.728054
-offset_top = 102.903385
-offset_right = 274.676449
-offset_bottom = 103.236649
+offset_left = 12.562012
+offset_top = 87.737244
+offset_right = 259.510406
+offset_bottom = 88.070507
 texture = ExtResource("74")
 expand_mode = 1
 stretch_mode = 5
@@ -1758,10 +1758,10 @@ theme_override_styles/panel = SubResource("75")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.728054
-offset_top = 81.258358
-offset_right = 274.676449
-offset_bottom = 81.591622
+offset_left = 12.562012
+offset_top = 66.092224
+offset_right = 259.510406
+offset_bottom = 66.425488
 texture = ExtResource("76")
 expand_mode = 1
 stretch_mode = 5
@@ -1769,10 +1769,10 @@ theme_override_styles/panel = SubResource("77")
 
 [node name="Vector_2" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.728054
-offset_top = 59.974182
-offset_right = 274.676449
-offset_bottom = 60.307446
+offset_left = 12.562012
+offset_top = 44.808044
+offset_right = 259.510406
+offset_bottom = 45.141308
 texture = ExtResource("78")
 expand_mode = 1
 stretch_mode = 5
@@ -1780,10 +1780,10 @@ theme_override_styles/panel = SubResource("79")
 
 [node name="Vector_3" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.728054
-offset_top = 38.329212
-offset_right = 274.676449
-offset_bottom = 38.662476
+offset_left = 12.562012
+offset_top = 23.163086
+offset_right = 259.510406
+offset_bottom = 23.496350
 texture = ExtResource("80")
 expand_mode = 1
 stretch_mode = 5
@@ -1791,10 +1791,10 @@ theme_override_styles/panel = SubResource("81")
 
 [node name="Vector_4" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.728054
-offset_top = 16.684299
-offset_right = 274.676449
-offset_bottom = 17.017563
+offset_left = 12.562012
+offset_top = 1.518188
+offset_right = 259.510406
+offset_bottom = 1.851452
 texture = ExtResource("82")
 expand_mode = 1
 stretch_mode = 5
@@ -1802,10 +1802,10 @@ theme_override_styles/panel = SubResource("83")
 
 [node name="Clip_path_group" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 274.651970
-offset_bottom = 102.885257
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 259.485809
+offset_bottom = 87.719116
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group"]
 layout_mode = 1
@@ -1827,20 +1827,20 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group"]
 layout_mode = 1
-offset_left = 48.062244
-offset_top = 16.864598
-offset_right = 84.810516
-offset_bottom = 102.722913
+offset_left = 20.309570
+offset_top = 0.030090
+offset_right = 57.057842
+offset_bottom = 85.888405
 texture = ExtResource("86")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Clip_path_group_1" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 274.651970
-offset_bottom = 102.885257
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 259.485809
+offset_bottom = 87.719116
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_1"]
 layout_mode = 1
@@ -1862,10 +1862,10 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_1"]
 layout_mode = 1
-offset_left = 48.062244
-offset_top = 16.864598
-offset_right = 84.810516
-offset_bottom = 102.722913
+offset_left = 20.309570
+offset_top = 0.030090
+offset_right = 57.057842
+offset_bottom = 85.888405
 theme_override_styles/panel = SubResource("89")
 texture = ExtResource("90")
 expand_mode = 1
@@ -1873,10 +1873,10 @@ stretch_mode = 5
 
 [node name="Clip_path_group_2" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 274.651970
-offset_bottom = 102.885257
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 259.485809
+offset_bottom = 87.719116
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_2"]
 layout_mode = 1
@@ -1898,20 +1898,20 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_2"]
 layout_mode = 1
-offset_left = 104.899643
-offset_top = 38.509568
-offset_right = 141.647915
-offset_bottom = 102.722939
+offset_left = 77.146973
+offset_top = 21.675049
+offset_right = 113.895245
+offset_bottom = 85.888420
 texture = ExtResource("93")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Clip_path_group_3" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 274.651970
-offset_bottom = 102.885257
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 259.485809
+offset_bottom = 87.719116
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_3"]
 layout_mode = 1
@@ -1933,10 +1933,10 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_3"]
 layout_mode = 1
-offset_left = 104.899643
-offset_top = 38.509568
-offset_right = 141.647915
-offset_bottom = 102.722939
+offset_left = 77.146973
+offset_top = 21.675049
+offset_right = 113.895245
+offset_bottom = 85.888420
 theme_override_styles/panel = SubResource("96")
 texture = ExtResource("97")
 expand_mode = 1
@@ -1944,10 +1944,10 @@ stretch_mode = 5
 
 [node name="Clip_path_group_4" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 274.651970
-offset_bottom = 102.885257
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 259.485809
+offset_bottom = 87.719116
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_4"]
 layout_mode = 1
@@ -1969,20 +1969,20 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_4"]
 layout_mode = 1
-offset_left = 161.246834
-offset_top = 59.793742
-offset_right = 197.995106
-offset_bottom = 102.722899
+offset_left = 133.494141
+offset_top = 42.959229
+offset_right = 170.242413
+offset_bottom = 85.888386
 texture = ExtResource("100")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Clip_path_group_5" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 274.651970
-offset_bottom = 102.885257
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 259.485809
+offset_bottom = 87.719116
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_5"]
 layout_mode = 1
@@ -2004,10 +2004,10 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_5"]
 layout_mode = 1
-offset_left = 161.246834
-offset_top = 20.832775
-offset_right = 197.995106
-offset_bottom = 102.722858
+offset_left = 133.494141
+offset_top = 3.998230
+offset_right = 170.242413
+offset_bottom = 85.888313
 theme_override_styles/panel = SubResource("103")
 texture = ExtResource("104")
 expand_mode = 1
@@ -2015,10 +2015,10 @@ stretch_mode = 5
 
 [node name="Clip_path_group_6" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 27.752586
-offset_top = 16.834537
-offset_right = 27.752586
-offset_bottom = 16.834537
+offset_left = 12.586426
+offset_top = 1.668396
+offset_right = 12.586426
+offset_bottom = 1.668396
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_6"]
 layout_mode = 1
@@ -2041,27 +2041,27 @@ stretch_mode = 5
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_6"]
 layout_mode = 1
-offset_left = 218.084236
-offset_top = 81.438655
-offset_right = 254.832508
-offset_bottom = 102.722861
+offset_left = 190.331543
+offset_top = 64.604126
+offset_right = 227.079815
+offset_bottom = 85.888332
 texture = ExtResource("107")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Clip_path_group_7" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 218.083951
-offset_top = 81.438702
-offset_right = 254.832223
-offset_bottom = 102.722908
+offset_left = 202.917969
+offset_top = 66.272583
+offset_right = 239.666241
+offset_bottom = 87.556789
 
 [node name="id_0" type="Control" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_7"]
 layout_mode = 1
-offset_left = 27.752240
-offset_top = 16.834476
-offset_right = 274.651624
-offset_bottom = 102.885197
+offset_left = -190.331787
+offset_top = -64.604248
+offset_right = 56.567596
+offset_bottom = 21.446472
 visible = false
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12/Clip_path_group_7/id_0"]
@@ -2088,10 +2088,10 @@ stretch_mode = 5
 
 [node name="Vector_5" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 21.627858
-offset_top = 101.216846
-offset_right = 24.368667
-offset_bottom = 104.379039
+offset_left = 6.461670
+offset_top = 86.050720
+offset_right = 9.202479
+offset_bottom = 89.212913
 theme_override_styles/panel = SubResource("112")
 texture = ExtResource("113")
 expand_mode = 1
@@ -2099,10 +2099,10 @@ stretch_mode = 5
 
 [node name="Vector_6" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 18.129074
-offset_top = 79.704159
-offset_right = 24.414562
-offset_bottom = 82.866351
+offset_left = 2.962891
+offset_top = 64.538025
+offset_right = 9.248378
+offset_bottom = 67.700217
 theme_override_styles/panel = SubResource("114")
 texture = ExtResource("115")
 expand_mode = 1
@@ -2110,10 +2110,10 @@ stretch_mode = 5
 
 [node name="Vector_7" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 18.197947
-offset_top = 58.191479
-offset_right = 24.368597
-offset_bottom = 61.353671
+offset_left = 3.031738
+offset_top = 43.025330
+offset_right = 9.202388
+offset_bottom = 46.187522
 theme_override_styles/panel = SubResource("116")
 texture = ExtResource("117")
 expand_mode = 1
@@ -2121,10 +2121,10 @@ stretch_mode = 5
 
 [node name="Vector_8" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 18.228557
-offset_top = 36.729496
-offset_right = 24.414518
-offset_bottom = 39.840958
+offset_left = 3.062500
+offset_top = 21.563354
+offset_right = 9.248461
+offset_bottom = 24.674817
 theme_override_styles/panel = SubResource("118")
 texture = ExtResource("119")
 expand_mode = 1
@@ -2143,10 +2143,10 @@ stretch_mode = 5
 
 [node name="Vector_10" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 53.531724
-offset_top = 105.917866
-offset_right = 79.546439
-offset_bottom = 109.068785
+offset_left = 38.365723
+offset_top = 90.751770
+offset_right = 64.380438
+offset_bottom = 93.902689
 theme_override_styles/panel = SubResource("122")
 texture = ExtResource("123")
 expand_mode = 1
@@ -2154,10 +2154,10 @@ stretch_mode = 5
 
 [node name="Vector_11" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 110.045247
-offset_top = 105.917866
-offset_right = 135.738406
-offset_bottom = 109.068785
+offset_left = 94.879150
+offset_top = 90.751770
+offset_right = 120.572309
+offset_bottom = 93.902689
 theme_override_styles/panel = SubResource("124")
 texture = ExtResource("125")
 expand_mode = 1
@@ -2165,10 +2165,10 @@ stretch_mode = 5
 
 [node name="Vector_12" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 166.558759
-offset_top = 105.867107
-offset_right = 192.657689
-offset_bottom = 109.068757
+offset_left = 151.392578
+offset_top = 90.700989
+offset_right = 177.491508
+offset_bottom = 93.902638
 theme_override_styles/panel = SubResource("126")
 texture = ExtResource("127")
 expand_mode = 1
@@ -2176,10 +2176,10 @@ stretch_mode = 5
 
 [node name="Vector_13" type="TextureRect" parent="./Frame_4/Group_2/Frame_1/Contents_1/Group_12"]
 layout_mode = 1
-offset_left = 223.317166
-offset_top = 105.917866
-offset_right = 249.339540
-offset_bottom = 109.068785
+offset_left = 208.151123
+offset_top = 90.751770
+offset_right = 234.173496
+offset_bottom = 93.902689
 theme_override_styles/panel = SubResource("128")
 texture = ExtResource("129")
 expand_mode = 1
@@ -2187,10 +2187,10 @@ stretch_mode = 5
 
 [node name="Group_17" type="Control" parent="./Frame_4"]
 layout_mode = 1
-offset_left = 0.509794
-offset_top = 181.151611
-offset_right = 288.999937
-offset_bottom = 362.303223
+offset_left = 0.509766
+offset_top = 561.361328
+offset_right = 288.999908
+offset_bottom = 742.512939
 
 [node name="Group_3" type="Control" parent="./Frame_4/Group_17"]
 layout_mode = 1
@@ -2208,10 +2208,10 @@ offset_bottom = 181.151611
 
 [node name="Contents" type="Panel" parent="./Frame_4/Group_17/Group_3/Frame_1"]
 layout_mode = 1
-offset_left = -0.000028
-offset_top = 380.209717
-offset_right = 288.157412
-offset_bottom = 436.661613
+offset_left = 0.000000
+offset_top = 0.000000
+offset_right = 288.157440
+offset_bottom = 56.451897
 theme_override_styles/panel = SubResource("131")
 clip_contents = true
 material = SubResource("132")
@@ -2230,10 +2230,10 @@ vertical_alignment = 1
 
 [node name="Contents_1" type="Panel" parent="./Frame_4/Group_17/Group_3/Frame_1"]
 layout_mode = 1
-offset_left = -0.000028
-offset_top = 436.661560
-offset_right = 288.157412
-offset_bottom = 561.361275
+offset_left = 0.000000
+offset_top = 56.451843
+offset_right = 288.157440
+offset_bottom = 181.151558
 modulate = Color(1, 1, 1, 0.900000)
 theme_override_styles/panel = SubResource("134")
 clip_contents = true
@@ -2241,25 +2241,25 @@ material = SubResource("135")
 
 [node name="Frame" type="Control" parent="./Frame_4/Group_17"]
 layout_mode = 1
-offset_left = 0.589273
-offset_top = 626.352867
-offset_right = 288.999979
-offset_bottom = 724.090477
+offset_left = 0.079590
+offset_top = 64.991516
+offset_right = 288.490295
+offset_bottom = 162.729126
 clip_contents = true
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame"]
 layout_mode = 1
-offset_left = 27.519979
-offset_top = 89.274281
-offset_right = 183.231222
-offset_bottom = 94.640604
+offset_left = 27.520020
+offset_top = 8.463318
+offset_right = 183.231262
+offset_bottom = 13.829641
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group"]
 layout_mode = 1
-offset_left = 27.519940
-offset_top = 9.149649
-offset_right = 182.733350
-offset_bottom = 13.724602
+offset_left = 0.000000
+offset_top = 0.686340
+offset_right = 155.213409
+offset_bottom = 5.261293
 texture = ExtResource("136")
 expand_mode = 1
 stretch_mode = 5
@@ -2273,19 +2273,19 @@ offset_bottom = 5.366323
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group/Group"]
 layout_mode = 1
-offset_left = 27.519950
-offset_top = 9.149649
-offset_right = 113.933081
-offset_bottom = 13.724602
+offset_left = 0.000000
+offset_top = 0.686340
+offset_right = 86.413132
+offset_bottom = 5.261293
 texture = ExtResource("137")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 14.310547
 offset_top = 0.000000
-offset_right = 72.252190
+offset_right = 86.562737
 offset_bottom = 5.366323
 
 [node name="Reten__o__usu_rios_ativos_" type="Label" parent="./Frame_4/Group_17/Frame/Group/Group/Group"]
@@ -2302,10 +2302,10 @@ vertical_alignment = 0
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group/Group"]
 layout_mode = 1
-offset_left = 27.519950
-offset_top = 11.437082
-offset_right = 39.628795
-offset_bottom = 11.764348
+offset_left = 0.000000
+offset_top = 2.973755
+offset_right = 12.108846
+offset_bottom = 3.301021
 texture = ExtResource("138")
 expand_mode = 1
 stretch_mode = 5
@@ -2313,26 +2313,26 @@ theme_override_styles/panel = SubResource("139")
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 96.320313
 offset_top = 0.000000
-offset_right = 59.390892
+offset_right = 155.711205
 offset_bottom = 5.366323
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group/Group_1"]
 layout_mode = 1
-offset_left = 123.840445
-offset_top = 9.149661
-offset_right = 182.733470
-offset_bottom = 13.724613
+offset_left = 0.000000
+offset_top = 0.686340
+offset_right = 58.893024
+offset_bottom = 5.261293
 texture = ExtResource("140")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group/Group_1"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 14.310547
 offset_top = 0.000000
-offset_right = 45.080433
+offset_right = 59.390980
 offset_bottom = 5.366323
 
 [node name="Felicidade__NPS_" type="Label" parent="./Frame_4/Group_17/Frame/Group/Group_1/Group"]
@@ -2349,10 +2349,10 @@ vertical_alignment = 0
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group/Group_1"]
 layout_mode = 1
-offset_left = 123.840445
-offset_top = 11.437093
-offset_right = 135.949291
-offset_bottom = 11.764359
+offset_left = 0.000000
+offset_top = 2.973755
+offset_right = 12.108846
+offset_bottom = 3.301021
 texture = ExtResource("141")
 expand_mode = 1
 stretch_mode = 5
@@ -2360,27 +2360,27 @@ theme_override_styles/panel = SubResource("142")
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame"]
 layout_mode = 1
-offset_left = 12.671137
-offset_top = 79.978420
-offset_right = 285.403131
-offset_bottom = 153.812046
+offset_left = 12.671143
+offset_top = 17.759216
+offset_right = 285.403137
+offset_bottom = 91.592842
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1"]
 layout_mode = 1
-offset_left = 27.519975
-offset_top = 20.795306
-offset_right = 274.650544
-offset_bottom = 76.942446
+offset_left = 14.848877
+offset_top = 3.036133
+offset_right = 261.979446
+offset_bottom = 59.183273
 texture = ExtResource("143")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group_1"]
 layout_mode = 1
-offset_left = 27.519750
-offset_top = 20.795306
-offset_right = 274.650319
-offset_bottom = 76.942446
+offset_left = 14.848633
+offset_top = 3.036133
+offset_right = 261.979202
+offset_bottom = 59.183273
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group"]
 layout_mode = 1
@@ -2402,9 +2402,9 @@ stretch_mode = 5
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 41.280029
 offset_top = 0.000000
-offset_right = 0.550402
+offset_right = 41.830431
 offset_bottom = 56.147141
 theme_override_styles/panel = SubResource("146")
 texture = ExtResource("147")
@@ -2413,9 +2413,9 @@ stretch_mode = 5
 
 [node name="Vector_2" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 82.010010
 offset_top = 0.000000
-offset_right = 0.550402
+offset_right = 82.560412
 offset_bottom = 56.147141
 theme_override_styles/panel = SubResource("148")
 texture = ExtResource("149")
@@ -2424,9 +2424,9 @@ stretch_mode = 5
 
 [node name="Vector_3" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 123.290039
 offset_top = 0.000000
-offset_right = 0.550402
+offset_right = 123.840441
 offset_bottom = 56.147141
 theme_override_styles/panel = SubResource("150")
 texture = ExtResource("151")
@@ -2435,9 +2435,9 @@ stretch_mode = 5
 
 [node name="Vector_4" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 164.570313
 offset_top = 0.000000
-offset_right = 0.550402
+offset_right = 165.120715
 offset_bottom = 56.147141
 theme_override_styles/panel = SubResource("152")
 texture = ExtResource("153")
@@ -2446,9 +2446,9 @@ stretch_mode = 5
 
 [node name="Vector_5" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 205.300049
 offset_top = 0.000000
-offset_right = 0.550402
+offset_right = 205.850451
 offset_bottom = 56.147141
 theme_override_styles/panel = SubResource("154")
 texture = ExtResource("155")
@@ -2457,9 +2457,9 @@ stretch_mode = 5
 
 [node name="Vector_6" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 246.580078
 offset_top = 0.000000
-offset_right = 0.550402
+offset_right = 247.130480
 offset_bottom = 56.147141
 theme_override_styles/panel = SubResource("156")
 texture = ExtResource("157")
@@ -2468,10 +2468,10 @@ stretch_mode = 5
 
 [node name="Vector_7" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 76.526335
-offset_right = 274.650299
-offset_bottom = 76.942240
+offset_left = 0.000000
+offset_top = 55.731079
+offset_right = 247.130569
+offset_bottom = 56.146984
 theme_override_styles/panel = SubResource("158")
 texture = ExtResource("159")
 expand_mode = 1
@@ -2479,10 +2479,10 @@ stretch_mode = 5
 
 [node name="Vector_8" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 57.810488
-offset_right = 274.650299
-offset_bottom = 58.226393
+offset_left = 0.000000
+offset_top = 37.015198
+offset_right = 247.130569
+offset_bottom = 37.431102
 theme_override_styles/panel = SubResource("160")
 texture = ExtResource("161")
 expand_mode = 1
@@ -2490,10 +2490,10 @@ stretch_mode = 5
 
 [node name="Vector_9" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 39.511195
-offset_right = 274.650299
-offset_bottom = 39.927100
+offset_left = 0.000000
+offset_top = 18.715881
+offset_right = 247.130569
+offset_bottom = 19.131786
 theme_override_styles/panel = SubResource("162")
 texture = ExtResource("163")
 expand_mode = 1
@@ -2512,10 +2512,10 @@ stretch_mode = 5
 
 [node name="Vector_11" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 67.376605
-offset_right = 274.650299
-offset_bottom = 67.792510
+offset_left = 0.000000
+offset_top = 46.581299
+offset_right = 247.130569
+offset_bottom = 46.997204
 theme_override_styles/panel = SubResource("166")
 texture = ExtResource("167")
 expand_mode = 1
@@ -2523,10 +2523,10 @@ stretch_mode = 5
 
 [node name="Vector_12" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 48.660813
-offset_right = 274.650299
-offset_bottom = 49.076718
+offset_left = 0.000000
+offset_top = 27.865479
+offset_right = 247.130569
+offset_bottom = 28.281383
 theme_override_styles/panel = SubResource("168")
 texture = ExtResource("169")
 expand_mode = 1
@@ -2534,10 +2534,10 @@ stretch_mode = 5
 
 [node name="Vector_13" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 29.944908
-offset_right = 274.650299
-offset_bottom = 30.360813
+offset_left = 0.000000
+offset_top = 9.149597
+offset_right = 247.130569
+offset_bottom = 9.565502
 theme_override_styles/panel = SubResource("170")
 texture = ExtResource("171")
 expand_mode = 1
@@ -2563,10 +2563,10 @@ stretch_mode = 5
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group_1"]
 layout_mode = 1
-offset_left = 27.519729
-offset_top = 76.526335
-offset_right = 274.650299
-offset_bottom = 76.942240
+offset_left = 0.000000
+offset_top = 55.731079
+offset_right = 247.130569
+offset_bottom = 56.146984
 theme_override_styles/panel = SubResource("174")
 texture = ExtResource("175")
 expand_mode = 1
@@ -2574,10 +2574,10 @@ stretch_mode = 5
 
 [node name="Group_2" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group"]
 layout_mode = 1
-offset_left = 27.794995
-offset_top = 21.003258
-offset_right = 274.375165
-offset_bottom = 70.232518
+offset_left = 0.275146
+offset_top = 0.207947
+offset_right = 246.855316
+offset_bottom = 49.437206
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group_2"]
 layout_mode = 1
@@ -2592,10 +2592,10 @@ theme_override_styles/panel = SubResource("177")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group/Group_2"]
 layout_mode = 1
-offset_left = 27.795095
-offset_top = 64.659398
-offset_right = 274.375265
-offset_bottom = 70.232525
+offset_left = 0.000000
+offset_top = 43.656189
+offset_right = 246.580170
+offset_bottom = 49.229316
 texture = ExtResource("178")
 expand_mode = 1
 stretch_mode = 5
@@ -2603,10 +2603,10 @@ theme_override_styles/panel = SubResource("179")
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group_1"]
 layout_mode = 1
-offset_left = 188.604258
-offset_top = 46.165428
-offset_right = 195.759484
-offset_bottom = 71.078070
+offset_left = 175.933105
+offset_top = 28.406250
+offset_right = 183.088332
+offset_bottom = 53.318892
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_1"]
 layout_mode = 1
@@ -2628,10 +2628,10 @@ theme_override_styles/panel = SubResource("181")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group_1/Group"]
 layout_mode = 1
-offset_left = 189.980376
-offset_top = 47.205317
-offset_right = 194.383593
-offset_bottom = 50.532555
+offset_left = 1.376221
+offset_top = 1.039917
+offset_right = 5.779438
+offset_bottom = 4.367155
 theme_override_styles/panel = SubResource("182")
 texture = ExtResource("183")
 expand_mode = 1
@@ -2639,10 +2639,10 @@ stretch_mode = 5
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_1"]
 layout_mode = 1
-offset_left = 188.604270
-offset_top = 65.671333
-offset_right = 195.759497
-offset_bottom = 71.078095
+offset_left = 0.000000
+offset_top = 19.505859
+offset_right = 7.155227
+offset_bottom = 24.912621
 
 [node name="Vector" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group_1/Group_1"]
 layout_mode = 1
@@ -2657,10 +2657,10 @@ theme_override_styles/panel = SubResource("185")
 
 [node name="Vector_1" type="TextureRect" parent="./Frame_4/Group_17/Frame/Group_1/Group_1/Group_1"]
 layout_mode = 1
-offset_left = 189.980389
-offset_top = 66.711336
-offset_right = 194.383606
-offset_bottom = 70.038574
+offset_left = 1.376221
+offset_top = 1.040039
+offset_right = 5.779438
+offset_bottom = 4.367277
 theme_override_styles/panel = SubResource("186")
 texture = ExtResource("187")
 expand_mode = 1
@@ -2675,10 +2675,10 @@ offset_bottom = 73.833626
 
 [node name="Group" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 14.475779
-offset_top = 79.105034
-offset_right = 40.721234
-offset_bottom = 84.937993
+offset_left = 1.804688
+offset_top = 61.345825
+offset_right = 28.050142
+offset_bottom = 67.178784
 
 [node name="domingo" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group"]
 layout_mode = 1
@@ -2694,10 +2694,10 @@ vertical_alignment = 0
 
 [node name="Group_1" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 48.645247
-offset_top = 85.759815
-offset_right = 88.785353
-offset_bottom = 91.592774
+offset_left = 35.974121
+offset_top = 68.000610
+offset_right = 76.114227
+offset_bottom = 73.833570
 
 [node name="segunda_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_1"]
 layout_mode = 1
@@ -2713,10 +2713,10 @@ vertical_alignment = 0
 
 [node name="Group_2" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 94.937456
-offset_top = 79.105034
-offset_right = 124.888151
-offset_bottom = 84.937993
+offset_left = 82.266357
+offset_top = 61.345825
+offset_right = 112.217052
+offset_bottom = 67.178784
 
 [node name="ter_a_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_2"]
 layout_mode = 1
@@ -2732,10 +2732,10 @@ vertical_alignment = 0
 
 [node name="Group_3" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 133.955927
-offset_top = 85.759815
-offset_right = 168.229399
-offset_bottom = 91.592774
+offset_left = 121.284912
+offset_top = 68.000610
+offset_right = 155.558384
+offset_bottom = 73.833570
 
 [node name="quarta_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_3"]
 layout_mode = 1
@@ -2751,10 +2751,10 @@ vertical_alignment = 0
 
 [node name="Group_4" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 175.398905
-offset_top = 79.105034
-offset_right = 208.746069
-offset_bottom = 84.937993
+offset_left = 162.727783
+offset_top = 61.345825
+offset_right = 196.074947
+offset_bottom = 67.178784
 
 [node name="quinta_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_4"]
 layout_mode = 1
@@ -2770,10 +2770,10 @@ vertical_alignment = 0
 
 [node name="Group_5" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 217.572245
-offset_top = 85.759815
-offset_right = 248.449245
-offset_bottom = 91.592774
+offset_left = 204.901123
+offset_top = 68.000610
+offset_right = 235.778124
+offset_bottom = 73.833570
 
 [node name="sexta_feira" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_5"]
 layout_mode = 1
@@ -2789,10 +2789,10 @@ vertical_alignment = 0
 
 [node name="Group_6" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 263.480478
-offset_top = 79.105034
-offset_right = 285.403151
-offset_bottom = 84.937993
+offset_left = 250.809326
+offset_top = 61.345825
+offset_right = 272.731998
+offset_bottom = 67.178784
 
 [node name="s_bado" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_6"]
 layout_mode = 1
@@ -2808,10 +2808,10 @@ vertical_alignment = 0
 
 [node name="Group_7" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 16.481193
-offset_top = 73.490211
-offset_right = 20.495203
-offset_bottom = 79.323171
+offset_left = 3.810059
+offset_top = 55.731079
+offset_right = 7.824069
+offset_bottom = 61.564038
 
 [node name="_0" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_7"]
 layout_mode = 1
@@ -2827,10 +2827,10 @@ vertical_alignment = 0
 
 [node name="Group_8" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 12.671131
-offset_top = 54.912838
-offset_right = 20.390381
-offset_bottom = 60.745797
+offset_left = 0.000000
+offset_top = 37.153625
+offset_right = 7.719250
+offset_bottom = 42.986585
 
 [node name="_20" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_8"]
 layout_mode = 1
@@ -2846,10 +2846,10 @@ vertical_alignment = 0
 
 [node name="Group_9" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 12.671131
-offset_top = 36.336029
-offset_right = 20.390381
-offset_bottom = 42.168988
+offset_left = 0.000000
+offset_top = 18.576843
+offset_right = 7.719250
+offset_bottom = 24.409802
 
 [node name="_40" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_9"]
 layout_mode = 1
@@ -2865,9 +2865,9 @@ vertical_alignment = 0
 
 [node name="Group_10" type="Control" parent="./Frame_4/Group_17/Frame/Group_1/Group_2"]
 layout_mode = 1
-offset_left = 0.000000
+offset_left = 0.000244
 offset_top = 0.000000
-offset_right = 7.719250
+offset_right = 7.719494
 offset_bottom = 5.832959
 
 [node name="_60" type="Label" parent="./Frame_4/Group_17/Frame/Group_1/Group_2/Group_10"]

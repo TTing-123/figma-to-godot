@@ -34,7 +34,10 @@ void fragment() {
 	vec2 center = target_size * 0.5;
 	vec2 p = pixel_pos - center;
 	vec2 half_size = target_size * 0.5;
-	float d = rounded_box_sdf(p, half_size, vec4(corner_radius));
+	// 当 corner_radius 超过节点尺寸的一半时，限制为 min(half_size)
+	// 这样圆角矩形会正确渲染为胶囊/椭圆形状（与 Figma 行为一致）
+	vec2 clamped_r = min(vec2(corner_radius), half_size);
+	float d = rounded_box_sdf(p, half_size, vec4(clamped_r.x, clamped_r.y, clamped_r.x, clamped_r.y));
 
 	if (d > 0.0) {
 		discard;

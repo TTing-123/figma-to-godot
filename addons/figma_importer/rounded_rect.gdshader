@@ -34,13 +34,24 @@ void fragment() {
 	vec2 center = target_size * 0.5;
 	vec2 p = pixel_pos - center;
 	vec2 half_size = target_size * 0.5;
-	// 当 corner_radius 超过节点尺寸的一半时，限制为 min(half_size)
-	// 这样圆角矩形会正确渲染为胶囊/椭圆形状（与 Figma 行为一致）
-	vec2 clamped_r = min(vec2(corner_radius), half_size);
-	float d = rounded_box_sdf(p, half_size, vec4(clamped_r.x, clamped_r.y, clamped_r.x, clamped_r.y));
 
-	if (d > 0.0) {
-		discard;
+	// 判断是否需要渲染为椭圆：corner_radius >= 较小的 half_size 时
+	float min_half = min(half_size.x, half_size.y);
+	if (corner_radius >= min_half) {
+		// 椭圆 SDF：(px/rx)^2 + (py/ry)^2 - 1
+		// rx = 较大的 half_size, ry = 较小的 half_size（保持宽高比）
+		float rx = max(half_size.x, half_size.y);
+		float ry = min_half;
+		float d = (p.x * p.x) / (rx * rx) + (p.y * p.y) / (ry * ry) - 1.0;
+		if (d > 0.0) {
+			discard;
+		}
+	} else {
+		// 普通圆角矩形 SDF
+		float d = rounded_box_sdf(p, half_size, vec4(corner_radius));
+		if (d > 0.0) {
+			discard;
+		}
 	}
 
 	if (use_texture) {

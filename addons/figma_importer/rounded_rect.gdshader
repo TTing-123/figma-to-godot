@@ -12,8 +12,9 @@ uniform bool use_texture = false;
 uniform bool use_gradient = false;
 uniform vec4 gradient_color1 : source_color = vec4(1.0);  // 起始颜色
 uniform vec4 gradient_color2 : source_color = vec4(1.0);  // 结束颜色
-uniform vec2 gradient_start = vec2(0.0);   // 渐变起点
-uniform vec2 gradient_end = vec2(1.0);     // 渐变终点
+uniform vec2 gradient_start = vec2(0.0);   // 渐变起点（画布坐标）
+uniform vec2 gradient_end = vec2(1.0);     // 渐变终点（画布坐标）
+uniform vec2 node_pos_in_root = vec2(0.0); // 节点在根画布中的位置
 
 // 描边支持
 uniform float border_width = 0.0;
@@ -76,13 +77,17 @@ void fragment() {
 		if (d > 0.0) { discard; }
 	}
 
-	// 渐变填充
+	// 渐变填充（在画布坐标空间计算，y 轴翻转）
 	if (use_gradient) {
-		vec2 uv = pixel_pos / target_size;
-		vec2 gradient_dir = gradient_end - gradient_start;
+		// 节点本地像素 -> 画布 UV (root=375x812)，翻转 y
+		vec2 canvas_uv = node_pos_in_root + pixel_pos / vec2(375.0, 812.0);
+		canvas_uv.y = 1.0 - canvas_uv.y;
+		vec2 gs = vec2(gradient_start.x, 1.0 - gradient_start.y);
+		vec2 ge = vec2(gradient_end.x, 1.0 - gradient_end.y);
+		vec2 gradient_dir = ge - gs;
 		float gradient_len = length(gradient_dir);
 		if (gradient_len > 0.001) {
-			float t = clamp(dot(uv - gradient_start, gradient_dir) / (gradient_len * gradient_len), 0.0, 1.0);
+			float t = clamp(dot(canvas_uv - gs, gradient_dir) / (gradient_len * gradient_len), 0.0, 1.0);
 			COLOR = mix(gradient_color1, gradient_color2, t);
 		} else {
 			COLOR = gradient_color1;

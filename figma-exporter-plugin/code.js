@@ -281,6 +281,15 @@ async function parseNode(node, imageRefs, vectorRefs) {
                 useAbsoluteBounds: true
             });
             vectorRefs.set(node.id, bytes);
+            // 对有描边的线条节点：如果 width 或 height 为 0，
+            // 用 strokeWeight 补偿（因为 useAbsoluteBounds 不含描边区域）
+            if (node.type === 'VECTOR' && 'strokeWeight' in node && node.strokeWeight > 0) {
+                if (base.height === 0 && base.width > 0) {
+                    base.height = node.strokeWeight;
+                } else if (base.width === 0 && base.height > 0) {
+                    base.width = node.strokeWeight;
+                }
+            }
         }
         catch (e) {
             console.error('Failed to export vector as PNG:', e);

@@ -305,6 +305,9 @@ func _calculate_bounds(node: Dictionary) -> Dictionary:
 	return bounds
 
 func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offset_x: float = 0, offset_y: float = 0, depth: int = 0, root_width: float = 0, root_height: float = 0) -> void:
+	# 父节点不可见时，子节点也不可见（Figma 行为）
+	if parent_pos.get("visible", true) == false:
+		node["visible"] = false
 	# 存储父节点的绝对坐标（已减去全局偏移量）
 	var abs_x = node.get("absoluteX", node.get("x", 0)) - offset_x
 	var abs_y = node.get("absoluteY", node.get("y", 0)) - offset_y
@@ -347,7 +350,8 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 		"abs_y": abs_y,
 		"corner_radius": current_corner,
 		"clips_content": current_clips,
-		"size": current_size
+		"size": current_size,
+		"visible": node.get("visible", true)
 	}
 	for child in node.get("children", []):
 		_preprocess_parent_positions(child, current_pos, offset_x, offset_y, depth + 1, root_width, root_height)
@@ -432,6 +436,10 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	if not node.get("visible", true):
 		properties["visible"] = false
 
+	# 处理纯黑色 VECTOR 节点：设为隐藏（Figma 中不可见，导出后不应显示）
+	if node_type == "VECTOR" and _is_solid_black_fill(node):
+		properties["visible"] = false
+
 	# 处理透明度
 	var opacity = node.get("opacity", 1.0)
 	if opacity < 1.0:
@@ -449,7 +457,9 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		# 有纹理 → TextureRect
 		godot_type = "TextureRect"
 		properties["expand_mode"] = 1  # IGNORE_SIZE
-		properties["stretch_mode"] = 5  # KEEP_ASPECT_CENTERED
+		# 如果 _apply_styles 中没有设置 stretch_mode（细线型 Vector），则使用默认值
+		if not properties.has("stretch_mode"):
+			properties["stretch_mode"] = 5  # KEEP_ASPECT_CENTERED
 		# 如果有圆角（自己的或继承的），应用 Shader
 		var effective_radius = max(tl, max(tr, max(bl, br)))
 		var parent_radius = node.get("_parent_corner_radius", 0)
@@ -687,8 +697,18 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 			"path": _vector_cache[node_id]
 		})
 		properties["texture"] = 'ExtResource("%d")' % res_id
-		properties["expand_mode"] = 1
-		properties["stretch_mode"] = 6
+		properties["expand_mode"] = 1  # IGNORE_SIZE
+		# 细线型 Vector（只有 strokes 没有 fills，高度很小）使用 STRETCH，
+		# 让纹理适应节点大小，避免被裁剪
+		var node_height = node.get("height", 0)
+		var is_thin_line = fills.is_empty() and not strokes.is_empty() and node_height < 2.0
+		if is_thin_line:
+			properties["stretch_mode"] = 0  # STRETCH
+		else:
+			properties["stretch_mode"] = 6  # KEEP_ASPECT_COVERED
+		# VECTOR 类型：纹理已包含完整的渲染结果（fill + stroke），
+		# 移除 fill/stroke 产生的 panel 样式，避免干扰纹理渲染
+		properties.erase("theme_override_styles/panel")
 
 	# 处理描边
 	if not is_text and not strokes.is_empty() and stroke_weight > 0:
@@ -698,8 +718,8 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				var border_w = stroke_weight if stroke_weight >= 0.5 else 1
 				# 存储描边数据供 shader 使用
 				node["_stroke_data"] = {"color": stroke_color, "width": border_w}
-				# 如果没有 fill 样式，用 StyleBoxFlat 渲染描边
-				if not properties.has("theme_override_styles/panel"):
+				# VECTOR 类型已有纹理，不需要 panel 样式
+				if node_type != "VECTOR" and not properties.has("theme_override_styles/panel"):
 					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
 
 	# 处理阴影
@@ -814,6 +834,9 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var characters = node.get("characters", "")
 	if characters.is_empty():
 		return
+	# 跳过 SF Symbol 等不可渲染的特殊字符（Unicode U+10000 以上）
+	if characters.unicode_at(0) >= 0x10000:
+		return
 
 	characters = characters.replace('"', '\\"').replace("\n", "\\n")
 	properties["text"] = '"%s"' % characters
@@ -881,3 +904,19 @@ func _format_sub_resource(res: Dictionary) -> String:
 		content += "%s = %s\n" % [key, str(res["properties"][key])]
 	content += "\n"
 	return content
+
+func _is_solid_black_fill(node: Dictionary) -> bool:
+	# 检查节点是否只有纯黑色 SOLID 填充
+	var fills = node.get("fills", [])
+	if fills.size() != 1:
+		return false
+	var fill = fills[0]
+	if fill.get("type") != "SOLID":
+		return false
+	var color = fill.get("color", {})
+	var r = color.get("r", 0)
+	var g = color.get("g", 0)
+	var b = color.get("b", 0)
+	var a = color.get("a", 1)
+	# 检查是否为纯黑色（r=0, g=0, b=0, a=1）
+	return r == 0 and g == 0 and b == 0 and a == 1

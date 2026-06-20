@@ -670,6 +670,11 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 							var tmp_x = sx; var tmp_y = sy
 							sx = ex; sy = ey
 							ex = tmp_x; ey = tmp_y
+						# 将坐标从 Figma 的 (-0.5, -0.5)→(0.5, 0.5) 映射到 UV 空间的 (0, 0)→(1, 1)
+						sx = sx + 0.5
+						sy = sy + 0.5
+						ex = ex + 0.5
+						ey = ey + 0.5
 						node["_gradient_data"] = {
 							"color1": "Color(%f, %f, %f, %f)" % [c1.get("r",0), c1.get("g",0), c1.get("b",0), c1.get("a",1)],
 							"color2": "Color(%f, %f, %f, %f)" % [c2.get("r",0), c2.get("g",0), c2.get("b",0), c2.get("a",1)],

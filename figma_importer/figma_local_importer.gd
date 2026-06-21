@@ -29,6 +29,7 @@ var _name_counter: Dictionary = {}
 var _image_cache: Dictionary = {}
 var _vector_cache: Dictionary = {}
 var _vector_size_cache: Dictionary = {}
+var _font_cache: Dictionary = {}  # { "fontFamily_fontWeight": "res://path/to/font.ttf" }
 
 func import_from_file(json_path: String, output_path: String) -> Error:
 	# 读取 JSON 文件
@@ -65,6 +66,12 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 	if suffix.length() > 0:
 		assets_dir = "res://%s_assets%s/" % [base_name, suffix]
 	_extract_resources(data, assets_dir)
+
+	# 查找字体资源
+	progress_changed.emit("查找字体...", 0.5)
+	var fonts = data.get("fonts", {})
+	if not fonts.is_empty():
+		_find_fonts(fonts, assets_dir)
 
 	# 生成场景
 	progress_changed.emit("生成场景...", 0.6)
@@ -133,6 +140,233 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 		var img = Image.load_from_file(png_path)
 		if img:
 			_vector_size_cache[node_id] = Vector2(img.get_width(), img.get_height())
+
+func _find_fonts(fonts: Dictionary, assets_dir: String) -> void:
+	# 字体目录
+	var fonts_dir = assets_dir + "fonts/"
+	var font_dirs = [fonts_dir, "res://fonts/", "res://assets/fonts/"]
+
+	# 确保字体目录存在
+	DirAccess.make_dir_recursive_absolute(fonts_dir)
+
+	# 收集项目中所有 .ttf 和 .otf 文件
+	var all_fonts: PackedStringArray = []
+	for font_dir in font_dirs:
+		_collect_fonts_recursive(font_dir, all_fonts)
+
+	# 为每个需要的字体查找匹配的文件
+	for font_key in fonts:
+		var font_info = fonts[font_key]
+		var family = font_info.get("family", "")
+		var style = font_info.get("style", "")
+
+		# 尝试查找匹配的字体文件
+		var matched_font = _find_matching_font(family, style, all_fonts)
+		if matched_font:
+			_font_cache[font_key] = matched_font
+		else:
+			# 尝试自动下载字体
+			var downloaded = _download_font_from_google(family, style, fonts_dir)
+			if downloaded:
+				_font_cache[font_key] = downloaded
+
+	# 打印结果
+	if _font_cache.size() > 0:
+		print("[FigmaImporter] 字体: %d/%d 已加载" % [_font_cache.size(), fonts.size()])
+	else:
+		print("[FigmaImporter] 未找到字体，请手动下载到 %s" % fonts_dir)
+
+func _download_font_from_google(family: String, style: String, target_dir: String) -> String:
+	# 构建字体文件名
+	var font_filename = "%s-%s.ttf" % [family.replace(" ", ""), style]
+	var font_path = target_dir + font_filename
+
+	# 步骤1: 从 Google Fonts CSS API 获取字体文件 URL
+	var weight = _get_weight(style)
+	var family_encoded = family.replace(" ", "+")
+	var css_url = "https://fonts.googleapis.com/css2?family=%s:wght@%s" % [family_encoded, weight]
+
+	# 使用 HTTPClient 下载 CSS
+	var http = HTTPClient.new()
+	var err = http.connect_to_host("fonts.googleapis.com", 443, TLSOptions.client())
+	if err != OK:
+		return ""
+
+	while http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:
+		http.poll()
+		OS.delay_usec(10000)
+
+	if http.get_status() != HTTPClient.STATUS_CONNECTED:
+		return ""
+
+	# 发送请求（需要特定 User-Agent 才能获取 TTF 格式）
+	var headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"]
+	err = http.request(HTTPClient.METHOD_GET, "/css2?family=%s:wght@%s" % [family_encoded, weight], headers)
+	if err != OK:
+		return ""
+
+	while http.get_status() == HTTPClient.STATUS_REQUESTING:
+		http.poll()
+		OS.delay_usec(10000)
+
+	# 读取 CSS 响应
+	var response_body = PackedByteArray()
+	if http.has_response():
+		while http.get_status() == HTTPClient.STATUS_BODY:
+			http.poll()
+			var chunk = http.read_response_body_chunk()
+			if chunk.size() > 0:
+				response_body.append_array(chunk)
+			else:
+				OS.delay_usec(1000)
+
+	var css_text = response_body.get_string_from_utf8()
+
+	# 步骤2: 从 CSS 中提取 TTF 文件 URL
+	var regex = RegEx.new()
+	regex.compile("url\\((https://fonts\\.gstatic\\.com/[^)]+\\.ttf)\\)")
+	var result = regex.search(css_text)
+	if not result:
+		return ""
+
+	var font_url = result.get_string(1)
+
+	# 步骤3: 下载 TTF 文件
+	var font_http = HTTPClient.new()
+	var url_parts = font_url.substr(8).split("/")
+	var host = url_parts[0]
+	var path = "/" + "/".join(Array(url_parts).slice(1))
+
+	err = font_http.connect_to_host(host, 443, TLSOptions.client())
+	if err != OK:
+		return ""
+
+	while font_http.get_status() == HTTPClient.STATUS_CONNECTING or font_http.get_status() == HTTPClient.STATUS_RESOLVING:
+		font_http.poll()
+		OS.delay_usec(10000)
+
+	if font_http.get_status() != HTTPClient.STATUS_CONNECTED:
+		return ""
+
+	err = font_http.request(HTTPClient.METHOD_GET, path, ["User-Agent: Mozilla/5.0"])
+	if err != OK:
+		return ""
+
+	while font_http.get_status() == HTTPClient.STATUS_REQUESTING:
+		font_http.poll()
+		OS.delay_usec(10000)
+
+	var font_data = PackedByteArray()
+	if font_http.has_response():
+		while font_http.get_status() == HTTPClient.STATUS_BODY:
+			font_http.poll()
+			var chunk = font_http.read_response_body_chunk()
+			if chunk.size() > 0:
+				font_data.append_array(chunk)
+			else:
+				OS.delay_usec(1000)
+
+	if font_data.size() < 1000:
+		return ""
+
+	# 保存字体文件
+	var file = FileAccess.open(font_path, FileAccess.WRITE)
+	if file:
+		file.store_buffer(font_data)
+		file.close()
+		print("[FigmaImporter] 下载字体: %s" % font_filename)
+		return font_path
+
+	return ""
+
+func _get_weight(style: String) -> String:
+	match style.to_lower():
+		"thin", "hairline":
+			return "100"
+		"extralight", "ultralight":
+			return "200"
+		"light":
+			return "300"
+		"regular", "normal", "book":
+			return "400"
+		"medium":
+			return "500"
+		"semibold", "demibold":
+			return "600"
+		"bold":
+			return "700"
+		"extrabold", "ultrabold":
+			return "800"
+		"black", "heavy":
+			return "900"
+		_:
+			return "400"
+
+func _collect_fonts_recursive(dir_path: String, result: PackedStringArray) -> void:
+	var dir = DirAccess.open(dir_path)
+	if not dir:
+		return
+
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while file_name != "":
+		if not file_name.begins_with("."):
+			var full_path = dir_path + file_name
+			if dir.current_is_dir():
+				_collect_fonts_recursive(full_path + "/", result)
+			elif file_name.ends_with(".ttf") or file_name.ends_with(".otf"):
+				result.append(full_path)
+		file_name = dir.get_next()
+	dir.list_dir_end()
+
+func _find_matching_font(family: String, style: String, available_fonts: PackedStringArray) -> String:
+	# 将字体名称转换为小写用于比较
+	var family_lower = family.to_lower()
+	var style_lower = style.to_lower()
+
+	# 常见的样式映射
+	var style_aliases = {
+		"regular": ["regular", "normal", "book", "roman"],
+		"bold": ["bold", "heavy", "black"],
+		"italic": ["italic", "oblique", "slanted"],
+		"bold italic": ["bold italic", "boldoblique", "heavyitalic"],
+		"light": ["light", "thin", "hairline"],
+		"medium": ["medium", "semibold", "demi"],
+	}
+
+	# 第一轮：精确匹配（文件名包含 family + style）
+	for font_path in available_fonts:
+		var file_name = font_path.get_file().get_basename().to_lower()
+		if file_name.contains(family_lower) and file_name.contains(style_lower):
+			return font_path
+
+	# 第二轮：只匹配 family，style 为 regular 时优先匹配无 style 的文件
+	for font_path in available_fonts:
+		var file_name = font_path.get_file().get_basename().to_lower()
+		if file_name.contains(family_lower):
+			# 如果请求的是 regular，匹配不包含其他样式的文件
+			if style_lower == "regular" or style_lower == "normal":
+				var is_regular = true
+				for other_style in ["bold", "italic", "light", "medium", "thin", "heavy"]:
+					if file_name.contains(other_style):
+						is_regular = false
+						break
+				if is_regular:
+					return font_path
+			# 否则匹配包含样式关键词的文件
+			else:
+				var aliases = style_aliases.get(style_lower, [style_lower])
+				for alias in aliases:
+					if file_name.contains(alias):
+						return font_path
+
+	# 第三轮：只匹配 family（返回第一个找到的）
+	for font_path in available_fonts:
+		var file_name = font_path.get_file().get_basename().to_lower()
+		if file_name.contains(family_lower):
+			return font_path
+
+	return ""
 
 func _collect_text_node_ids(nodes: Array) -> PackedStringArray:
 	var text_ids = PackedStringArray()
@@ -538,8 +772,8 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var parent_clips = node.get("_parent_clips_content", false)
 		if shader_radius > 0 and parent_clips:
 			# 使用父节点大小作为目标大小（裁剪区域）
-			var root_width = node.get("_root_width", width)
-			var root_height = node.get("_root_height", height)
+			
+			
 			var shader_id = _next_resource_id()
 			_sub_resources.append({
 				"id": shader_id,
@@ -547,19 +781,15 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				"properties": {
 					"shader": 'ExtResource("shader_rounded")',
 					"shader_parameter/corner_radius": shader_radius,
-					"shader_parameter/target_size": "Vector2(%f, %f)" % [root_width, root_height],
+					"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
 					"shader_parameter/parent_corner_radius": 0.0,
-					"shader_parameter/parent_size": "Vector2(%f, %f)" % [root_width, root_height],
+					"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
 					"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
 					"shader_parameter/use_texture": true,
 				}
 			})
 			properties["material"] = 'SubResource("%d")' % shader_id
-			# 将节点大小设置为目标大小，shader会处理纹理裁剪
-			properties["offset_left"] = 0
-			properties["offset_top"] = 0
-			properties["offset_right"] = root_width
-			properties["offset_bottom"] = root_height
+			# 保持节点自身的大小，不改变尺寸
 		# TextureRect 也可以有荧光效果（如 ring 矢量图）
 		elif node.has("_glow_data"):
 			var gd2 = node["_glow_data"]
@@ -967,6 +1197,21 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var style = node.get("style", {})
 	var font_size = style.get("fontSize", 16)
 	properties["theme_override_font_sizes/font_size"] = font_size
+
+	# 查找并应用字体
+	var font_family = style.get("fontFamily", "")
+	var font_weight = style.get("fontWeight", "")
+	if font_family and font_weight:
+		var font_key = "%s_%s" % [font_family, font_weight]
+		if _font_cache.has(font_key):
+			var font_path = _font_cache[font_key]
+			var res_id = _next_resource_id()
+			_ext_resources.append({
+				"id": res_id,
+				"type": "FontFile",
+				"path": font_path
+			})
+			properties["theme_override_fonts/font"] = 'ExtResource("%d")' % res_id
 
 	# 文本颜色
 	for fill in node.get("fills", []):

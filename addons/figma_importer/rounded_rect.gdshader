@@ -19,6 +19,12 @@ uniform vec2 gradient_end = vec2(1.0);     // 渐变终点
 uniform float border_width = 0.0;
 uniform vec4 border_color : source_color = vec4(1.0);
 
+// 外发光支持（模拟 Figma 的 DROP_SHADOW offset=(0,0) 荧光效果）
+uniform bool use_glow = false;
+uniform vec4 glow_color : source_color = vec4(1.0);
+uniform float glow_radius = 0.0;      // 发光扩散半径（像素）
+uniform float glow_intensity = 1.0;   // 发光强度 0~1
+
 // SDF 圆角矩形
 float rounded_box_sdf(vec2 p, vec2 b, vec4 r) {
 	r.xy = (p.x > 0.0) ? r.xy : r.zw;
@@ -54,25 +60,38 @@ void fragment() {
 	vec2 p = pixel_pos - center;
 	vec2 half_size = target_size * 0.5;
 
+	// 计算 SDF 距离（用于圆角裁剪和发光）
+	float d;
 	// 判断是否需要胶囊模式：corner_radius >= 较小的 half_size
 	float min_half = min(half_size.x, half_size.y);
 	if (corner_radius >= min_half) {
 		// 胶囊 SDF：两端圆头 + 中间平边
-		// 根据宽高比选择方向：竖向(h>w)用竖线段，横向(w>=h)用横线段
-		float d;
 		if (half_size.y > half_size.x) {
-			// 竖向胶囊：竖线段 + 上下半圆头
 			float half_line = half_size.y - min_half;
 			d = capsule_sdf(p, vec2(0.0, -half_line), vec2(0.0, half_line), min_half);
 		} else {
-			// 横向胶囊：横线段 + 左右半圆头
 			float half_line_x = max(half_size.x - min_half, 0.0);
 			d = capsule_sdf(p, vec2(-half_line_x, 0.0), vec2(half_line_x, 0.0), min_half);
 		}
-		if (d > 0.0) { discard; }
 	} else {
 		// 普通圆角矩形 SDF
-		float d = rounded_box_sdf(p, half_size, corner_radiuses);
+		d = rounded_box_sdf(p, half_size, corner_radiuses);
+	}
+
+	// 外发光（在裁剪之前渲染，允许发光超出节点边界）
+	if (use_glow && glow_radius > 0.0) {
+		// d < 0 在形状内，d > 0 在形状外
+		// 发光范围：从边缘向外 glow_radius 像素
+		float glow_factor = 1.0 - smoothstep(0.0, glow_radius, d);
+		glow_factor = pow(glow_factor, 2.0);  // 更锐利的衰减
+		if (glow_factor > 0.001) {
+			COLOR = mix(COLOR, glow_color, glow_factor * glow_intensity * glow_color.a);
+		}
+		// 如果在形状外部且发光已衰减到 0，丢弃
+		if (d > 0.0 && glow_factor <= 0.001) {
+			discard;
+		}
+	} else {
 		if (d > 0.0) { discard; }
 	}
 

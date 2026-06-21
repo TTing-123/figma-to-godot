@@ -332,9 +332,45 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	# 记录节点在父节点中的偏移（用于 shader 中父节点圆角裁剪）
 	node["_offset_in_parent"] = Vector2(abs_x - parent_pos.get("abs_x", abs_x), abs_y - parent_pos.get("abs_y", abs_y))
 
+	# 处理 auto-layout 负间距：重新计算子节点位置，避免重叠
+	# Figma 导出的 x/y 已包含 itemSpacing 效果，负间距会导致子节点重叠
+	var children = node.get("children", [])
+	var layout_mode = node.get("layoutMode", "NONE")
+	var item_spacing = node.get("itemSpacing", 0)
+	if (layout_mode == "VERTICAL" or layout_mode == "HORIZONTAL") and item_spacing < 0 and children.size() > 1:
+		var effective_spacing = max(0, item_spacing)
+		if layout_mode == "VERTICAL":
+			var py = node.get("paddingTop", 0)
+			for child in children:
+				child["y"] = py
+				py += child.get("height", 0) + effective_spacing
+		else:
+			var px = node.get("paddingLeft", 0)
+			for child in children:
+				child["x"] = px
+				px += child.get("width", 0) + effective_spacing
+
+	# 荧光传递：FRAME 节点的 DROP_SHADOW 荧光效果应传递给后代中的 VECTOR
+	# 而不是应用在 FRAME 本身（否则整个面板背景都会发光）
+	var node_type = node.get("type", "")
+	if node_type != "VECTOR":
+		for effect in node.get("effects", []):
+			if effect.get("type") == "DROP_SHADOW":
+				var eoffset = effect.get("offset", {})
+				if eoffset.get("x", 0) == 0 and eoffset.get("y", 0) == 0 and effect.get("radius", 0) >= 5:
+					# 递归查找第一个 VECTOR 后代节点传递荧光
+					var found = _find_last_vector(children)
+					if found:
+						var ecolor = effect.get("color", {})
+						found["_glow_data"] = {
+							"color": "Color(%f, %f, %f, %f)" % [ecolor.get("r",0), ecolor.get("g",0), ecolor.get("b",0), ecolor.get("a",1)],
+							"radius": effect.get("radius", 0),
+							"intensity": clampf(ecolor.get("a", 1.0) * 2.0, 0.0, 1.0),
+						}
+					break
+
 	# 递归处理子节点
 	# 注意：在Figma中，Group不改变子节点的坐标系统，只有Frame/Component改变
-	var node_type = node.get("type", "")
 	var is_group = (node_type == "GROUP")
 	var current_corner = node.get("cornerRadius", 0)
 	var current_clips = node.get("clipsContent", false)
@@ -353,7 +389,7 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 		"size": current_size,
 		"visible": node.get("visible", true)
 	}
-	for child in node.get("children", []):
+	for child in children:
 		_preprocess_parent_positions(child, current_pos, offset_x, offset_y, depth + 1, root_width, root_height)
 
 func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
@@ -490,6 +526,29 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			properties["offset_top"] = 0
 			properties["offset_right"] = root_width
 			properties["offset_bottom"] = root_height
+		# TextureRect 也可以有荧光效果（如 ring 矢量图）
+		elif node.has("_glow_data"):
+			var gd2 = node["_glow_data"]
+			var shader_id = _next_resource_id()
+			_sub_resources.append({
+				"id": shader_id,
+				"type": "ShaderMaterial",
+				"properties": {
+					"shader": 'ExtResource("shader_rounded")',
+					"shader_parameter/corner_radius": 0.0,
+					"shader_parameter/corner_radiuses": "Vector4(0.0, 0.0, 0.0, 0.0)",
+					"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
+					"shader_parameter/parent_corner_radius": 0.0,
+					"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
+					"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
+					"shader_parameter/use_texture": true,
+					"shader_parameter/use_glow": true,
+					"shader_parameter/glow_color": gd2["color"],
+					"shader_parameter/glow_radius": gd2["radius"],
+					"shader_parameter/glow_intensity": gd2["intensity"],
+				}
+			})
+			properties["material"] = 'SubResource("%d")' % shader_id
 	elif properties.has("theme_override_styles/panel"):
 		# 有样式（填充/描边）→ Panel
 		if godot_type == "Control":
@@ -501,9 +560,10 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var panel_parent_radius = node.get("_parent_corner_radius", 0)
 		var panel_parent_size = node.get("_parent_size", Vector2.ZERO)
 		var panel_offset_in_parent = node.get("_offset_in_parent", Vector2.ZERO)
-		# 当自身有圆角、父节点有圆角裁剪、或有渐变填充时，应用 shader
+		# 当自身有圆角、父节点有圆角裁剪、有渐变填充、或有发光时，应用 shader
 		var has_gradient = node.has("_gradient_data")
-		if panel_self_radius > 0 or panel_parent_radius > 0 or has_gradient:
+		var has_glow = node.has("_glow_data")
+		if panel_self_radius > 0 or panel_parent_radius > 0 or has_gradient or has_glow:
 			var panel_shader_props = {
 				"shader": 'ExtResource("shader_rounded")',
 				"shader_parameter/corner_radius": float(panel_self_radius),
@@ -522,11 +582,18 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				panel_shader_props["shader_parameter/gradient_color2"] = gd["color2"]
 				panel_shader_props["shader_parameter/gradient_start"] = gd["start"]
 				panel_shader_props["shader_parameter/gradient_end"] = gd["end"]
-				# 描边：传递到 shader
-				if node.has("_stroke_data"):
-					var sd = node["_stroke_data"]
-					panel_shader_props["shader_parameter/border_width"] = sd["width"]
-					panel_shader_props["shader_parameter/border_color"] = sd["color"]
+			# 描边：传递到 shader（独立于渐变）
+			if node.has("_stroke_data"):
+				var sd = node["_stroke_data"]
+				panel_shader_props["shader_parameter/border_width"] = sd["width"]
+				panel_shader_props["shader_parameter/border_color"] = sd["color"]
+			# 外发光：传递到 shader
+			if node.has("_glow_data"):
+				var gd2 = node["_glow_data"]
+				panel_shader_props["shader_parameter/use_glow"] = true
+				panel_shader_props["shader_parameter/glow_color"] = gd2["color"]
+				panel_shader_props["shader_parameter/glow_radius"] = gd2["radius"]
+				panel_shader_props["shader_parameter/glow_intensity"] = gd2["intensity"]
 			var panel_shader_id = _next_resource_id()
 			_sub_resources.append({
 				"id": panel_shader_id,
@@ -727,11 +794,27 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				if node_type != "VECTOR" and not properties.has("theme_override_styles/panel"):
 					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
 
-	# 处理阴影
+	# 处理阴影和发光
 	for effect in effects:
 		match effect.get("type"):
 			"DROP_SHADOW":
-				_apply_shadow(effect, properties)
+				var offset = effect.get("offset", {})
+				var ox = offset.get("x", 0)
+				var oy = offset.get("y", 0)
+				var radius = effect.get("radius", 0)
+				# offset=(0,0) + 较大 radius = 荧光效果（非投影）
+				if ox == 0 and oy == 0 and radius >= 5:
+					# 只有 VECTOR 类型节点才直接应用荧光
+					# FRAME 节点的荧光由 _preprocess_parent_positions 传递给子矢量图
+					if node_type == "VECTOR":
+						var color = effect.get("color", {})
+						node["_glow_data"] = {
+							"color": "Color(%f, %f, %f, %f)" % [color.get("r",0), color.get("g",0), color.get("b",0), color.get("a",1)],
+							"radius": radius,
+							"intensity": clampf(color.get("a", 1.0) * 2.0, 0.0, 1.0),
+						}
+				else:
+					_apply_shadow(effect, properties)
 			"INNER_SHADOW":
 				_apply_shadow(effect, properties)
 
@@ -741,7 +824,8 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 		properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
 
 	# 有圆角的节点需要 clip_contents 才能显示圆角（TEXT 跳过）
-	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0):
+	# 有发光时禁用裁剪，允许发光超出节点边界
+	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0) and not node.has("_glow_data"):
 		properties["clip_contents"] = true
 
 func _create_flat_style(color: String, corner_radius: int) -> int:
@@ -925,3 +1009,16 @@ func _is_solid_black_fill(node: Dictionary) -> bool:
 	var a = color.get("a", 1)
 	# 检查是否为纯黑色（r=0, g=0, b=0, a=1）
 	return r == 0 and g == 0 and b == 0 and a == 1
+
+func _find_last_vector(nodes: Array) -> Dictionary:
+	# 递归查找最后一个 VECTOR 类型的节点（ring 总是排在 SVG 组最后）
+	var result = {}
+	for node in nodes:
+		if node.get("type", "") == "VECTOR":
+			result = node
+		var children = node.get("children", [])
+		if children.size() > 0:
+			var found = _find_last_vector(children)
+			if not found.is_empty():
+				result = found
+	return result

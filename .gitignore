@@ -1,9 +1,7 @@
 # Godot
 .godot/
 *.import
-
-# Node
-figma-exporter-plugin/node_modules/
+*.uid
 
 # OS
 .DS_Store

@@ -4,7 +4,7 @@
 
 ## 安装
 
-1. 将 `addons/figma_importer/` 目录复制到你的 Godot 项目中的 `addons/figma_importer/`
+1. 将 `figma_importer/` 目录复制到你的 Godot 项目的 `addons/figma_importer/`
 2. 在 Godot 编辑器中启用插件：**Project > Project Settings > Plugins > Figma Importer > Enabled**
 
 ## 使用方法
@@ -57,9 +57,10 @@ JSON 文件需要包含：
 ## 项目结构
 
 ```
-addons/figma_importer/
+figma_importer/
 ├── figma_importer_plugin.gd    # 编辑器插件入口
 ├── figma_local_importer.gd     # 核心导入逻辑
+├── plugin.cfg                  # 插件配置
 └── rounded_rect.gdshader       # 圆角/发光/渐变 Shader
 ```
 

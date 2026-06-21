@@ -9,7 +9,7 @@
 
 ## 使用
 
-1. 用 Figma Plugin API 导出设计稿为 JSON
+1. 用 [Figma Exporter Plugin](https://github.com/TTing-123/figma-exporter-plugin) 导出设计稿为 JSON
 2. 在 Godot 中：**Project > Tools > Import Figma JSON...**
 3. 选择 JSON 文件，场景自动保存到 `scenes/`
 4. 运行生成的 `.tscn` 即可预览

@@ -192,7 +192,10 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
+	var _deadline := Time.get_ticks_msec() + 15000
 	while http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:
+		if Time.get_ticks_msec() > _deadline:
+			return ""
 		http.poll()
 		OS.delay_usec(10000)
 
@@ -205,7 +208,10 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
+	var _deadline := Time.get_ticks_msec() + 15000
 	while http.get_status() == HTTPClient.STATUS_REQUESTING:
+		if Time.get_ticks_msec() > _deadline:
+			return ""
 		http.poll()
 		OS.delay_usec(10000)
 
@@ -244,7 +250,10 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
+	var _deadline := Time.get_ticks_msec() + 15000
 	while font_http.get_status() == HTTPClient.STATUS_CONNECTING or font_http.get_status() == HTTPClient.STATUS_RESOLVING:
+		if Time.get_ticks_msec() > _deadline:
+			return ""
 		font_http.poll()
 		OS.delay_usec(10000)
 
@@ -255,7 +264,10 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
+	var _deadline := Time.get_ticks_msec() + 15000
 	while font_http.get_status() == HTTPClient.STATUS_REQUESTING:
+		if Time.get_ticks_msec() > _deadline:
+			return ""
 		font_http.poll()
 		OS.delay_usec(10000)
 
@@ -494,7 +506,7 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	var parent_clips = parent_pos.get("clips_content", false)
 	var parent_corner = parent_pos.get("corner_radius", 0)
 	node["_parent_clips_content"] = parent_clips
-	node["_parent_corner_radius"] = parent_corner if parent_clips else 0
+	node["_parent_corner_radius"] = parent_corner if (parent_clips and parent_pos.get("rotation", 0.0) == 0.0) else 0
 	node["_parent_size"] = parent_pos.get("size", Vector2.ZERO)
 	# 记录节点在父节点中的偏移（用于 shader 中父节点圆角裁剪）
 	node["_offset_in_parent"] = Vector2(abs_x - parent_pos.get("abs_x", abs_x), abs_y - parent_pos.get("abs_y", abs_y))
@@ -588,7 +600,8 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 		"corner_radius": current_corner,
 		"clips_content": current_clips,
 		"size": current_size,
-		"visible": node.get("visible", true)
+		"visible": node.get("visible", true),
+		"rotation": node.get("rotation", 0.0)
 	}
 	for child in children:
 		_preprocess_parent_positions(child, current_pos, offset_x, offset_y, depth + 1, root_width, root_height)
@@ -709,7 +722,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var shader_radius = max(effective_radius, parent_radius)
 		# 只有父节点有clipsContent时才应用shader裁剪
 		var parent_clips = node.get("_parent_clips_content", false)
-		if shader_radius > 0 and (parent_clips or effective_radius > 0):
+		if shader_radius > 0 and (parent_clips or effective_radius > 0) or node.has("_shadow_data"):
 			# 使用父节点大小作为目标大小（裁剪区域）
 			
 			
@@ -729,6 +742,12 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			})
 			properties["material"] = 'SubResource("%d")' % shader_id
 			# 保持节点自身的大小，不改变尺寸
+			if node.has("_shadow_data"):
+				var _sd = node["_shadow_data"]
+				_sub_resources[-1]["properties"]["shader_parameter/use_shadow"] = true
+				_sub_resources[-1]["properties"]["shader_parameter/shadow_color"] = _sd["color"]
+				_sub_resources[-1]["properties"]["shader_parameter/shadow_size"] = _sd["size"]
+				_sub_resources[-1]["properties"]["shader_parameter/shadow_offset"] = _sd["offset"]
 		# TextureRect 也可以有荧光效果（如 ring 矢量图）
 		elif node.has("_glow_data"):
 			var gd2 = node["_glow_data"]
@@ -798,6 +817,13 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				panel_shader_props["shader_parameter/glow_color"] = gd2["color"]
 				panel_shader_props["shader_parameter/glow_radius"] = gd2["radius"]
 				panel_shader_props["shader_parameter/glow_intensity"] = gd2["intensity"]
+			# 内阴影：传递到 shader
+			if node.has("_inner_shadow_data"):
+				var isd = node["_inner_shadow_data"]
+				panel_shader_props["shader_parameter/use_inner_shadow"] = true
+				panel_shader_props["shader_parameter/inner_shadow_color"] = isd["color"]
+				panel_shader_props["shader_parameter/inner_shadow_blur"] = isd["blur"]
+				panel_shader_props["shader_parameter/inner_shadow_offset"] = isd["offset"]
 			var panel_shader_id = _next_resource_id()
 			_sub_resources.append({
 				"id": panel_shader_id,
@@ -906,7 +932,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 							"color2": "Color(%f, %f, %f, %f)" % [c2.get("r",0), c2.get("g",0), c2.get("b",0), c2.get("a",1)],
 							"start": "Vector2(%f, %f)" % [sx, sy],
 							"end": "Vector2(%f, %f)" % [ex, ey],
-							"type": 1 if fill.get("type") == "GRADIENT_RADIAL" else 0,
+							"type": {"GRADIENT_RADIAL": 1, "GRADIENT_ANGULAR": 2, "GRADIENT_DIAMOND": 3}.get(fill.get("type"), 0),
 						}
 
 				"IMAGE":
@@ -983,9 +1009,20 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 					# 普通投影：合并进节点 panel StyleBoxFlat（见 _apply_drop_shadow）
 					_apply_drop_shadow(effect, properties)
 					has_drop_shadow = true
+					var _sc = effect.get("color", {})
+					node["_shadow_data"] = {
+						"color": _figma_color_to_godot(_sc),
+						"size": effect.get("radius", 0),
+						"offset": "Vector2(%f, %f)" % [ox, oy],
+					}
 			"INNER_SHADOW":
-				# StyleBoxFlat 不支持内阴影，��跳过
-				pass
+				var ic = effect.get("color", {})
+				var io = effect.get("offset", {})
+				node["_inner_shadow_data"] = {
+					"color": _figma_color_to_godot(ic),
+					"blur": effect.get("radius", 0),
+					"offset": "Vector2(%f, %f)" % [io.get("x", 0), io.get("y", 0)],
+				}
 
 	# 有圆角的节点需要 clip_contents 才能显示圆角（TEXT 跳过）
 	# 有发光时禁用裁剪，允许发光超出节点边界

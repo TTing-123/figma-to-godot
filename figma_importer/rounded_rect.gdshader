@@ -1,5 +1,7 @@
 shader_type canvas_item;
 
+const float PI = 3.14159265359;
+
 uniform float corner_radius : hint_range(0.0, 200.0) = 10.0;
 uniform vec4 corner_radiuses = vec4(10.0);  // per-corner: x=br, y=tr, z=bl, w=tl (匹配 rounded_box_sdf)
 uniform vec2 target_size = vec2(375.0, 812.0);
@@ -14,7 +16,7 @@ uniform vec4 gradient_color1 : source_color = vec4(1.0);  // 起始颜色
 uniform vec4 gradient_color2 : source_color = vec4(1.0);  // 结束颜色
 uniform vec2 gradient_start = vec2(0.0);   // 渐变起点
 uniform vec2 gradient_end = vec2(1.0);     // 渐变终点
-uniform int gradient_type = 0;             // 0=线性, 1=径向（对应 GRADIENT_RADIAL）
+uniform int gradient_type = 0;             // 0=线性, 1=径向, 2=角向, 3=菱形
 
 // 描边支持
 uniform float border_width = 0.0;
@@ -25,6 +27,18 @@ uniform bool use_glow = false;
 uniform vec4 glow_color : source_color = vec4(1.0);
 uniform float glow_radius = 0.0;      // 发光扩散半径（像素）
 uniform float glow_intensity = 1.0;   // 发光强度 0~1
+
+// 内阴影（Figma INNER_SHADOW，StyleBoxFlat ��支持，用 SDF 模拟）
+uniform bool use_inner_shadow = false;
+uniform vec4 inner_shadow_color : source_color = vec4(0.0);
+uniform float inner_shadow_blur = 0.0;   // 模糊范围（像素）
+uniform vec2 inner_shadow_offset = vec2(0.0);
+
+// 图片节点外阴影（TextureRect 无 panel，用 SDF 在矩形内模拟；朝矩形外的部分会被截断）
+uniform bool use_shadow = false;
+uniform vec4 shadow_color : source_color = vec4(0.0);
+uniform float shadow_size = 0.0;
+uniform vec2 shadow_offset = vec2(0.0);
 
 // SDF 圆角矩形
 float rounded_box_sdf(vec2 p, vec2 b, vec4 r) {
@@ -79,6 +93,19 @@ void fragment() {
 		d = rounded_box_sdf(p, half_size, corner_radiuses);
 	}
 
+	// 图片外阴影：在形状外（d>0）按 offset 偏移绘制衰减阴影。
+	// 必须在 discard 之前画，并用 keep_for_shadow 标志让后续 discard / 纹理块跳过这些像素。
+	bool keep_for_shadow = false;
+	if (use_shadow && shadow_size > 0.0 && d > 0.0) {
+		vec2 sp = p - shadow_offset;
+		float sd = rounded_box_sdf(sp, half_size, corner_radiuses);
+		float amt = smoothstep(shadow_size, 0.0, sd);  // sd 从 size→0 衰减
+		if (sd > 0.0 && amt > 0.001) {                  // 偏移后形状外才有阴影
+			COLOR = vec4(shadow_color.rgb, amt * shadow_color.a);
+			keep_for_shadow = true;
+		}
+	}
+
 	// 外发光（在裁剪之前渲染，允许发光超出节点边界）
 	if (use_glow && glow_radius > 0.0) {
 		// d < 0 在形状内，d > 0 在形状外
@@ -88,31 +115,51 @@ void fragment() {
 		if (glow_factor > 0.001) {
 			COLOR = mix(COLOR, glow_color, glow_factor * glow_intensity * glow_color.a);
 		}
-		// 如果在形状外部且发光已衰减到 0，丢弃
-		if (d > 0.0 && glow_factor <= 0.001) {
+		// 如果在形状外部且发光已衰减到 0，丢弃（除非该像素留给阴影）
+		if (d > 0.0 && glow_factor <= 0.001 && !keep_for_shadow) {
 			discard;
 		}
 	} else {
-		if (d > 0.0) { discard; }
+		if (d > 0.0 && !keep_for_shadow) { discard; }
 	}
 
-	// 渐变填充
+	// 渐变��充
 	if (use_gradient) {
 		vec2 uv = pixel_pos / target_size;
 		vec2 gradient_dir = gradient_end - gradient_start;
 		float gradient_len = length(gradient_dir);
-		if (gradient_type == 1) {
+		if (gradient_type == 2) {
+			// 角向（conic）：绕 gradient_start，gradient_end 定 0° 方向
+			float base = atan(gradient_dir.y, gradient_dir.x);
+			float a = atan(uv.y - gradient_start.y, uv.x - gradient_start.x);
+			float t = fract((a - base) / (2.0 * PI) + 1.0);
+			COLOR = mix(gradient_color1, gradient_color2, t);
+		} else if (gradient_type == 3) {
+			// 菱形：到 gradient_start 的曼哈顿距离
+			float r = max(gradient_len, 0.001);
+			float t = clamp((abs(uv.x - gradient_start.x) + abs(uv.y - gradient_start.y)) / r, 0.0, 1.0);
+			COLOR = mix(gradient_color1, gradient_color2, t);
+		} else if (gradient_type == 1) {
 			// 径向渐变：gradient_start 为圆心，半径 = |gradient_end - gradient_start|
 			float r = max(gradient_len, 0.001);
 			float t = clamp(distance(uv, gradient_start) / r, 0.0, 1.0);
 			COLOR = mix(gradient_color1, gradient_color2, t);
 		} else if (gradient_len > 0.001) {
-			// 线性渐变（ANGULAR/DIAMOND 暂按线性 fallback）
+			// ��性渐变
 			float t = clamp(dot(uv - gradient_start, gradient_dir) / (gradient_len * gradient_len), 0.0, 1.0);
 			COLOR = mix(gradient_color1, gradient_color2, t);
 		} else {
 			COLOR = gradient_color1;
 		}
+	}
+
+	// 内阴影（仅在形状内 d<0 绘制，叠加在填充之上）
+	if (use_inner_shadow && d < 0.0) {
+		vec2 isp = p - inner_shadow_offset;  // 反向偏移 = SDF 朝 offset 方向移
+		float id = rounded_box_sdf(isp, half_size, corner_radiuses);
+		float w = max(inner_shadow_blur, 0.001);
+		float amt = smoothstep(-w, 0.0, id);  // 偏移后近边缘内侧最强
+		COLOR = mix(COLOR, inner_shadow_color, amt * inner_shadow_color.a);
 	}
 
 	// 描边（在渐变填充之后，纹理之前）
@@ -126,7 +173,7 @@ void fragment() {
 		}
 	}
 
-	if (use_texture) {
+	if (use_texture && !keep_for_shadow) {
 		// 获取纹理尺寸
 		vec2 tex_size = vec2(textureSize(TEXTURE, 0));
 

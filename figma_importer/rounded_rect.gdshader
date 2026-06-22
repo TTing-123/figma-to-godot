@@ -1,6 +1,5 @@
 shader_type canvas_item;
 
-const float PI = 3.14159265359;
 
 uniform float corner_radius : hint_range(0.0, 200.0) = 10.0;
 uniform vec4 corner_radiuses = vec4(10.0);  // per-corner: x=br, y=tr, z=bl, w=tl (匹配 rounded_box_sdf)

@@ -208,7 +208,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	var _deadline := Time.get_ticks_msec() + 15000
+	_deadline = Time.get_ticks_msec() + 15000
 	while http.get_status() == HTTPClient.STATUS_REQUESTING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -250,7 +250,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	var _deadline := Time.get_ticks_msec() + 15000
+	_deadline = Time.get_ticks_msec() + 15000
 	while font_http.get_status() == HTTPClient.STATUS_CONNECTING or font_http.get_status() == HTTPClient.STATUS_RESOLVING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -264,7 +264,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	var _deadline := Time.get_ticks_msec() + 15000
+	_deadline = Time.get_ticks_msec() + 15000
 	while font_http.get_status() == HTTPClient.STATUS_REQUESTING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -927,12 +927,19 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 						sy = sy + 0.5
 						ex = ex + 0.5
 						ey = ey + 0.5
+						var _gtype = 0
+						if fill.get("type") == "GRADIENT_RADIAL":
+							_gtype = 1
+						elif fill.get("type") == "GRADIENT_ANGULAR":
+							_gtype = 2
+						elif fill.get("type") == "GRADIENT_DIAMOND":
+							_gtype = 3
 						node["_gradient_data"] = {
 							"color1": "Color(%f, %f, %f, %f)" % [c1.get("r",0), c1.get("g",0), c1.get("b",0), c1.get("a",1)],
 							"color2": "Color(%f, %f, %f, %f)" % [c2.get("r",0), c2.get("g",0), c2.get("b",0), c2.get("a",1)],
 							"start": "Vector2(%f, %f)" % [sx, sy],
 							"end": "Vector2(%f, %f)" % [ex, ey],
-							"type": {"GRADIENT_RADIAL": 1, "GRADIENT_ANGULAR": 2, "GRADIENT_DIAMOND": 3}.get(fill.get("type"), 0),
+							"type": _gtype,
 						}
 
 				"IMAGE":

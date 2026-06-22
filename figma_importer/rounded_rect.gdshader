@@ -14,6 +14,7 @@ uniform vec4 gradient_color1 : source_color = vec4(1.0);  // 起始颜色
 uniform vec4 gradient_color2 : source_color = vec4(1.0);  // 结束颜色
 uniform vec2 gradient_start = vec2(0.0);   // 渐变起点
 uniform vec2 gradient_end = vec2(1.0);     // 渐变终点
+uniform int gradient_type = 0;             // 0=线性, 1=径向（对应 GRADIENT_RADIAL）
 
 // 描边支持
 uniform float border_width = 0.0;
@@ -100,7 +101,13 @@ void fragment() {
 		vec2 uv = pixel_pos / target_size;
 		vec2 gradient_dir = gradient_end - gradient_start;
 		float gradient_len = length(gradient_dir);
-		if (gradient_len > 0.001) {
+		if (gradient_type == 1) {
+			// 径向渐变：gradient_start 为圆心，半径 = |gradient_end - gradient_start|
+			float r = max(gradient_len, 0.001);
+			float t = clamp(distance(uv, gradient_start) / r, 0.0, 1.0);
+			COLOR = mix(gradient_color1, gradient_color2, t);
+		} else if (gradient_len > 0.001) {
+			// 线性渐变（ANGULAR/DIAMOND 暂按线性 fallback）
 			float t = clamp(dot(uv - gradient_start, gradient_dir) / (gradient_len * gradient_len), 0.0, 1.0);
 			COLOR = mix(gradient_color1, gradient_color2, t);
 		} else {

@@ -212,7 +212,10 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	# 读取 CSS 响应
 	var response_body = PackedByteArray()
 	if http.has_response():
+		var _body_deadline := Time.get_ticks_msec() + 15000
 		while http.get_status() == HTTPClient.STATUS_BODY:
+			if Time.get_ticks_msec() > _body_deadline:
+				return ""
 			http.poll()
 			var chunk = http.read_response_body_chunk()
 			if chunk.size() > 0:
@@ -258,7 +261,11 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 
 	var font_data = PackedByteArray()
 	if font_http.has_response():
+		var _body_deadline := Time.get_ticks_msec() + 15000
 		while font_http.get_status() == HTTPClient.STATUS_BODY:
+			if Time.get_ticks_msec() > _body_deadline:
+				push_warning("[FigmaImporter] 字体文件下载超时")
+				return ""
 			font_http.poll()
 			var chunk = font_http.read_response_body_chunk()
 			if chunk.size() > 0:
@@ -394,80 +401,6 @@ func _save_base64_image(base64_data: String, path: String) -> void:
 		file.store_buffer(bytes)
 		file.close()
 
-func _save_base64_svg(base64_data: String, path: String) -> void:
-	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
-	var bytes = Marshalls.base64_to_raw(base64_data)
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	if file:
-		file.store_buffer(bytes)
-		file.close()
-
-func _create_svg_import_file(svg_path: String) -> void:
-	# 生成 .import 文件，设置 svg/scale=3.0 保证光栅化分辨率与之前 3x PNG 一致
-	var import_path = svg_path + ".import"
-	var content = """[remap]
-
-importer="texture"
-type="CompressedTexture2D"
-
-[deps]
-
-source_file="res://%s"
-dest_files=[]
-
-[params]
-
-compress/mode=0
-compress/high_quality=false
-compress/lossy_quality=0.7
-compress/uastc_level=0
-compress/rdo_quality_loss=0.0
-compress/hdr_compression=1
-compress/normal_map=0
-compress/channel_pack=0
-mipmaps/generate=false
-mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
-process/channel_remap/red=0
-process/channel_remap/green=1
-process/channel_remap/blue=2
-process/channel_remap/alpha=3
-process/fix_alpha_border=true
-process/premult_alpha=false
-process/normal_map_invert_y=false
-process/hdr_as_srgb=false
-process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=1
-svg/scale=3.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
-""" % svg_path.replace("\\", "/")
-	var file = FileAccess.open(import_path, FileAccess.WRITE)
-	if file:
-		file.store_string(content)
-		file.close()
-
-func _parse_svg_size(svg_path: String) -> Vector2:
-	var file = FileAccess.open(svg_path, FileAccess.READ)
-	if not file:
-		return Vector2.ZERO
-	var content = file.get_as_text()
-	file.close()
-	# 提取 <svg> 标签中的 width 和 height 属性（Figma 导出的 SVG 会包含这些）
-	var regex = RegEx.new()
-	regex.compile("<svg[^>]*width=\"([\\d.]+)\"[^>]*height=\"([\\d.]+)\"")
-	var result = regex.search(content)
-	if result:
-		return Vector2(float(result.get_string(1)), float(result.get_string(2)))
-	# 备选：从 viewBox 解析
-	regex.compile("viewBox=\"[^\\s]+\\s+[^\\s]+\\s+([\\d.]+)\\s+([\\d.]+)\"")
-	result = regex.search(content)
-	if result:
-		return Vector2(float(result.get_string(1)), float(result.get_string(2)))
-	return Vector2.ZERO
-
 func _generate_scene(root_node: Dictionary) -> String:
 	_resource_id_counter = 0
 	_ext_resources.clear()
@@ -491,7 +424,7 @@ func _generate_scene(root_node: Dictionary) -> String:
 	_process_node(root_node, "", 0)
 
 	# 构建场景文件
-	var content = "[gd_scene load_steps=%d format=3]\n\n" % (_resource_id_counter + 1)
+	var content = "[gd_scene load_steps=%d format=3]\n\n" % (_resource_id_counter + 2)
 
 	# 添加外部资源（Shader）
 	content += '[ext_resource type="Shader" path="res://addons/figma_importer/rounded_rect.gdshader" id="shader_rounded"]\n'
@@ -753,6 +686,12 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	if depth > 0 and node.get("clipsContent", false):
 		properties["clip_contents"] = true
 
+	# 处理旋转（Figma rotation 为顺时针角度，绕节点中心）
+	var rot = node.get("rotation", 0.0)
+	if rot != 0.0:
+		properties["pivot_offset"] = "Vector2(%f, %f)" % [width / 2.0, height / 2.0]
+		properties["rotation"] = deg_to_rad(rot)
+
 	# 处理样式
 	_apply_styles(node, properties, node_id)
 
@@ -770,7 +709,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var shader_radius = max(effective_radius, parent_radius)
 		# 只有父节点有clipsContent时才应用shader裁剪
 		var parent_clips = node.get("_parent_clips_content", false)
-		if shader_radius > 0 and parent_clips:
+		if shader_radius > 0 and (parent_clips or effective_radius > 0):
 			# 使用父节点大小作为目标大小（裁剪区域）
 			
 			
@@ -831,7 +770,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			var panel_shader_props = {
 				"shader": 'ExtResource("shader_rounded")',
 				"shader_parameter/corner_radius": float(panel_self_radius),
-					"shader_parameter/corner_radiuses": "Vector4(%f, %f, %f, %f)" % [float(bl), float(tr), float(br), float(tl)],
+					"shader_parameter/corner_radiuses": "Vector4(%f, %f, %f, %f)" % [float(br), float(tr), float(bl), float(tl)],
 				"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
 				"shader_parameter/parent_corner_radius": float(panel_parent_radius),
 				"shader_parameter/parent_size": "Vector2(%f, %f)" % [panel_parent_size.x, panel_parent_size.y],
@@ -842,6 +781,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			if node.has("_gradient_data"):
 				var gd = node["_gradient_data"]
 				panel_shader_props["shader_parameter/use_gradient"] = true
+				panel_shader_props["shader_parameter/gradient_type"] = gd.get("type", 0)
 				panel_shader_props["shader_parameter/gradient_color1"] = gd["color1"]
 				panel_shader_props["shader_parameter/gradient_color2"] = gd["color2"]
 				panel_shader_props["shader_parameter/gradient_start"] = gd["start"]
@@ -904,51 +844,6 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	for child in node.get("children", []):
 		_process_node(child, current_path, depth + 1)
 
-func _apply_auto_layout(node: Dictionary, properties: Dictionary) -> void:
-	var layout_mode = node.get("layoutMode", "NONE")
-	var primary_axis = node.get("primaryAxisAlignItems", "MIN")
-	var item_spacing = node.get("itemSpacing", 0)
-	var padding_left = node.get("paddingLeft", 0)
-	var padding_right = node.get("paddingRight", 0)
-	var padding_top = node.get("paddingTop", 0)
-	var padding_bottom = node.get("paddingBottom", 0)
-
-	if layout_mode == "HORIZONTAL":
-		properties["_container_type"] = "HBoxContainer"
-		match primary_axis:
-			"MIN":
-				properties["alignment"] = 0
-			"CENTER":
-				properties["alignment"] = 1
-			"MAX":
-				properties["alignment"] = 2
-	elif layout_mode == "VERTICAL":
-		properties["_container_type"] = "VBoxContainer"
-		match primary_axis:
-			"MIN":
-				properties["alignment"] = 0
-			"CENTER":
-				properties["alignment"] = 1
-			"MAX":
-				properties["alignment"] = 2
-
-	if item_spacing > 0:
-		properties["theme_override_constants/separation"] = item_spacing
-
-	if padding_left > 0 or padding_right > 0 or padding_top > 0 or padding_bottom > 0:
-		var style_id = _next_resource_id()
-		_sub_resources.append({
-			"id": style_id,
-			"type": "StyleBoxEmpty",
-			"properties": {
-				"content_margin_left": padding_left,
-				"content_margin_right": padding_right,
-				"content_margin_top": padding_top,
-				"content_margin_bottom": padding_bottom,
-			}
-		})
-		properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
-
 func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) -> void:
 	var fills = node.get("fills", [])
 	var effects = node.get("effects", [])
@@ -976,7 +871,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 					var style_id = _create_flat_style_ex(color, int(tl), int(tr), int(bl), int(br))
 					properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
 
-				"GRADIENT_LINEAR", "GRADIENT_RADIAL":
+				"GRADIENT_LINEAR", "GRADIENT_RADIAL", "GRADIENT_ANGULAR", "GRADIENT_DIAMOND":
 					var style_id = _create_gradient_style_ex(fill, int(tl), int(tr), int(bl), int(br))
 					if style_id > 0:
 						properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
@@ -1011,6 +906,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 							"color2": "Color(%f, %f, %f, %f)" % [c2.get("r",0), c2.get("g",0), c2.get("b",0), c2.get("a",1)],
 							"start": "Vector2(%f, %f)" % [sx, sy],
 							"end": "Vector2(%f, %f)" % [ex, ey],
+							"type": 1 if fill.get("type") == "GRADIENT_RADIAL" else 0,
 						}
 
 				"IMAGE":
@@ -1058,7 +954,13 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				if node_type != "VECTOR" and not properties.has("theme_override_styles/panel"):
 					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
 
+	# 若有圆角但尚无 panel，先建透明背景 panel（供阴影合并 & 圆角渲染；TEXT 跳过）
+	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0) and not properties.has("theme_override_styles/panel"):
+		var style_id = _create_flat_style_ex("Color(0, 0, 0, 0)", tl, tr, bl, br)
+		properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
+
 	# 处理阴影和发光
+	var has_drop_shadow = false
 	for effect in effects:
 		match effect.get("type"):
 			"DROP_SHADOW":
@@ -1078,18 +980,16 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 							"intensity": clampf(color.get("a", 1.0) * 2.0, 0.0, 1.0),
 						}
 				else:
-					_apply_shadow(effect, properties)
+					# 普通投影：合并进节点 panel StyleBoxFlat（见 _apply_drop_shadow）
+					_apply_drop_shadow(effect, properties)
+					has_drop_shadow = true
 			"INNER_SHADOW":
-				_apply_shadow(effect, properties)
-
-	# 如果有圆角但还没有样式，创建透明背景样式（TEXT 跳过：Label 圆角无意义）
-	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0) and not properties.has("theme_override_styles/panel"):
-		var style_id = _create_flat_style_ex("Color(0, 0, 0, 0)", tl, tr, bl, br)
-		properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
+				# StyleBoxFlat 不支持内阴影，��跳过
+				pass
 
 	# 有圆角的节点需要 clip_contents 才能显示圆角（TEXT 跳过）
 	# 有发光时禁用裁剪，允许发光超出节点边界
-	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0) and not node.has("_glow_data"):
+	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0) and not node.has("_glow_data") and not has_drop_shadow:
 		properties["clip_contents"] = true
 
 func _create_flat_style(color: String, corner_radius: int) -> int:
@@ -1166,22 +1066,32 @@ func _create_border_style_ex(color: String, width, tl: int, tr: int, bl: int, br
 	})
 	return 'SubResource("%d")' % res_id
 
-func _apply_shadow(effect: Dictionary, properties: Dictionary) -> void:
-	var offset = effect.get("offset", {})
-	var color = _figma_color_to_godot(effect.get("color", {}))
-	var radius = effect.get("radius", 0)
+func _apply_drop_shadow(effect: Dictionary, properties: Dictionary) -> void:
+	# 将投影合并到节点当前的 panel StyleBoxFlat。
+	# StyleBoxFlat 的 shadow 是背景阴影，写到节点正在用的 bg style 上即可生效。
+	# 旧实现单独创建了一个 StyleBoxFlat 但没赋给节点，导致阴影完全不显示。
+	# 若节点没有 panel 样式（纯 TextureRect/Label），则无法应用，跳过。
+	if not properties.has("theme_override_styles/panel"):
+		return
+	var style_id := _extract_sub_resource_id(str(properties["theme_override_styles/panel"]))
+	if style_id < 0:
+		return
+	for res in _sub_resources:
+		if int(res["id"]) == style_id:
+			var offset = effect.get("offset", {})
+			res["properties"]["shadow_color"] = _figma_color_to_godot(effect.get("color", {}))
+			res["properties"]["shadow_size"] = effect.get("radius", 0)
+			res["properties"]["shadow_offset"] = "Vector2(%f, %f)" % [offset.get("x", 0), offset.get("y", 0)]
+			return
 
-	var shadow_id = _next_resource_id()
-	_sub_resources.append({
-		"id": shadow_id,
-		"type": "StyleBoxFlat",
-		"properties": {
-			"bg_color": "Color(0, 0, 0, 0)",
-			"shadow_color": color,
-			"shadow_size": radius,
-			"shadow_offset": "Vector2(%f, %f)" % [offset.get("x", 0), offset.get("y", 0)],
-		}
-	})
+func _extract_sub_resource_id(s: String) -> int:
+	# 从 'SubResource("5")' 形式的字符串中解析出资源 id
+	var regex = RegEx.new()
+	regex.compile('SubResource\\("(-?\\d+)"\\)')
+	var m = regex.search(s)
+	if m:
+		return int(m.get_string(1))
+	return -1
 
 func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var characters = node.get("characters", "")
@@ -1191,7 +1101,7 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	if characters.unicode_at(0) >= 0x10000:
 		return
 
-	characters = characters.replace('"', '\\"').replace("\n", "\\n")
+	characters = characters.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 	properties["text"] = '"%s"' % characters
 
 	var style = node.get("style", {})
@@ -1259,11 +1169,10 @@ func _get_unique_name(name: String, parent_path: String) -> String:
 	return "%s_%d" % [name, _name_counter[key]]
 
 func _sanitize_name(name: String) -> String:
+	# Godot 节点名不允许 / . : [ ] 及空白；保留中文等 Unicode 字符（原实现会把中文全替成 _）
 	var regex = RegEx.new()
-	regex.compile("[^a-zA-Z0-9_]")
+	regex.compile("[/.\\[\\]\\s:]")
 	var result = regex.sub(name, "_", true)
-	if result.length() > 0 and result[0] >= "0" and result[0] <= "9":
-		result = "_" + result
 	return result if result.length() > 0 else "Node"
 
 func _format_sub_resource(res: Dictionary) -> String:

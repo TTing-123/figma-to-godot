@@ -643,24 +643,29 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	var width = node.get("width", 0)
 	var height = node.get("height", 0)
 
-	# VECTOR 类型修正：figma 的 width/height 是矢量路径包围盒，
-	# 可能为 0（如水平/垂直线条），但导出的 PNG 含描边厚度有实际像素尺寸。
-	# 只有当 figma 的 width 或 height 为 0 时，才用 PNG 尺寸按比例计算。
+	# VECTOR 类型修正：SVG 栅格化的 PNG 含完整内容（含描边溢出），
+	# 实际像素尺寸 = 内容大小 × 3。需要按情况修正 TextureRect 尺寸。
 	if node_type == "VECTOR" and _vector_size_cache.has(node_id):
 		var png_size: Vector2 = _vector_size_cache[node_id]
 		if png_size.x > 0 and png_size.y > 0:
-			# 只有当 width 或 height 为 0 时才修正
 			if width == 0 and height == 0:
-				# 两者都为 0，使用 PNG 尺寸
+				# 两者都为 0（线条等），使用 PNG 尺寸
 				width = png_size.x
 				height = png_size.y
 			elif width == 0:
-				# width 为 0，按 PNG 比例计算
 				width = height * png_size.x / png_size.y
 			elif height == 0:
-				# height 为 0，按 PNG 比例计算
 				height = width * png_size.y / png_size.x
-			# 如果 width 和 height 都大于 0，直接使用 figma 的尺寸，不做修正
+			else:
+				# width/height 都有值（AABB）：PNG 可能含描边溢出，比 AABB 大。
+				# 用实际内容尺寸（÷3）作为 TextureRect 大小，并居中对齐到节点中心
+				# （描边通常对称，节点中心 = 内容中心）。无溢出时 PNG/3≈AABB，几乎无变化。
+				var content_w = png_size.x / 3.0
+				var content_h = png_size.y / 3.0
+				x += (width - content_w) / 2.0
+				y += (height - content_h) / 2.0
+				width = content_w
+				height = content_h
 
 	# 构建节点属性 - 全部使用绝对定位
 	var properties: Dictionary = {}

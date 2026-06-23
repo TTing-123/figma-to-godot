@@ -553,31 +553,6 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 			if new_w > node.get("width", 0):
 				node["width"] = new_w
 
-	# SVG 居中修正：无 auto-layout 且子节点全为 VECTOR 的 FRAME，居中子节点
-	# Figma Plugin API 对这类容器的子节点坐标有偏差，实际设计中是居中的
-	if layout_mode == "NONE" and children.size() > 0:
-		var all_vectors = true
-		for child in children:
-			if child.get("type", "") != "VECTOR":
-				all_vectors = false
-				break
-		if all_vectors:
-			var fw = node.get("width", 0)
-			var fh = node.get("height", 0)
-			if fw > 0 and fh > 0:
-				for child in children:
-					var cw = child.get("width", 0)
-					var ch = child.get("height", 0)
-					var new_x = (fw - cw) / 2.0
-					var new_y = (fh - ch) / 2.0
-					# 同步更新 absoluteX/absoluteY 保持一致
-					var parent_abs_x = node.get("absoluteX", 0)
-					var parent_abs_y = node.get("absoluteY", 0)
-					child["x"] = new_x
-					child["y"] = new_y
-					child["absoluteX"] = parent_abs_x + new_x
-					child["absoluteY"] = parent_abs_y + new_y
-
 	# 荧光传递：FRAME 节点的 DROP_SHADOW 荧光效果应传递给后代中的 VECTOR
 	# 而不是应用在 FRAME 本身（否则整个面板背景都会发光）
 	var node_type = node.get("type", "")

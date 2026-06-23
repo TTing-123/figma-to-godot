@@ -8,7 +8,7 @@ const TYPE_MAP = {
 	"FRAME": "Control",
 	"GROUP": "Control",
 	"VECTOR": "TextureRect",
-	"BOOLEAN": "TextureRect",
+	"BOOLEAN_OPERATION": "TextureRect",
 	"STAR": "TextureRect",
 	"LINE": "TextureRect",
 	"ELLIPSE": "TextureRect",
@@ -556,7 +556,7 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	# 荧光传递：FRAME 节点的 DROP_SHADOW 荧光效果应传递给后代中的 VECTOR
 	# 而不是应用在 FRAME 本身（否则整个面板背景都会发光）
 	var node_type = node.get("type", "")
-	if node_type != "VECTOR":
+	if node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION":
 		for effect in node.get("effects", []):
 			if effect.get("type") == "DROP_SHADOW":
 				var eoffset = effect.get("offset", {})
@@ -620,7 +620,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 
 	# VECTOR 类型修正：SVG 栅格化的 PNG 含完整内容（含描边溢出），
 	# 实际像素尺寸 = 内容大小 × 3。需要按情况修正 TextureRect 尺寸。
-	if node_type == "VECTOR" and _vector_size_cache.has(node_id):
+	if (node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION") and _vector_size_cache.has(node_id):
 		var png_size: Vector2 = _vector_size_cache[node_id]
 		if png_size.x > 0 and png_size.y > 0:
 			if width == 0 and height == 0:
@@ -704,7 +704,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		properties["visible"] = false
 
 	# 处理纯黑色 VECTOR 节点：设为隐藏（Figma 中不可见，导出后不应显示）
-	if node_type == "VECTOR" and _is_solid_black_fill(node):
+	if (node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION") and _is_solid_black_fill(node):
 		properties["visible"] = false
 
 	# 处理透明度
@@ -884,8 +884,10 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	else:
 		current_path = parent_path + "/" + node_name
 
-	for child in node.get("children", []):
-		_process_node(child, current_path, depth + 1)
+	# BOOLEAN_OPERATION 子节点是布尔操作数，视觉已烘焙进父节点合并 SVG，跳过避免空节点
+	if node_type != "BOOLEAN_OPERATION":
+		for child in node.get("children", []):
+			_process_node(child, current_path, depth + 1)
 
 func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) -> void:
 	var fills = node.get("fills", [])
@@ -1001,7 +1003,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				# 存储描边数据供 shader 使用
 				node["_stroke_data"] = {"color": stroke_color, "width": border_w}
 				# VECTOR 类型已有纹理，不需要 panel 样式
-				if node_type != "VECTOR" and not properties.has("theme_override_styles/panel"):
+				if node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION" and not properties.has("theme_override_styles/panel"):
 					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
 
 	# 若有圆角但尚无 panel，先建透明背景 panel（供阴影合并 & 圆角渲染；TEXT 跳过）
@@ -1022,7 +1024,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				if ox == 0 and oy == 0 and radius >= 5:
 					# 只有 VECTOR 类型节点才直接应用荧光
 					# FRAME 节点的荧光由 _preprocess_parent_positions 传递给子矢量图
-					if node_type == "VECTOR":
+					if node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION":
 						var color = effect.get("color", {})
 						node["_glow_data"] = {
 							"color": "Color(%f, %f, %f, %f)" % [color.get("r",0), color.get("g",0), color.get("b",0), color.get("a",1)],

@@ -502,6 +502,14 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	if root_width > 0 and root_height > 0:
 		node["_canvas_uv"] = Vector2(abs_x / root_width, abs_y / root_height)
 
+	# 统一用 absoluteX/Y 差值计算相对父节点的偏移
+	# 解决 Figma Plugin API 对 GROUP 子节点 x/y 返回绝对坐标的已知问题
+	#（FRAME 子节点的 x/y 是相对偏移，但 GROUP 子节点的 x/y = absoluteX/Y）
+	var _p_abs_x = parent_pos.get("abs_x", abs_x)
+	var _p_abs_y = parent_pos.get("abs_y", abs_y)
+	node["_rel_x"] = abs_x - _p_abs_x
+	node["_rel_y"] = abs_y - _p_abs_y
+
 	# 存储父节点的裁剪信息和尺寸
 	var parent_clips = parent_pos.get("clips_content", false)
 	var parent_corner = parent_pos.get("corner_radius", 0)
@@ -509,7 +517,7 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	node["_parent_corner_radius"] = parent_corner if (parent_clips and parent_pos.get("rotation", 0.0) == 0.0) else 0
 	node["_parent_size"] = parent_pos.get("size", Vector2.ZERO)
 	# 记录节点在父节点中的偏移（用于 shader 中父节点圆角裁剪）
-	node["_offset_in_parent"] = Vector2(abs_x - parent_pos.get("abs_x", abs_x), abs_y - parent_pos.get("abs_y", abs_y))
+	node["_offset_in_parent"] = Vector2(abs_x - _p_abs_x, abs_y - _p_abs_y)
 
 	# 处理 auto-layout 负间距：重新计算子节点位置，避免重叠
 	# Figma 导出的 x/y 已包含 itemSpacing 效果，负间距会导致子节点重叠
@@ -520,8 +528,10 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 		var effective_spacing = max(0, item_spacing)
 		if layout_mode == "VERTICAL":
 			var py = node.get("paddingTop", 0)
+			var p_abs_y = node.get("absoluteY", 0)
 			for child in children:
 				child["y"] = py
+				child["absoluteY"] = p_abs_y + py
 				py += child.get("height", 0) + effective_spacing
 			# 更新父容器高度以适应不再重叠的子节点
 			var new_h = py + node.get("paddingBottom", 0)
@@ -530,8 +540,10 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 				node["absoluteY_end"] = node.get("absoluteY", 0) + new_h
 		else:
 			var px = node.get("paddingLeft", 0)
+			var p_abs_x = node.get("absoluteX", 0)
 			for child in children:
 				child["x"] = px
+				child["absoluteX"] = p_abs_x + px
 				px += child.get("width", 0) + effective_spacing
 			# 更新父容器宽度以适应不再重叠的子节点
 			var new_w = px + node.get("paddingRight", 0)
@@ -620,10 +632,11 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	# 获取 Godot 类型
 	var godot_type = TYPE_MAP.get(node_type, "Control")
 
-	# 直接使用 Figma 的 x/y（相对于父节点的偏移）
-	# 不使用 absoluteX/Y 计算，因为 Figma Plugin API 对 GROUP 节点的 absoluteTransform 有 bug
-	var x = node.get("x", 0)
-	var y = node.get("y", 0)
+	# 使用预处理阶段计算的相对偏移（基于 absoluteX/Y 差值）
+	# Figma Plugin API 对 GROUP 子节点的 x/y 返回绝对坐标（非相对偏移），
+	# 直接用 x/y 会导致 GROUP 子节点位置错误。_rel_x/y 已统一修正。
+	var x = node.get("_rel_x", node.get("x", 0))
+	var y = node.get("_rel_y", node.get("y", 0))
 	var width = node.get("width", 0)
 	var height = node.get("height", 0)
 
@@ -676,11 +689,32 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
 			properties["clip_contents"] = true
 	else:
-		# 子节点使用相对父节点的坐标
-		properties["offset_left"] = x
-		properties["offset_top"] = y
-		properties["offset_right"] = x + width
-		properties["offset_bottom"] = y + height
+		# 子节点：相对父节点的坐标
+		#
+		# 坐标模型：
+		#   Figma: node.x/y = relativeTransform 平移分量 = 旋转后本地原点(0,0)的位置。
+		#          旋转绕本地原点(0,0)，旋转后 AABB 中心 = (x,y) + R(θ)·(w/2,h/2)。
+		#   Godot: offset_left/top = 未旋转矩形左上角。pivot_offset = 中心 = (w/2,h/2)。
+		#          旋转绕 pivot_offset，旋转后 AABB 中心 = (offset_left+w/2, offset_top+h/2)。
+		#
+		#   令二者 AABB 中心相等 → offset_left = x + (w/2)(cosθ-1) + (h/2)sinθ
+		#                           offset_top  = y - (w/2)sinθ   + (h/2)(cosθ-1)
+		var _erot = node.get("rotation", 0.0)
+		if _erot != 0.0:
+			var _th = deg_to_rad(_erot)
+			var _cs = cos(_th)
+			var _sn = sin(_th)
+			var _hw = width / 2.0
+			var _hh = height / 2.0
+			properties["offset_left"] = x + _hw * (_cs - 1.0) + _hh * _sn
+			properties["offset_top"] = y - _hw * _sn + _hh * (_cs - 1.0)
+			properties["offset_right"] = properties["offset_left"] + width
+			properties["offset_bottom"] = properties["offset_top"] + height
+		else:
+			properties["offset_left"] = x
+			properties["offset_top"] = y
+			properties["offset_right"] = x + width
+			properties["offset_bottom"] = y + height
 
 	# 处理可见性
 	if not node.get("visible", true):
@@ -695,8 +729,8 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	if opacity < 1.0:
 		properties["modulate"] = "Color(1, 1, 1, %f)" % opacity
 
-	# 处理裁剪（根节点不裁剪，允许子节点超出边界）
-	if depth > 0 and node.get("clipsContent", false):
+	# 处理裁剪：clipsContent=true 时裁剪超出自身边界的子节点（根节点也裁剪，匹配 Figma 根 Frame）
+	if node.get("clipsContent", false):
 		properties["clip_contents"] = true
 
 	# 处理旋转（Figma rotation 为顺时针角度，绕节点中心）
@@ -1152,7 +1186,7 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var font_size = style.get("fontSize", 16)
 	properties["theme_override_font_sizes/font_size"] = font_size
 
-	# 查找并应用字体
+	# 字体
 	var font_family = style.get("fontFamily", "")
 	var font_weight = style.get("fontWeight", "")
 	if font_family and font_weight:
@@ -1167,14 +1201,51 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 			})
 			properties["theme_override_fonts/font"] = 'ExtResource("%d")' % res_id
 
-	# 文本颜色
+	# 文本颜色（fills 中第一个 SOLID 填充）
 	for fill in node.get("fills", []):
 		if fill.get("type") == "SOLID":
 			var color = _figma_color_to_godot(fill.get("color", {}))
 			properties["theme_override_colors/font_color"] = color
 			break
 
-	# 文本对齐
+	# 行高
+	# Figma: lineHeight = {unit:"AUTO"|"PIXELS"|"PERCENT", value:N}
+	# Godot: line_spacing = 在默认行高基础上的增量（像素）
+	var line_height = style.get("lineHeight", {})
+	match line_height.get("unit", ""):
+		"PIXELS":
+			# 固定行高：line_spacing = 目标行高 - fontSize（近似默认行高）
+			var target_lh = line_height.get("value", 0)
+			if target_lh > 0:
+				properties["theme_override_constants/line_spacing"] = int(target_lh - font_size)
+		"PERCENT":
+			# 百分比行高：目标 = fontSize * percent/100
+			var pct = line_height.get("value", 100)
+			var target_lh = font_size * pct / 100.0
+			properties["theme_override_constants/line_spacing"] = int(target_lh - font_size)
+		# AUTO: 使用字体默认行高，不设 line_spacing
+
+	# 字间距
+	var letter_spacing = style.get("letterSpacing", {})
+	if letter_spacing.get("unit", "") == "PIXELS":
+		var spacing = int(letter_spacing.get("value", 0))
+		if spacing != 0:
+			properties["theme_override_constants/character_spacing"] = spacing
+
+	# 文本装饰
+	match node.get("textDecoration", "NONE"):
+		"UNDERLINE":
+			properties["underline"] = true
+		"STRIKETHROUGH":
+			properties["strikethrough"] = true
+
+	# 文本大小写
+	match node.get("textCase", "ORIGINAL"):
+		"UPPER":
+			properties["uppercase"] = true
+		# LOWER/TITLE: Godot Label 无直接支持
+
+	# 水平对齐
 	match style.get("textAlignHorizontal"):
 		"LEFT":
 			properties["horizontal_alignment"] = 0
@@ -1185,6 +1256,7 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 		"JUSTIFIED":
 			properties["horizontal_alignment"] = 3
 
+	# 垂直对齐
 	match style.get("textAlignVertical"):
 		"TOP":
 			properties["vertical_alignment"] = 0
@@ -1192,6 +1264,55 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 			properties["vertical_alignment"] = 1
 		"BOTTOM":
 			properties["vertical_alignment"] = 2
+
+	# ── 对齐修正：让文字视觉中心与 Figma 一致 ──
+	#
+	# Figma 的 width/height 是文字紧凑边界框，Godot Label 的渲染尺寸由字体度量决定。
+	# 同一 fontSize 在两个系统中渲染尺寸不同，需要调整 offset 让文字中心对齐。
+	#
+	# 修正公式（所有对齐方式推导结果一致）：
+	#   label_pos = figma_pos + (figma_size - godot_render_size) / 2
+	var _ol = properties.get("offset_left", 0)
+	var _ot = properties.get("offset_top", 0)
+	var _fw = node.get("width", 0)
+	var _fh = node.get("height", 0)
+
+	# 渲染尺寸：用字体 ascent+descent 计算 Label 高度
+	# Godot Label 的高度 = ascent + descent + line_gap（不是文字紧密边界）
+	var _text = node.get("characters", "")
+	var _godot_rw = _fw  # 宽度直接用 Figma 值
+	var _godot_rh = font_size * 1.36  # 默认估算
+
+	# 尝试加载字体获取精确 ascent+descent
+	var _font_key = "%s_%s" % [font_family, font_weight]
+	if _font_cache.has(_font_key):
+		var _font_res_path = _font_cache[_font_key]
+		var _abs_path = ProjectSettings.globalize_path(_font_res_path)
+		if FileAccess.file_exists(_abs_path):
+			var _f = FileAccess.open(_abs_path, FileAccess.READ)
+			if _f:
+				var _data = _f.get_buffer(_f.get_length())
+				_f.close()
+				var _font = FontFile.new()
+				_font.data = _data
+				var _ascent = _font.get_ascent(font_size)
+				var _descent = _font.get_descent(font_size)
+				if _ascent > 0 and _descent > 0:
+					_godot_rh = _ascent + _descent
+
+	var ol = _ol + (_fw - _godot_rw) / 2.0
+	var ot = _ot + (_fh - _godot_rh) / 2.0
+	properties["offset_left"] = ol
+	properties["offset_top"] = ot
+	properties["offset_right"] = ol + _fw
+	properties["offset_bottom"] = ot + _fh
+
+	# ── textAutoResize 控制尺寸行为 ──
+	match node.get("textAutoResize", "NONE"):
+		"TRUNCATE":
+			properties["clip_text"] = true
+			properties["text_overrun"] = 3  # ELLipsis
+		# WIDTH_AND_HEIGHT / HEIGHT / NONE: offset 已修正，保持不变
 
 func _figma_color_to_godot(color: Dictionary) -> String:
 	var r = color.get("r", 0.0)

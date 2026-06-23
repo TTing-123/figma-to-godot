@@ -124,22 +124,25 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 	# 收集所有TEXT节点的ID，这些节点不应该被转换为图片
 	var text_node_ids = _collect_text_node_ids(data.get("nodes", []))
 
-	# 提取矢量资源（高分辨率 PNG）
+	# 提取矢量资源（SVG 字符串 → 栅格化成 PNG）
 	var vectors = data.get("vectors", {})
 	for node_id in vectors:
 		# 跳过TEXT类型的节点，保持为Label而不是图片
 		if node_id in text_node_ids:
 			continue
 
-		var base64_data = vectors[node_id]
+		var svg_text = vectors[node_id]
 		var safe_name = _sanitize_filename(node_id)
 		var png_path = vectors_dir + "%s.png" % safe_name
-		_save_base64_image(base64_data, png_path)
-		_vector_cache[node_id] = png_path
-		# 加载 PNG 获取实际像素尺寸（figma 的 width/height 可能为 0，例如线条矢量）
-		var img = Image.load_from_file(png_path)
-		if img:
+		# SVG 含完整路径数据，栅格化成 PNG（3x scale）
+		var svg_bytes = svg_text.to_utf8_buffer()
+		var img := Image.new()
+		if img.load_svg_from_buffer(svg_bytes, 3.0) == OK:
+			img.save_png(png_path)
+			_vector_cache[node_id] = png_path
 			_vector_size_cache[node_id] = Vector2(img.get_width(), img.get_height())
+		else:
+			push_warning("[FigmaImporter] SVG 栅格化失败: %s" % node_id)
 
 func _find_fonts(fonts: Dictionary, assets_dir: String) -> void:
 	# 字体目录

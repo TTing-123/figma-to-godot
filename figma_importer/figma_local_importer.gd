@@ -533,9 +533,14 @@ func _apply_mask_groups(node: Dictionary) -> void:
 			# Figma 中 mask 仅作裁剪形状，自身 fill 不渲染 → 清空避免背景色
 			c["fills"] = []
 			new_children.append(c)
-			var masked = c.get("children", [])
-			if not (masked is Array):
-				masked = []
+			# Figma mask 不渲染 mask 形状自身填充（仅用形状 alpha 裁剪），裁剪由本节点 clip_contents 提供；
+			# 故丢弃 mask 原有 children（mask 形状）。FRAME/COMPONENT 作 mask 时其子是被遮罩内容，需保留。
+			var masked: Array = []
+			var mtype = c.get("type", "")
+			if mtype == "FRAME" or mtype == "COMPONENT":
+				var own = c.get("children", [])
+				if own is Array:
+					masked.append_array(own)
 			var j := i + 1
 			while j < children.size() and not (children[j] is Dictionary and children[j].get("isMask", false)):
 				masked.append(children[j])

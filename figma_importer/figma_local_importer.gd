@@ -29,6 +29,7 @@ var _name_counter: Dictionary = {}
 var _image_cache: Dictionary = {}
 var _vector_cache: Dictionary = {}
 var _vector_size_cache: Dictionary = {}
+var _vector_content_center_cache: Dictionary = {}  # 内容几何中心(像素)：修正 PNG 画布留白不对称
 var _font_cache: Dictionary = {}  # { "fontFamily_fontWeight": "res://path/to/font.ttf" }
 
 func import_from_file(json_path: String, output_path: String) -> Error:
@@ -141,6 +142,26 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 			img.save_png(png_path)
 			_vector_cache[node_id] = png_path
 			_vector_size_cache[node_id] = Vector2(img.get_width(), img.get_height())
+			# 内容几何中心(像素)：用于修正 SVG viewBox 留白/描边不对称导致的内容偏移
+			img.convert(Image.FORMAT_RGBA8)
+			var _cdata = img.get_data()
+			var _cw = img.get_width()
+			var _ch = img.get_height()
+			var _cmn_x = _cw
+			var _cmn_y = _ch
+			var _cmx_x = -1
+			var _cmx_y = -1
+			var _ci = 0
+			for _cpy in range(_ch):
+				for _cpx in range(_cw):
+					if _cdata[_ci + 3] > 12:
+						if _cpx < _cmn_x: _cmn_x = _cpx
+						if _cpx > _cmx_x: _cmx_x = _cpx
+						if _cpy < _cmn_y: _cmn_y = _cpy
+						if _cpy > _cmx_y: _cmx_y = _cpy
+					_ci += 4
+			if _cmx_x >= 0:
+				_vector_content_center_cache[node_id] = Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
 		else:
 			push_warning("[FigmaImporter] SVG 栅格化失败: %s" % node_id)
 
@@ -618,27 +639,21 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	var width = node.get("width", 0)
 	var height = node.get("height", 0)
 
-	# VECTOR 类型修正：SVG 栅格化的 PNG 含完整内容（含描边溢出），
-	# 实际像素尺寸 = 内容大小 × 3。需要按情况修正 TextureRect 尺寸。
+	# VECTOR 尺寸：SVG 栅格化的 PNG 已烘焙旋转，其像素尺寸（÷3）即节点视觉包围。
+	# 用它作 Godot size；位置由下方几何中心公式对齐（不再用原始几何尺寸）。
 	if (node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION") and _vector_size_cache.has(node_id):
 		var png_size: Vector2 = _vector_size_cache[node_id]
 		if png_size.x > 0 and png_size.y > 0:
+			var content_w = png_size.x / 3.0
+			var content_h = png_size.y / 3.0
 			if width == 0 and height == 0:
-				# 两者都为 0（线条等），使用 PNG 尺寸
-				width = png_size.x
-				height = png_size.y
+				width = content_w
+				height = content_h
 			elif width == 0:
-				width = height * png_size.x / png_size.y
+				width = height * content_w / content_h
 			elif height == 0:
-				height = width * png_size.y / png_size.x
+				height = width * content_h / content_w
 			else:
-				# width/height 都有值（AABB）：PNG 可能含描边溢出，比 AABB 大。
-				# 用实际内容尺寸（÷3）作为 TextureRect 大小，并居中对齐到节点中心
-				# （描边通常对称，节点中心 = 内容中心）。无溢出时 PNG/3≈AABB，几乎无变化。
-				var content_w = png_size.x / 3.0
-				var content_h = png_size.y / 3.0
-				x += (width - content_w) / 2.0
-				y += (height - content_h) / 2.0
 				width = content_w
 				height = content_h
 
@@ -673,31 +688,55 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			properties["clip_contents"] = true
 	else:
 		# 子节点：相对父节点的坐标
-		#
-		# 坐标模型：
-		#   Figma: node.x/y = relativeTransform 平移分量 = 旋转后本地原点(0,0)的位置。
-		#          旋转绕本地原点(0,0)，旋转后 AABB 中心 = (x,y) + R(θ)·(w/2,h/2)。
-		#   Godot: offset_left/top = 未旋转矩形左上角。pivot_offset = 中心 = (w/2,h/2)。
-		#          旋转绕 pivot_offset，旋转后 AABB 中心 = (offset_left+w/2, offset_top+h/2)。
-		#
-		#   令二者 AABB 中心相等 → offset_left = x + (w/2)(cosθ-1) + (h/2)sinθ
-		#                           offset_top  = y - (w/2)sinθ   + (h/2)(cosθ-1)
-		var _erot = node.get("rotation", 0.0)
-		if _erot != 0.0:
-			var _th = deg_to_rad(_erot)
-			var _cs = cos(_th)
-			var _sn = sin(_th)
-			var _hw = width / 2.0
-			var _hh = height / 2.0
-			properties["offset_left"] = x + _hw * (_cs - 1.0) + _hh * _sn
-			properties["offset_top"] = y - _hw * _sn + _hh * (_cs - 1.0)
+		if node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION":
+			# PNG(SVG 栅格化)已烘焙旋转+翻转(矢量→位图，含描边)，Godot 不再设 rotation。
+			# 几何中心 C = 本地原点(x,y) + M·(原始w/2,原始h/2)，M 取自完整 relativeTransform 线性部分。
+			# 翻转是反射(det<0)，rotation 标量(atan2)无法与纯旋转区分，故必须用矩阵；无矩阵时回退 rotation。
+			var _ow = node.get("width", 0.0)
+			var _oh = node.get("height", 0.0)
+			var _cx = x + _ow / 2.0
+			var _cy = y + _oh / 2.0
+			if node.has("relativeTransform") and node["relativeTransform"] != null:
+				var _m = node["relativeTransform"]
+				var _r0 = _m[0]
+				var _r1 = _m[1]
+				_cx = x + float(_r0[0]) * (_ow / 2.0) + float(_r0[1]) * (_oh / 2.0)
+				_cy = y + float(_r1[0]) * (_ow / 2.0) + float(_r1[1]) * (_oh / 2.0)
+			else:
+				var _vth = deg_to_rad(node.get("rotation", 0.0))
+				_cx = x + (_ow / 2.0) * cos(_vth) + (_oh / 2.0) * sin(_vth)
+				_cy = y - (_ow / 2.0) * sin(_vth) + (_oh / 2.0) * cos(_vth)
+			# PNG 内容中心(像素÷3)对齐 C，而非 PNG 画布中心，修正 viewBox 留白不对称的内容偏移
+			var _ccx = width / 2.0
+			var _ccy = height / 2.0
+			if _vector_content_center_cache.has(node_id):
+				var _cc = _vector_content_center_cache[node_id]
+				_ccx = _cc.x / 3.0
+				_ccy = _cc.y / 3.0
+			properties["offset_left"] = _cx - _ccx
+			properties["offset_top"] = _cy - _ccy
 			properties["offset_right"] = properties["offset_left"] + width
 			properties["offset_bottom"] = properties["offset_top"] + height
 		else:
-			properties["offset_left"] = x
-			properties["offset_top"] = y
-			properties["offset_right"] = x + width
-			properties["offset_bottom"] = y + height
+			# 其他节点：Godot 设 rotation，令旋转中心 = 几何中心。
+			#   offset_left = x + (w/2)(cosθ-1) + (h/2)sinθ   (Figma y-down M=[[cos,sin],[-sin,cos]])
+			#   offset_top  = y - (w/2)sinθ + (h/2)(cosθ-1)
+			var _erot = node.get("rotation", 0.0)
+			if _erot != 0.0:
+				var _th = deg_to_rad(_erot)
+				var _cs = cos(_th)
+				var _sn = sin(_th)
+				var _hw = width / 2.0
+				var _hh = height / 2.0
+				properties["offset_left"] = x + _hw * (_cs - 1.0) + _hh * _sn
+				properties["offset_top"] = y - _hw * _sn + _hh * (_cs - 1.0)
+				properties["offset_right"] = properties["offset_left"] + width
+				properties["offset_bottom"] = properties["offset_top"] + height
+			else:
+				properties["offset_left"] = x
+				properties["offset_top"] = y
+				properties["offset_right"] = x + width
+				properties["offset_bottom"] = y + height
 
 	# 处理可见性
 	if not node.get("visible", true):
@@ -716,11 +755,12 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	if node.get("clipsContent", false):
 		properties["clip_contents"] = true
 
-	# 处理旋转（Figma rotation 为顺时针角度，绕节点中心）
+	# 处理旋转：Figma rotation 正=逆时针(视觉)，Godot rotation 正=顺时针，故取负。
+	# VECTOR/BOOLEAN_OPERATION 的 PNG 已烘焙旋转，不在此设 Godot rotation。
 	var rot = node.get("rotation", 0.0)
-	if rot != 0.0:
+	if rot != 0.0 and node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION":
 		properties["pivot_offset"] = "Vector2(%f, %f)" % [width / 2.0, height / 2.0]
-		properties["rotation"] = deg_to_rad(rot)
+		properties["rotation"] = -deg_to_rad(rot)
 
 	# 处理样式
 	_apply_styles(node, properties, node_id)

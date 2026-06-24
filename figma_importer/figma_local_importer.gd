@@ -127,6 +127,19 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 
 	# 提取矢量资源（SVG 字符串 → 栅格化成 PNG）
 	var vectors = data.get("vectors", {})
+	# 建 node_id → node 查找表（位图填充分流需 fills/cornerRadius/width/height）
+	var _node_by_id: Dictionary = {}
+	var _stk: Array = []
+	for _nd in data.get("nodes", []):
+		_stk.append(_nd)
+	while _stk.size() > 0:
+		var _nd2 = _stk.pop_back()
+		if _nd2 is Dictionary:
+			_node_by_id[_nd2.get("id", "")] = _nd2
+			var _cs = _nd2.get("children", [])
+			if _cs is Array:
+				for _cc in _cs:
+					_stk.append(_cc)
 	for node_id in vectors:
 		# 跳过TEXT类型的节点，保持为Label而不是图片
 		if node_id in text_node_ids:
@@ -135,6 +148,20 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 		var svg_text = vectors[node_id]
 		var safe_name = _sanitize_filename(node_id)
 		var png_path = vectors_dir + "%s.png" % safe_name
+		# 位图填充的 vector：Godot SVG 栅格化不支持 <pattern>+<image>，
+		# 改用原始位图 + 圆角 alpha mask 生成 PNG（保留圆角，下游 texture/size/位置复用 vector 路径）。
+		var _n: Dictionary = _node_by_id.get(node_id, {})
+		var _iref = _get_image_fill_ref(_n)
+		if _iref != "" and _image_cache.has(_iref):
+			var _vw = float(_n.get("width", 0.0))
+			var _vh = float(_n.get("height", 0.0))
+			var _vcr = float(_n.get("cornerRadius", 0))
+			if _rasterize_image_fill_vector(_iref, png_path, _vw, _vh, _vcr):
+				_vector_cache[node_id] = png_path
+				_vector_size_cache[node_id] = Vector2(_vw * 3.0, _vh * 3.0)
+				_vector_content_center_cache[node_id] = Vector2(_vw * 1.5, _vh * 1.5)
+				_n["_bitmap_corner_baked"] = true
+			continue
 		# SVG 含完整路径数据，栅格化成 PNG（3x scale）
 		var svg_bytes = svg_text.to_utf8_buffer()
 		var img := Image.new()
@@ -453,6 +480,8 @@ func _generate_scene(root_node: Dictionary) -> String:
 	var root_width = root_node.get("width", 0)
 	var root_height = root_node.get("height", 0)
 
+	# 重组 mask 蒙版：mask 吸收后续兄弟为子节点 + clipsContent，坐标由 abs 差值自动修正
+	_apply_mask_groups(root_node)
 	# 预处理：计算每个节点的父节点绝对坐标
 	_preprocess_parent_positions(root_node, {}, offset_x, offset_y, 0, root_width, root_height)
 
@@ -484,6 +513,39 @@ func _generate_scene(root_node: Dictionary) -> String:
 		content += node_line
 
 	return content
+
+# Figma mask（蒙版）：mask 形状遮罩同层级、z序在其后的连续兄弟节点。
+# 重组树：mask 吸收后续兄弟为子节点 + 设 clipsContent=true，借现有 clip_contents 逻辑裁剪；
+# 坐标由 _preprocess 的 absoluteX/Y 差值自动修正（被遮罩节点 _rel 自动变为相对 mask 原点）。
+func _apply_mask_groups(node: Dictionary) -> void:
+	var children = node.get("children", [])
+	if not (children is Array):
+		return
+	for c in children:
+		_apply_mask_groups(c)
+	var new_children: Array = []
+	var i := 0
+	while i < children.size():
+		var c = children[i]
+		if c is Dictionary and c.get("isMask", false) == true:
+			c["clipsContent"] = true
+			c["_is_mask_clip"] = true
+			# Figma 中 mask 仅作裁剪形状，自身 fill 不渲染 → 清空避免背景色
+			c["fills"] = []
+			new_children.append(c)
+			var masked = c.get("children", [])
+			if not (masked is Array):
+				masked = []
+			var j := i + 1
+			while j < children.size() and not (children[j] is Dictionary and children[j].get("isMask", false)):
+				masked.append(children[j])
+				j += 1
+			c["children"] = masked
+			i = j
+		else:
+			new_children.append(c)
+			i += 1
+	node["children"] = new_children
 
 func _calculate_bounds(node: Dictionary) -> Dictionary:
 	var abs_x = node.get("absoluteX", node.get("x", 0))
@@ -630,6 +692,9 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 
 	# 获取 Godot 类型
 	var godot_type = TYPE_MAP.get(node_type, "Control")
+	# mask 蒙版：透明裁剪容器（Figma 中 mask 仅贡献裁剪形状，自身 fill 不渲染）
+	if node.get("_is_mask_clip", false):
+		godot_type = "Control"
 
 	# 使用预处理阶段计算的相对偏移（基于 absoluteX/Y 差值）
 	# Figma Plugin API 对 GROUP 子节点的 x/y 返回绝对坐标（非相对偏移），
@@ -779,7 +844,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var shader_radius = max(effective_radius, parent_radius)
 		# 只有父节点有clipsContent时才应用shader裁剪
 		var parent_clips = node.get("_parent_clips_content", false)
-		if shader_radius > 0 and (parent_clips or effective_radius > 0) or node.has("_shadow_data"):
+		if (not node.get("_bitmap_corner_baked", false) and shader_radius > 0 and (parent_clips or effective_radius > 0)) or node.has("_shadow_data"):
 			# 使用父节点大小作为目标大小（裁剪区域）
 			
 			
@@ -1400,3 +1465,61 @@ func _find_last_vector(nodes: Array) -> Dictionary:
 			if not found.is_empty():
 				result = found
 	return result
+
+# 取节点第一个 IMAGE 填充的 imageRef（位图填充 vector 判定）
+func _get_image_fill_ref(node: Dictionary) -> String:
+	var fills = node.get("fills", [])
+	if fills is Array:
+		for f in fills:
+			if f is Dictionary and f.get("type", "") == "IMAGE":
+				var ref = f.get("imageRef", "")
+				if ref != "":
+					return ref
+	return ""
+
+# 位图填充 vector：原始位图 + 圆角 alpha mask → PNG（Godot SVG 栅格化不支持 pattern+image 位图填充）
+func _rasterize_image_fill_vector(ref: String, out_png: String, width: float, height: float, corner: float) -> bool:
+	if not _image_cache.has(ref):
+		return false
+	var img := Image.new()
+	if img.load(_image_cache[ref]) != OK:
+		push_warning("[FigmaImporter] 位图填充加载失败: %s" % ref)
+		return false
+	img.convert(Image.FORMAT_RGBA8)
+	var SCALE := 3.0
+	var tw := int(round(width * SCALE))
+	var th := int(round(height * SCALE))
+	if tw < 1: tw = 1
+	if th < 1: th = 1
+	img.resize(tw, th, Image.INTERPOLATE_LANCZOS)
+	if corner > 0.0:
+		var r := corner * SCALE
+		var hw := tw / 2.0
+		var hh := th / 2.0
+		var hx := hw - r
+		var hy := hh - r
+		if hx < 0.0: hx = 0.0
+		if hy < 0.0: hy = 0.0
+		var data := img.get_data()
+		var i := 0
+		for y in range(th):
+			var ay: float = abs(float(y) - hh)
+			var qy: float = ay - hy
+			if qy < 0.0: qy = 0.0
+			for x in range(tw):
+				var ax: float = abs(float(x) - hw)
+				var qx: float = ax - hx
+				if qx < 0.0: qx = 0.0
+				var dist := sqrt(qx * qx + qy * qy) - r
+				var cov := 0.5 - dist
+				if cov <= 0.0:
+					data[i + 3] = 0
+				elif cov < 1.0:
+					var na := int(round(data[i + 3] * cov))
+					if na < 0: na = 0
+					elif na > 255: na = 255
+					data[i + 3] = na
+				i += 4
+		img = Image.create_from_data(tw, th, false, Image.FORMAT_RGBA8, data)
+	img.save_png(out_png)
+	return true

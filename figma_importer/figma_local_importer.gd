@@ -174,6 +174,9 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 				_pimg.save_png(png_path)
 				_vector_cache[node_id] = png_path
 				_vector_size_cache[node_id] = Vector2(_pimg.get_width(), _pimg.get_height())
+				# 导出端 PNG 已烘焙阴影/模糊/渐变(见 code.ts _vectorNeedsPng)，纹理内已含效果；
+				# 导入端不应再挂 shader 重画阴影(TextureRect 不渲染节点外，use_shadow 本就画不出)。
+				_n["_effects_baked_in_texture"] = true
 				# 本体几何中心：优先用导出端精确值(本体在 PNG @3x 的像素中心)；
 				# 阴影/模糊外扩使 PNG 比本体大且不对称，alpha 扫描对半透明/渐变本体不可靠。
 				# 无精确值时回退高阈值扫描(扫不到则由对齐处回退 PNG 中心)。
@@ -912,7 +915,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var shader_radius = max(effective_radius, parent_radius)
 		# 只有父节点有clipsContent时才应用shader裁剪
 		var parent_clips = node.get("_parent_clips_content", false)
-		if (not node.get("_bitmap_corner_baked", false) and shader_radius > 0 and (parent_clips or effective_radius > 0)) or node.has("_shadow_data"):
+		if (not node.get("_bitmap_corner_baked", false) and shader_radius > 0 and (parent_clips or (effective_radius > 0 and not node.get("_effects_baked_in_texture", false)))) or (node.has("_shadow_data") and not node.get("_effects_baked_in_texture", false)):
 			# 使用父节点大小作为目标大小（裁剪区域）
 			
 			

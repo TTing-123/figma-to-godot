@@ -127,6 +127,8 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 
 	# 提取矢量资源（SVG 字符串 → 栅格化成 PNG）
 	var vectors = data.get("vectors", {})
+	# 导出端矢量本体几何中心(PNG @3x 像素)：含阴影/模糊外扩矢量用于精确对齐本体，替代 alpha 扫描
+	var _body_centers = data.get("vectorBodyCenter", {})
 	# 建 node_id → node 查找表（位图填充分流需 fills/cornerRadius/width/height）
 	var _node_by_id: Dictionary = {}
 	var _stk: Array = []
@@ -162,6 +164,30 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 				_vector_content_center_cache[node_id] = Vector2(_vw * 1.5, _vh * 1.5)
 				_n["_bitmap_corner_baked"] = true
 			continue
+		# PNG 回退：导出端 SVG 失败/无矢量内容时已栅格化为 PNG（3x），前缀 "PNG:" 标记
+		if svg_text.begins_with("PNG:"):
+			var _pb64 = svg_text.substr(4)
+			var _pbytes = Marshalls.base64_to_raw(_pb64)
+			var _pimg := Image.new()
+			# 拒收 1×1 占位空图(mask/空节点导出失败)，否则节点会缩成 ~0.33px
+			if _pimg.load_png_from_buffer(_pbytes) == OK and _pimg.get_width() >= 2 and _pimg.get_height() >= 2:
+				_pimg.save_png(png_path)
+				_vector_cache[node_id] = png_path
+				_vector_size_cache[node_id] = Vector2(_pimg.get_width(), _pimg.get_height())
+				# 本体几何中心：优先用导出端精确值(本体在 PNG @3x 的像素中心)；
+				# 阴影/模糊外扩使 PNG 比本体大且不对称，alpha 扫描对半透明/渐变本体不可靠。
+				# 无精确值时回退高阈值扫描(扫不到则由对齐处回退 PNG 中心)。
+				var _bc = _body_centers.get(node_id, null)
+				if _bc != null and _bc is Array and _bc.size() >= 2:
+					_vector_content_center_cache[node_id] = Vector2(float(_bc[0]), float(_bc[1]))
+				else:
+					var _pthr2 = 180 if _has_visible_drop_shadow(_n) else 12
+					var _pcc2 = _scan_alpha_center(_pimg, _pthr2)
+					if _pcc2 != null:
+						_vector_content_center_cache[node_id] = _pcc2
+			else:
+				push_warning("[FigmaImporter] PNG 回退无效或占位空图(1×1)跳过: %s" % node_id)
+			continue
 		# SVG 含完整路径数据，栅格化成 PNG（3x scale）
 		var svg_bytes = svg_text.to_utf8_buffer()
 		var img := Image.new()
@@ -191,6 +217,40 @@ func _extract_resources(data: Dictionary, assets_dir: String) -> void:
 				_vector_content_center_cache[node_id] = Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
 		else:
 			push_warning("[FigmaImporter] SVG 栅格化失败: %s" % node_id)
+
+# 扫描图像 alpha 通道，返回不透明内容的几何中心(像素)；无内容返回 null。
+# 修正 SVG/PNG 画布留白(阴影、viewBox/渲染范围不对称)导致的内容偏移，供"内容中心对齐"使用。
+func _scan_alpha_center(img: Image, threshold: int = 12):
+	img.convert(Image.FORMAT_RGBA8)
+	var _cdata = img.get_data()
+	var _cw = img.get_width()
+	var _ch = img.get_height()
+	var _cmn_x = _cw
+	var _cmn_y = _ch
+	var _cmx_x = -1
+	var _cmx_y = -1
+	var _ci = 0
+	for _cpy in range(_ch):
+		for _cpx in range(_cw):
+			if _cdata[_ci + 3] > threshold:
+				if _cpx < _cmn_x: _cmn_x = _cpx
+				if _cpx > _cmx_x: _cmx_x = _cpx
+				if _cpy < _cmn_y: _cmn_y = _cpy
+				if _cpy > _cmx_y: _cmx_y = _cpy
+			_ci += 4
+	if _cmx_x >= 0:
+		return Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
+	return null
+
+# 节点是否有可见的外扩阴影(DROP_SHADOW)：外扩阴影膨胀 PNG 并污染 alpha 中心扫描
+func _has_visible_drop_shadow(n: Dictionary) -> bool:
+	var effects = n.get("effects", [])
+	if not (effects is Array):
+		return false
+	for e in effects:
+		if e is Dictionary and e.get("type", "") == "DROP_SHADOW" and e.get("visible", true):
+			return true
+	return false
 
 func _find_fonts(fonts: Dictionary, assets_dir: String) -> void:
 	# 字体目录
@@ -711,7 +771,10 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 
 	# VECTOR 尺寸：SVG 栅格化的 PNG 已烘焙旋转，其像素尺寸（÷3）即节点视觉包围。
 	# 用它作 Godot size；位置由下方几何中心公式对齐（不再用原始几何尺寸）。
-	if (node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION") and _vector_size_cache.has(node_id):
+	# 含 ELLIPSE/STAR/LINE/REGULAR_POLYGON：带阴影/GROUP坐标系时 SVG viewBox 留白不对称，
+	# 内容(球体)会偏离节点几何中心，必须统一走下方的"内容中心对齐"。
+	var _is_svg_vector = node_type in ["VECTOR", "BOOLEAN_OPERATION", "ELLIPSE", "STAR", "LINE", "REGULAR_POLYGON"]
+	if _is_svg_vector and _vector_size_cache.has(node_id):
 		var png_size: Vector2 = _vector_size_cache[node_id]
 		if png_size.x > 0 and png_size.y > 0:
 			var content_w = png_size.x / 3.0
@@ -758,7 +821,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			properties["clip_contents"] = true
 	else:
 		# 子节点：相对父节点的坐标
-		if node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION":
+		if _is_svg_vector and _vector_size_cache.has(node_id):
 			# PNG(SVG 栅格化)已烘焙旋转+翻转(矢量→位图，含描边)，Godot 不再设 rotation。
 			# 几何中心 C = 本地原点(x,y) + M·(原始w/2,原始h/2)，M 取自完整 relativeTransform 线性部分。
 			# 翻转是反射(det<0)，rotation 标量(atan2)无法与纯旋转区分，故必须用矩阵；无矩阵时回退 rotation。
@@ -994,8 +1057,9 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	else:
 		current_path = parent_path + "/" + node_name
 
-	# BOOLEAN_OPERATION 子节点是布尔操作数，视觉已烘焙进父节点合并 SVG，跳过避免空节点
-	if node_type != "BOOLEAN_OPERATION":
+	# BOOLEAN_OPERATION 子节点是布尔操作数，视觉已烘焙进父节点合并 SVG，跳过避免空节点。
+	# 但 BOOLEAN_OPERATION 作为 mask 时，其 children 是被吸收的遮罩内容（非操作数），必须渲染。
+	if node_type != "BOOLEAN_OPERATION" or node.get("_is_mask_clip", false):
 		for child in node.get("children", []):
 			_process_node(child, current_path, depth + 1)
 
@@ -1082,8 +1146,9 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 						})
 						properties["texture"] = 'ExtResource("%d")' % res_id
 
-	# 处理矢量（TEXT 跳过：保持 Label）
-	if not is_text and _vector_cache.has(node_id):
+	# 处理矢量（TEXT 跳过：保持 Label；mask 跳过：Figma 中 mask 只裁剪、自身填充不渲染，
+	# 保持透明 Control 做裁剪容器，不赋 texture 以免被盖成 TextureRect 显示不存在的填充）
+	if not is_text and _vector_cache.has(node_id) and not node.get("_is_mask_clip", false):
 		var res_id = _next_resource_id()
 		_ext_resources.append({
 			"id": res_id,

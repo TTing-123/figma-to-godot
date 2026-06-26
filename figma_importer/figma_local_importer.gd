@@ -21,16 +21,12 @@ const TYPE_MAP = {
 	"INSTANCE": "Control",
 }
 
-var _resource_id_counter: int = 0
-var _ext_resources: Array[Dictionary] = []
-var _sub_resources: Array[Dictionary] = []
-var _nodes: PackedStringArray = []
-var _name_counter: Dictionary = {}
-var _image_cache: Dictionary = {}
-var _vector_cache: Dictionary = {}
-var _vector_size_cache: Dictionary = {}
-var _vector_content_center_cache: Dictionary = {}  # 内容几何中心(像素)：修正 PNG 画布留白不对称
-var _font_cache: Dictionary = {}  # { "fontFamily_fontWeight": "res://path/to/font.ttf" }
+# tscn 输出缓冲区/id 分配/序列化由 _writer 持有（add_* 内部原子分配 id + append，调用顺序即 id 顺序）
+var _writer := FigmaTscnWriter.new()
+# 资源提取（图片/矢量/位图填充），4 cache 由 _assets 持有
+var _assets := FigmaAssetExtractor.new()
+# 字体（本地匹配 + Google 下载），_font_cache 由 _fonts 持有
+var _fonts := FigmaFontLoader.new()
 
 func import_from_file(json_path: String, output_path: String) -> Error:
 	# 读取 JSON 文件
@@ -66,13 +62,13 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 	var suffix = scene_name.substr(base_name.length())
 	if suffix.length() > 0:
 		assets_dir = "res://%s_assets%s/" % [base_name, suffix]
-	_extract_resources(data, assets_dir)
+	_assets.extract(data, assets_dir)
 
 	# 查找字体资源
 	progress_changed.emit("查找字体...", 0.5)
 	var fonts = data.get("fonts", {})
 	if not fonts.is_empty():
-		_find_fonts(fonts, assets_dir)
+		_fonts.find_fonts(fonts, assets_dir)
 
 	# 生成场景
 	progress_changed.emit("生成场景...", 0.6)
@@ -104,664 +100,33 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 	progress_changed.emit("导入完成！", 1.0)
 	return OK
 
-func _extract_resources(data: Dictionary, assets_dir: String) -> void:
-	# 使用传入的资源目录
-	var images_dir = assets_dir + "images/"
-	var vectors_dir = assets_dir + "vectors/"
-
-	# 确保目录存在
-	DirAccess.make_dir_recursive_absolute(images_dir)
-	DirAccess.make_dir_recursive_absolute(vectors_dir)
-
-	# 提取图片资源
-	var images = data.get("images", {})
-	for ref in images:
-		var base64_data = images[ref]
-		var safe_name = _sanitize_filename(ref)
-		var image_path = images_dir + "%s.png" % safe_name
-		_save_base64_image(base64_data, image_path)
-		_image_cache[ref] = image_path
-
-	# 收集所有TEXT节点的ID，这些节点不应该被转换为图片
-	var text_node_ids = _collect_text_node_ids(data.get("nodes", []))
-
-	# 提取矢量资源（SVG 字符串 → 栅格化成 PNG）
-	var vectors = data.get("vectors", {})
-	# 导出端矢量本体几何中心(PNG @3x 像素)：含阴影/模糊外扩矢量用于精确对齐本体，替代 alpha 扫描
-	var _body_centers = data.get("vectorBodyCenter", {})
-	# 建 node_id → node 查找表（位图填充分流需 fills/cornerRadius/width/height）
-	var _node_by_id: Dictionary = {}
-	var _stk: Array = []
-	for _nd in data.get("nodes", []):
-		_stk.append(_nd)
-	while _stk.size() > 0:
-		var _nd2 = _stk.pop_back()
-		if _nd2 is Dictionary:
-			_node_by_id[_nd2.get("id", "")] = _nd2
-			var _cs = _nd2.get("children", [])
-			if _cs is Array:
-				for _cc in _cs:
-					_stk.append(_cc)
-	for node_id in vectors:
-		# 跳过TEXT类型的节点，保持为Label而不是图片
-		if node_id in text_node_ids:
-			continue
-
-		var svg_text = vectors[node_id]
-		var safe_name = _sanitize_filename(node_id)
-		var png_path = vectors_dir + "%s.png" % safe_name
-		# 位图填充的 vector：Godot SVG 栅格化不支持 <pattern>+<image>，
-		# 改用原始位图 + 圆角 alpha mask 生成 PNG（保留圆角，下游 texture/size/位置复用 vector 路径）。
-		var _n: Dictionary = _node_by_id.get(node_id, {})
-		var _iref = _get_image_fill_ref(_n)
-		if _iref != "" and _image_cache.has(_iref):
-			var _vw = float(_n.get("width", 0.0))
-			var _vh = float(_n.get("height", 0.0))
-			var _vcr = float(_n.get("cornerRadius", 0))
-			if _rasterize_image_fill_vector(_iref, png_path, _vw, _vh, _vcr):
-				_vector_cache[node_id] = png_path
-				_vector_size_cache[node_id] = Vector2(_vw * 3.0, _vh * 3.0)
-				_vector_content_center_cache[node_id] = Vector2(_vw * 1.5, _vh * 1.5)
-				_n["_bitmap_corner_baked"] = true
-			continue
-		# PNG 回退：导出端 SVG 失败/无矢量内容时已栅格化为 PNG（3x），前缀 "PNG:" 标记
-		if svg_text.begins_with("PNG:"):
-			var _pb64 = svg_text.substr(4)
-			var _pbytes = Marshalls.base64_to_raw(_pb64)
-			var _pimg := Image.new()
-			# 拒收 1×1 占位空图(mask/空节点导出失败)，否则节点会缩成 ~0.33px
-			if _pimg.load_png_from_buffer(_pbytes) == OK and _pimg.get_width() >= 2 and _pimg.get_height() >= 2:
-				_pimg.save_png(png_path)
-				_vector_cache[node_id] = png_path
-				_vector_size_cache[node_id] = Vector2(_pimg.get_width(), _pimg.get_height())
-				# 导出端 PNG 已烘焙阴影/模糊/渐变(见 code.ts _vectorNeedsPng)，纹理内已含效果；
-				# 导入端不应再挂 shader 重画阴影(TextureRect 不渲染节点外，use_shadow 本就画不出)。
-				_n["_effects_baked_in_texture"] = true
-				# 本体几何中心：优先用导出端精确值(本体在 PNG @3x 的像素中心)；
-				# 阴影/模糊外扩使 PNG 比本体大且不对称，alpha 扫描对半透明/渐变本体不可靠。
-				# 无精确值时回退高阈值扫描(扫不到则由对齐处回退 PNG 中心)。
-				var _bc = _body_centers.get(node_id, null)
-				if _bc != null and _bc is Array and _bc.size() >= 2:
-					_vector_content_center_cache[node_id] = Vector2(float(_bc[0]), float(_bc[1]))
-				else:
-					var _pthr2 = 180 if _has_visible_drop_shadow(_n) else 12
-					var _pcc2 = _scan_alpha_center(_pimg, _pthr2)
-					if _pcc2 != null:
-						_vector_content_center_cache[node_id] = _pcc2
-			else:
-				push_warning("[FigmaImporter] PNG 回退无效或占位空图(1×1)跳过: %s" % node_id)
-			continue
-		# SVG 含完整路径数据，栅格化成 PNG（3x scale）
-		var svg_bytes = svg_text.to_utf8_buffer()
-		var img := Image.new()
-		if img.load_svg_from_buffer(svg_bytes, 3.0) == OK:
-			img.save_png(png_path)
-			_vector_cache[node_id] = png_path
-			_vector_size_cache[node_id] = Vector2(img.get_width(), img.get_height())
-			# 内容几何中心(像素)：用于修正 SVG viewBox 留白/描边不对称导致的内容偏移
-			img.convert(Image.FORMAT_RGBA8)
-			var _cdata = img.get_data()
-			var _cw = img.get_width()
-			var _ch = img.get_height()
-			var _cmn_x = _cw
-			var _cmn_y = _ch
-			var _cmx_x = -1
-			var _cmx_y = -1
-			var _ci = 0
-			for _cpy in range(_ch):
-				for _cpx in range(_cw):
-					if _cdata[_ci + 3] > 12:
-						if _cpx < _cmn_x: _cmn_x = _cpx
-						if _cpx > _cmx_x: _cmx_x = _cpx
-						if _cpy < _cmn_y: _cmn_y = _cpy
-						if _cpy > _cmx_y: _cmx_y = _cpy
-					_ci += 4
-			if _cmx_x >= 0:
-				_vector_content_center_cache[node_id] = Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
-		else:
-			push_warning("[FigmaImporter] SVG 栅格化失败: %s" % node_id)
-
-# 扫描图像 alpha 通道，返回不透明内容的几何中心(像素)；无内容返回 null。
-# 修正 SVG/PNG 画布留白(阴影、viewBox/渲染范围不对称)导致的内容偏移，供"内容中心对齐"使用。
-func _scan_alpha_center(img: Image, threshold: int = 12):
-	img.convert(Image.FORMAT_RGBA8)
-	var _cdata = img.get_data()
-	var _cw = img.get_width()
-	var _ch = img.get_height()
-	var _cmn_x = _cw
-	var _cmn_y = _ch
-	var _cmx_x = -1
-	var _cmx_y = -1
-	var _ci = 0
-	for _cpy in range(_ch):
-		for _cpx in range(_cw):
-			if _cdata[_ci + 3] > threshold:
-				if _cpx < _cmn_x: _cmn_x = _cpx
-				if _cpx > _cmx_x: _cmx_x = _cpx
-				if _cpy < _cmn_y: _cmn_y = _cpy
-				if _cpy > _cmx_y: _cmx_y = _cpy
-			_ci += 4
-	if _cmx_x >= 0:
-		return Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
-	return null
-
-# 节点是否有可见的外扩阴影(DROP_SHADOW)：外扩阴影膨胀 PNG 并污染 alpha 中心扫描
-func _has_visible_drop_shadow(n: Dictionary) -> bool:
-	var effects = n.get("effects", [])
-	if not (effects is Array):
-		return false
-	for e in effects:
-		if e is Dictionary and e.get("type", "") == "DROP_SHADOW" and e.get("visible", true):
-			return true
-	return false
-
-func _find_fonts(fonts: Dictionary, assets_dir: String) -> void:
-	# 字体目录
-	var fonts_dir = assets_dir + "fonts/"
-	var font_dirs = [fonts_dir, "res://fonts/", "res://assets/fonts/"]
-
-	# 确保字体目录存在
-	DirAccess.make_dir_recursive_absolute(fonts_dir)
-
-	# 收集项目中所有 .ttf 和 .otf 文件
-	var all_fonts: PackedStringArray = []
-	for font_dir in font_dirs:
-		_collect_fonts_recursive(font_dir, all_fonts)
-
-	# 为每个需要的字体查找匹配的文件
-	for font_key in fonts:
-		var font_info = fonts[font_key]
-		var family = font_info.get("family", "")
-		var style = font_info.get("style", "")
-
-		# 尝试查找匹配的字体文件
-		var matched_font = _find_matching_font(family, style, all_fonts)
-		if matched_font:
-			_font_cache[font_key] = matched_font
-		else:
-			# 尝试自动下载字体
-			var downloaded = _download_font_from_google(family, style, fonts_dir)
-			if downloaded:
-				_font_cache[font_key] = downloaded
-
-	# 打印结果
-	if _font_cache.size() > 0:
-		print("[FigmaImporter] 字体: %d/%d 已加载" % [_font_cache.size(), fonts.size()])
-	else:
-		print("[FigmaImporter] 未找到字体，请手动下载到 %s" % fonts_dir)
-
-func _download_font_from_google(family: String, style: String, target_dir: String) -> String:
-	# 构建字体文件名
-	var font_filename = "%s-%s.ttf" % [family.replace(" ", ""), style]
-	var font_path = target_dir + font_filename
-
-	# 步骤1: 从 Google Fonts CSS API 获取字体文件 URL
-	var weight = _get_weight(style)
-	var family_encoded = family.replace(" ", "+")
-	var css_url = "https://fonts.googleapis.com/css2?family=%s:wght@%s" % [family_encoded, weight]
-
-	# 使用 HTTPClient 下载 CSS
-	var http = HTTPClient.new()
-	var err = http.connect_to_host("fonts.googleapis.com", 443, TLSOptions.client())
-	if err != OK:
-		return ""
-
-	var _deadline := Time.get_ticks_msec() + 15000
-	while http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:
-		if Time.get_ticks_msec() > _deadline:
-			return ""
-		http.poll()
-		OS.delay_usec(10000)
-
-	if http.get_status() != HTTPClient.STATUS_CONNECTED:
-		return ""
-
-	# 发送请求（需要特定 User-Agent 才能获取 TTF 格式）
-	var headers = ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"]
-	err = http.request(HTTPClient.METHOD_GET, "/css2?family=%s:wght@%s" % [family_encoded, weight], headers)
-	if err != OK:
-		return ""
-
-	_deadline = Time.get_ticks_msec() + 15000
-	while http.get_status() == HTTPClient.STATUS_REQUESTING:
-		if Time.get_ticks_msec() > _deadline:
-			return ""
-		http.poll()
-		OS.delay_usec(10000)
-
-	# 读取 CSS 响应
-	var response_body = PackedByteArray()
-	if http.has_response():
-		var _body_deadline := Time.get_ticks_msec() + 15000
-		while http.get_status() == HTTPClient.STATUS_BODY:
-			if Time.get_ticks_msec() > _body_deadline:
-				return ""
-			http.poll()
-			var chunk = http.read_response_body_chunk()
-			if chunk.size() > 0:
-				response_body.append_array(chunk)
-			else:
-				OS.delay_usec(1000)
-
-	var css_text = response_body.get_string_from_utf8()
-
-	# 步骤2: 从 CSS 中提取 TTF 文件 URL
-	var regex = RegEx.new()
-	regex.compile("url\\((https://fonts\\.gstatic\\.com/[^)]+\\.ttf)\\)")
-	var result = regex.search(css_text)
-	if not result:
-		return ""
-
-	var font_url = result.get_string(1)
-
-	# 步骤3: 下载 TTF 文件
-	var font_http = HTTPClient.new()
-	var url_parts = font_url.substr(8).split("/")
-	var host = url_parts[0]
-	var path = "/" + "/".join(Array(url_parts).slice(1))
-
-	err = font_http.connect_to_host(host, 443, TLSOptions.client())
-	if err != OK:
-		return ""
-
-	_deadline = Time.get_ticks_msec() + 15000
-	while font_http.get_status() == HTTPClient.STATUS_CONNECTING or font_http.get_status() == HTTPClient.STATUS_RESOLVING:
-		if Time.get_ticks_msec() > _deadline:
-			return ""
-		font_http.poll()
-		OS.delay_usec(10000)
-
-	if font_http.get_status() != HTTPClient.STATUS_CONNECTED:
-		return ""
-
-	err = font_http.request(HTTPClient.METHOD_GET, path, ["User-Agent: Mozilla/5.0"])
-	if err != OK:
-		return ""
-
-	_deadline = Time.get_ticks_msec() + 15000
-	while font_http.get_status() == HTTPClient.STATUS_REQUESTING:
-		if Time.get_ticks_msec() > _deadline:
-			return ""
-		font_http.poll()
-		OS.delay_usec(10000)
-
-	var font_data = PackedByteArray()
-	if font_http.has_response():
-		var _body_deadline := Time.get_ticks_msec() + 15000
-		while font_http.get_status() == HTTPClient.STATUS_BODY:
-			if Time.get_ticks_msec() > _body_deadline:
-				push_warning("[FigmaImporter] 字体文件下载超时")
-				return ""
-			font_http.poll()
-			var chunk = font_http.read_response_body_chunk()
-			if chunk.size() > 0:
-				font_data.append_array(chunk)
-			else:
-				OS.delay_usec(1000)
-
-	if font_data.size() < 1000:
-		return ""
-
-	# 保存字体文件
-	var file = FileAccess.open(font_path, FileAccess.WRITE)
-	if file:
-		file.store_buffer(font_data)
-		file.close()
-		print("[FigmaImporter] 下载字体: %s" % font_filename)
-		return font_path
-
-	return ""
-
-func _get_weight(style: String) -> String:
-	match style.to_lower():
-		"thin", "hairline":
-			return "100"
-		"extralight", "ultralight":
-			return "200"
-		"light":
-			return "300"
-		"regular", "normal", "book":
-			return "400"
-		"medium":
-			return "500"
-		"semibold", "demibold":
-			return "600"
-		"bold":
-			return "700"
-		"extrabold", "ultrabold":
-			return "800"
-		"black", "heavy":
-			return "900"
-		_:
-			return "400"
-
-func _collect_fonts_recursive(dir_path: String, result: PackedStringArray) -> void:
-	var dir = DirAccess.open(dir_path)
-	if not dir:
-		return
-
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	while file_name != "":
-		if not file_name.begins_with("."):
-			var full_path = dir_path + file_name
-			if dir.current_is_dir():
-				_collect_fonts_recursive(full_path + "/", result)
-			elif file_name.ends_with(".ttf") or file_name.ends_with(".otf"):
-				result.append(full_path)
-		file_name = dir.get_next()
-	dir.list_dir_end()
-
-func _find_matching_font(family: String, style: String, available_fonts: PackedStringArray) -> String:
-	# 将字体名称转换为小写用于比较
-	var family_lower = family.to_lower()
-	var style_lower = style.to_lower()
-
-	# 常见的样式映射
-	var style_aliases = {
-		"regular": ["regular", "normal", "book", "roman"],
-		"bold": ["bold", "heavy", "black"],
-		"italic": ["italic", "oblique", "slanted"],
-		"bold italic": ["bold italic", "boldoblique", "heavyitalic"],
-		"light": ["light", "thin", "hairline"],
-		"medium": ["medium", "semibold", "demi"],
-	}
-
-	# 第一轮：精确匹配（文件名包含 family + style）
-	for font_path in available_fonts:
-		var file_name = font_path.get_file().get_basename().to_lower()
-		if file_name.contains(family_lower) and file_name.contains(style_lower):
-			return font_path
-
-	# 第二轮：只匹配 family，style 为 regular 时优先匹配无 style 的文件
-	for font_path in available_fonts:
-		var file_name = font_path.get_file().get_basename().to_lower()
-		if file_name.contains(family_lower):
-			# 如果请求的是 regular，匹配不包含其他样式的文件
-			if style_lower == "regular" or style_lower == "normal":
-				var is_regular = true
-				for other_style in ["bold", "italic", "light", "medium", "thin", "heavy"]:
-					if file_name.contains(other_style):
-						is_regular = false
-						break
-				if is_regular:
-					return font_path
-			# 否则匹配包含样式关键词的文件
-			else:
-				var aliases = style_aliases.get(style_lower, [style_lower])
-				for alias in aliases:
-					if file_name.contains(alias):
-						return font_path
-
-	# 第三轮：只匹配 family（返回第一个找到的）
-	for font_path in available_fonts:
-		var file_name = font_path.get_file().get_basename().to_lower()
-		if file_name.contains(family_lower):
-			return font_path
-
-	return ""
-
-func _collect_text_node_ids(nodes: Array) -> PackedStringArray:
-	var text_ids = PackedStringArray()
-	for node in nodes:
-		if node.get("type", "") == "TEXT":
-			text_ids.append(node.get("id", ""))
-		# 递归处理子节点
-		var children = node.get("children", [])
-		if not children.is_empty():
-			text_ids.append_array(_collect_text_node_ids(children))
-	return text_ids
-
-func _sanitize_filename(name: String) -> String:
-	# 替换 Windows 文件名中的非法字符
-	var result = name.replace(":", "_").replace(";", "_").replace("\\", "_").replace("/", "_")
-	result = result.replace("*", "_").replace("?", "_").replace('"', "_")
-	result = result.replace("<", "_").replace(">", "_").replace("|", "_")
-	return result
-
-func _save_base64_image(base64_data: String, path: String) -> void:
-	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
-	var bytes = Marshalls.base64_to_raw(base64_data)
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	if file:
-		file.store_buffer(bytes)
-		file.close()
-
 func _generate_scene(root_node: Dictionary) -> String:
-	_resource_id_counter = 0
-	_ext_resources.clear()
-	_sub_resources.clear()
-	_nodes.clear()
-	_name_counter.clear()
+	_writer.reset()
 
 	# 计算所有节点的边界框
-	var bounds = _calculate_bounds(root_node)
+	var bounds = FigmaImporterUtils._calculate_bounds(root_node)
 	var offset_x = bounds.min_x
 	var offset_y = bounds.min_y
 
-	# 获取根节点大小
+	# 获取��节点大小
 	var root_width = root_node.get("width", 0)
 	var root_height = root_node.get("height", 0)
 
 	# 重组 mask 蒙版：mask 吸收后续兄弟为子节点 + clipsContent，坐标由 abs 差值自动修正
-	_apply_mask_groups(root_node)
+	FigmaImporterUtils._apply_mask_groups(root_node)
 	# 预处理：计算每个节点的父节点绝对坐标
-	_preprocess_parent_positions(root_node, {}, offset_x, offset_y, 0, root_width, root_height)
+	FigmaImporterUtils._preprocess_parent_positions(root_node, {}, offset_x, offset_y, 0, root_width, root_height)
 
 	# 处理根节点
 	_process_node(root_node, "", 0)
 
-	# 构建场景文件
-	var content = "[gd_scene load_steps=%d format=3]\n\n" % (_resource_id_counter + 2)
-
-	# 添加外部资源（Shader）
-	content += '[ext_resource type="Shader" path="res://addons/figma_importer/rounded_rect.gdshader" id="shader_rounded"]\n'
-
-	# 添加其他外部资源
-	for ext_res in _ext_resources:
-		content += '[ext_resource type="%s" path="%s" id="%d"]\n' % [
-			ext_res["type"],
-			ext_res["path"],
-			ext_res["id"]
-		]
-
-	content += "\n"
-
-	# 添加子资源
-	for sub_res in _sub_resources:
-		content += _format_sub_resource(sub_res)
-
-	# 添加节点
-	for node_line in _nodes:
-		content += node_line
-
-	return content
-
-# Figma mask（蒙版）：mask 形状遮罩同层级、z序在其后的连续兄弟节点。
-# 重组树：mask 吸收后续兄弟为子节点 + 设 clipsContent=true，借现有 clip_contents 逻辑裁剪；
-# 坐标由 _preprocess 的 absoluteX/Y 差值自动修正（被遮罩节点 _rel 自动变为相对 mask 原点）。
-func _apply_mask_groups(node: Dictionary) -> void:
-	var children = node.get("children", [])
-	if not (children is Array):
-		return
-	for c in children:
-		_apply_mask_groups(c)
-	var new_children: Array = []
-	var i := 0
-	while i < children.size():
-		var c = children[i]
-		if c is Dictionary and c.get("isMask", false) == true:
-			c["clipsContent"] = true
-			c["_is_mask_clip"] = true
-			# Figma 中 mask 仅作裁剪形状，自身 fill 不渲染 → 清空避免背景色
-			c["fills"] = []
-			new_children.append(c)
-			# Figma mask 不渲染 mask 形状自身填充（仅用形状 alpha 裁剪），裁剪由本节点 clip_contents 提供；
-			# 故丢弃 mask 原有 children（mask 形状）。FRAME/COMPONENT 作 mask 时其子是被遮罩内容，需保留。
-			var masked: Array = []
-			var mtype = c.get("type", "")
-			if mtype == "FRAME" or mtype == "COMPONENT":
-				var own = c.get("children", [])
-				if own is Array:
-					masked.append_array(own)
-			var j := i + 1
-			while j < children.size() and not (children[j] is Dictionary and children[j].get("isMask", false)):
-				masked.append(children[j])
-				j += 1
-			c["children"] = masked
-			i = j
-		else:
-			new_children.append(c)
-			i += 1
-	node["children"] = new_children
-
-func _calculate_bounds(node: Dictionary) -> Dictionary:
-	var abs_x = node.get("absoluteX", node.get("x", 0))
-	var abs_y = node.get("absoluteY", node.get("y", 0))
-	var width = node.get("width", 0)
-	var height = node.get("height", 0)
-
-	var bounds = {
-		"min_x": abs_x,
-		"min_y": abs_y,
-		"max_x": abs_x + width,
-		"max_y": abs_y + height
-	}
-
-	for child in node.get("children", []):
-		var child_bounds = _calculate_bounds(child)
-		bounds.min_x = min(bounds.min_x, child_bounds.min_x)
-		bounds.min_y = min(bounds.min_y, child_bounds.min_y)
-		bounds.max_x = max(bounds.max_x, child_bounds.max_x)
-		bounds.max_y = max(bounds.max_y, child_bounds.max_y)
-
-	return bounds
-
-func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offset_x: float = 0, offset_y: float = 0, depth: int = 0, root_width: float = 0, root_height: float = 0) -> void:
-	# 父节点不可见时，子节点也不可见（Figma 行为）
-	if parent_pos.get("visible", true) == false:
-		node["visible"] = false
-	# 存储父节点的绝对坐标（已减去全局偏移量）
-	var abs_x = node.get("absoluteX", node.get("x", 0)) - offset_x
-	var abs_y = node.get("absoluteY", node.get("y", 0)) - offset_y
-	node["_abs_x"] = abs_x
-	node["_abs_y"] = abs_y
-	node["_parent_abs_x"] = parent_pos.get("abs_x", abs_x)
-	node["_parent_abs_y"] = parent_pos.get("abs_y", abs_y)
-
-	# 存储根节点大小
-	node["_root_width"] = root_width
-	node["_root_height"] = root_height
-	# 存储节点在根画布中的 UV 位置（用于渐变坐标转换）
-	if root_width > 0 and root_height > 0:
-		node["_canvas_uv"] = Vector2(abs_x / root_width, abs_y / root_height)
-
-	# 统一用 absoluteX/Y 差值计算相对父节点的偏移
-	# 解决 Figma Plugin API 对 GROUP 子节点 x/y 返回绝对坐标的已知问题
-	#（FRAME 子节点的 x/y 是相对偏移，但 GROUP 子节点的 x/y = absoluteX/Y）
-	var _p_abs_x = parent_pos.get("abs_x", abs_x)
-	var _p_abs_y = parent_pos.get("abs_y", abs_y)
-	node["_rel_x"] = abs_x - _p_abs_x
-	node["_rel_y"] = abs_y - _p_abs_y
-
-	# 直接父是否 clipsContent（矩形裁边界判断，保留原语义）
-	node["_parent_clips_content"] = parent_pos.get("clips_content", false)
-	# 圆角裁剪祖先：沿树向上最近的 clipsContent+圆角>0 祖先（跳过无圆角中间层）。
-	# Figma clipsContent+cornerRadius 按圆角形状裁所有后代；Godot clip_contents 仅矩形裁，
-	# 故后代用 shader 的 parent_corner_radius 自我裁剪到祖先圆角（如工具栏贴 HMI 圆角边）。
-	# clip_anc_base_offset = 父相对(父的裁剪祖先)的偏移；本节点相对裁剪祖先 = _rel + base_offset。
-	var _anc_radius = parent_pos.get("clip_anc_radius", 0)
-	var _anc_base = parent_pos.get("clip_anc_base_offset", Vector2.ZERO)
-	node["_parent_corner_radius"] = _anc_radius
-	node["_parent_size"] = parent_pos.get("clip_anc_size", Vector2.ZERO)
-	node["_offset_in_parent"] = Vector2(node["_rel_x"], node["_rel_y"]) + _anc_base
-
-	# 处理 auto-layout 负间距：重新计算子节点位置，避免重叠
-	# Figma 导出的 x/y 已包含 itemSpacing 效果，负间距会导致子节点重叠
-	var children = node.get("children", [])
-	var layout_mode = node.get("layoutMode", "NONE")
-	var item_spacing = node.get("itemSpacing", 0)
-	if (layout_mode == "VERTICAL" or layout_mode == "HORIZONTAL") and item_spacing < 0 and children.size() > 1:
-		var effective_spacing = max(0, item_spacing)
-		if layout_mode == "VERTICAL":
-			var py = node.get("paddingTop", 0)
-			var p_abs_y = node.get("absoluteY", 0)
-			for child in children:
-				child["y"] = py
-				child["absoluteY"] = p_abs_y + py
-				py += child.get("height", 0) + effective_spacing
-			# 更新父容器高度以适应不再重叠的子节点
-			var new_h = py + node.get("paddingBottom", 0)
-			if new_h > node.get("height", 0):
-				node["height"] = new_h
-				node["absoluteY_end"] = node.get("absoluteY", 0) + new_h
-		else:
-			var px = node.get("paddingLeft", 0)
-			var p_abs_x = node.get("absoluteX", 0)
-			for child in children:
-				child["x"] = px
-				child["absoluteX"] = p_abs_x + px
-				px += child.get("width", 0) + effective_spacing
-			# 更新父容器宽度以适应不再重叠的子节点
-			var new_w = px + node.get("paddingRight", 0)
-			if new_w > node.get("width", 0):
-				node["width"] = new_w
-
-	# 荧光传递：FRAME 节点的 DROP_SHADOW 荧光效果应传递给后代中的 VECTOR
-	# 而不是应用在 FRAME 本身（否则整个面板背景都会发光）
-	var node_type = node.get("type", "")
-	if node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION":
-		for effect in node.get("effects", []):
-			if effect.get("type") == "DROP_SHADOW":
-				var eoffset = effect.get("offset", {})
-				if eoffset.get("x", 0) == 0 and eoffset.get("y", 0) == 0 and effect.get("radius", 0) >= 5:
-					# 递归查找第一个 VECTOR 后代节点传递荧光
-					var found = _find_last_vector(children)
-					if found:
-						var ecolor = effect.get("color", {})
-						found["_glow_data"] = {
-							"color": "Color(%f, %f, %f, %f)" % [ecolor.get("r",0), ecolor.get("g",0), ecolor.get("b",0), ecolor.get("a",1)],
-							"radius": effect.get("radius", 0),
-							"intensity": clampf(ecolor.get("a", 1.0) * 2.0, 0.0, 1.0),
-						}
-					break
-
-	# 递归处理子节点
-	# 注意：在Figma中，Group不改变子节点的坐标系统，只有Frame/Component改变
-	var is_group = (node_type == "GROUP")
-	var current_corner = node.get("cornerRadius", 0)
-	var current_clips = node.get("clipsContent", false)
-	var current_size = Vector2(node.get("width", 0), node.get("height", 0))
-
-	# 所有节点都使用自己的绝对坐标作为参考点
-	# Group 在 Figma 中不改变坐标系统，但 Godot 中每个节点都需要相对父节点的坐标
-	# 注意：Figma Plugin API 对 GROUP 内子节点的 absoluteY 有已知 bug
-	#（与 GROUP 完全重叠的子节点 absoluteY 会多加 GROUP 的高度），
-	# 但这是 API 层面的问题，导出插件无法修复。
-	# 本节点是否为新的圆角裁剪边界（clipsContent+圆角>0+无旋转）；否则子继承本���点的裁剪祖先
-	var _self_is_anc = current_clips and current_corner > 0 and node.get("rotation", 0.0) == 0.0
-	var _anc_radius_c = float(current_corner) if _self_is_anc else float(node["_parent_corner_radius"])
-	var _anc_size_c = current_size if _self_is_anc else node["_parent_size"]
-	var _anc_base_c = Vector2.ZERO if _self_is_anc else node["_offset_in_parent"]
-	var current_pos = {
-		"abs_x": abs_x,
-		"abs_y": abs_y,
-		"corner_radius": current_corner,
-		"clips_content": current_clips,
-		"size": current_size,
-		"visible": node.get("visible", true),
-		"rotation": node.get("rotation", 0.0),
-		"clip_anc_radius": _anc_radius_c,
-		"clip_anc_size": _anc_size_c,
-		"clip_anc_base_offset": _anc_base_c,
-	}
-	for child in children:
-		_preprocess_parent_positions(child, current_pos, offset_x, offset_y, depth + 1, root_width, root_height)
+	# 序列化为 .tscn（header + ext/sub_resource + 节点）
+	return _writer.serialize()
 
 func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	var node_type = node.get("type", "")
-	var raw_name = _sanitize_name(node.get("name", "Unnamed"))
-	var node_name = _get_unique_name(raw_name, parent_path)
+	var raw_name = FigmaImporterUtils._sanitize_name(node.get("name", "Unnamed"))
+	var node_name = _writer.unique_name(raw_name, parent_path)
 	var node_id = node.get("id", "")
 	var corner_radius = node.get("cornerRadius", 0)
 	var tl = int(node.get("topLeftRadius", corner_radius))
@@ -788,8 +153,8 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	# 含 ELLIPSE/STAR/LINE/REGULAR_POLYGON：带阴影/GROUP坐标系时 SVG viewBox 留白不对称，
 	# 内容(球体)会偏离节点几何中心，必须统一走下方的"内容中心对齐"。
 	var _is_svg_vector = node_type in ["VECTOR", "BOOLEAN_OPERATION", "ELLIPSE", "STAR", "LINE", "REGULAR_POLYGON"]
-	if _is_svg_vector and _vector_size_cache.has(node_id):
-		var png_size: Vector2 = _vector_size_cache[node_id]
+	if _is_svg_vector and _assets.vector_size_cache().has(node_id):
+		var png_size: Vector2 = _assets.vector_size_cache()[node_id]
 		if png_size.x > 0 and png_size.y > 0:
 			var content_w = png_size.x / 3.0
 			var content_h = png_size.y / 3.0
@@ -819,23 +184,18 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		# 根节点圆角
 		var root_corner = node.get("cornerRadius", 0)
 		if root_corner > 0:
-			var style_id = _next_resource_id()
-			_sub_resources.append({
-				"id": style_id,
-				"type": "StyleBoxFlat",
-				"properties": {
-					"bg_color": "Color(0, 0, 0, 0.01)",
-					"corner_radius_top_left": int(root_corner),
-					"corner_radius_top_right": int(root_corner),
-					"corner_radius_bottom_right": int(root_corner),
-					"corner_radius_bottom_left": int(root_corner),
-				}
+			var style_id = _writer.add_sub_resource("StyleBoxFlat", {
+				"bg_color": "Color(0, 0, 0, 0.01)",
+				"corner_radius_top_left": int(root_corner),
+				"corner_radius_top_right": int(root_corner),
+				"corner_radius_bottom_right": int(root_corner),
+				"corner_radius_bottom_left": int(root_corner),
 			})
 			properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
 			properties["clip_contents"] = true
 	else:
 		# 子节点：相对父节点的坐标
-		if _is_svg_vector and _vector_size_cache.has(node_id):
+		if _is_svg_vector and _assets.vector_size_cache().has(node_id):
 			# PNG(SVG 栅格化)已烘焙旋转+翻转(矢量→位图，含描边)，Godot 不再设 rotation。
 			# 几何中心 C = 本地原点(x,y) + M·(原始w/2,原始h/2)，M 取自完整 relativeTransform 线性部分。
 			# 翻转是反射(det<0)，rotation 标量(atan2)无法与纯旋转区分，故必须用矩阵；无矩阵时回退 rotation。
@@ -856,8 +216,8 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			# PNG 内容中心(像素÷3)对齐 C，而非 PNG 画布中心，修正 viewBox 留白不对称的内容偏移
 			var _ccx = width / 2.0
 			var _ccy = height / 2.0
-			if _vector_content_center_cache.has(node_id):
-				var _cc = _vector_content_center_cache[node_id]
+			if _assets.vector_content_center_cache().has(node_id):
+				var _cc = _assets.vector_content_center_cache()[node_id]
 				_ccx = _cc.x / 3.0
 				_ccy = _cc.y / 3.0
 			properties["offset_left"] = _cx - _ccx
@@ -889,8 +249,8 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	if not node.get("visible", true):
 		properties["visible"] = false
 
-	# 处理纯黑色 VECTOR 节点：设为隐藏（Figma 中不可见，导出后不应显示）
-	if (node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION") and _is_solid_black_fill(node):
+	# 处理纯黑色 VECTOR 节��：设为隐藏（Figma 中不可见，导出后不应显示）
+	if (node_type == "VECTOR" or node_type == "BOOLEAN_OPERATION") and FigmaImporterUtils._is_solid_black_fill(node):
 		properties["visible"] = false
 
 	# 处理透明度
@@ -928,51 +288,43 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var parent_clips = node.get("_parent_clips_content", false)
 		if (not node.get("_bitmap_corner_baked", false) and shader_radius > 0 and (parent_clips or (effective_radius > 0 and not node.get("_effects_baked_in_texture", false)))) or (node.has("_shadow_data") and not node.get("_effects_baked_in_texture", false)):
 			# 使用父节点大小作为目标大小（裁剪区域）
-			
-			
-			var shader_id = _next_resource_id()
-			_sub_resources.append({
-				"id": shader_id,
-				"type": "ShaderMaterial",
-				"properties": {
-					"shader": 'ExtResource("shader_rounded")',
-					"shader_parameter/corner_radius": shader_radius,
-					"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
-					"shader_parameter/parent_corner_radius": 0.0,
-					"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
-					"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
-					"shader_parameter/use_texture": true,
-				}
+
+
+			var shader_id = _writer.add_sub_resource("ShaderMaterial", {
+				"shader": 'ExtResource("shader_rounded")',
+				"shader_parameter/corner_radius": shader_radius,
+				"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
+				"shader_parameter/parent_corner_radius": 0.0,
+				"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
+				"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
+				"shader_parameter/use_texture": true,
 			})
 			properties["material"] = 'SubResource("%d")' % shader_id
 			# 保持节点自身的大小，不改变尺寸
 			if node.has("_shadow_data"):
 				var _sd = node["_shadow_data"]
-				_sub_resources[-1]["properties"]["shader_parameter/use_shadow"] = true
-				_sub_resources[-1]["properties"]["shader_parameter/shadow_color"] = _sd["color"]
-				_sub_resources[-1]["properties"]["shader_parameter/shadow_size"] = _sd["size"]
-				_sub_resources[-1]["properties"]["shader_parameter/shadow_offset"] = _sd["offset"]
+				# 刚 add_sub_resource 返回的 id 对应 sub_resources 末元素（引用，原地改写）
+				var _sr = _writer.get_sub_resources()[-1]
+				_sr["properties"]["shader_parameter/use_shadow"] = true
+				_sr["properties"]["shader_parameter/shadow_color"] = _sd["color"]
+				_sr["properties"]["shader_parameter/shadow_size"] = _sd["size"]
+				_sr["properties"]["shader_parameter/shadow_offset"] = _sd["offset"]
 		# TextureRect 也可以有荧光效果（如 ring 矢量图）
 		elif node.has("_glow_data"):
 			var gd2 = node["_glow_data"]
-			var shader_id = _next_resource_id()
-			_sub_resources.append({
-				"id": shader_id,
-				"type": "ShaderMaterial",
-				"properties": {
-					"shader": 'ExtResource("shader_rounded")',
-					"shader_parameter/corner_radius": 0.0,
-					"shader_parameter/corner_radiuses": "Vector4(0.0, 0.0, 0.0, 0.0)",
-					"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
-					"shader_parameter/parent_corner_radius": 0.0,
-					"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
-					"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
-					"shader_parameter/use_texture": true,
-					"shader_parameter/use_glow": true,
-					"shader_parameter/glow_color": gd2["color"],
-					"shader_parameter/glow_radius": gd2["radius"],
-					"shader_parameter/glow_intensity": gd2["intensity"],
-				}
+			var shader_id = _writer.add_sub_resource("ShaderMaterial", {
+				"shader": 'ExtResource("shader_rounded")',
+				"shader_parameter/corner_radius": 0.0,
+				"shader_parameter/corner_radiuses": "Vector4(0.0, 0.0, 0.0, 0.0)",
+				"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
+				"shader_parameter/parent_corner_radius": 0.0,
+				"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
+				"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
+				"shader_parameter/use_texture": true,
+				"shader_parameter/use_glow": true,
+				"shader_parameter/glow_color": gd2["color"],
+				"shader_parameter/glow_radius": gd2["radius"],
+				"shader_parameter/glow_intensity": gd2["intensity"],
 			})
 			properties["material"] = 'SubResource("%d")' % shader_id
 	elif properties.has("theme_override_styles/panel"):
@@ -1028,12 +380,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				panel_shader_props["shader_parameter/inner_shadow_color"] = isd["color"]
 				panel_shader_props["shader_parameter/inner_shadow_blur"] = isd["blur"]
 				panel_shader_props["shader_parameter/inner_shadow_offset"] = isd["offset"]
-			var panel_shader_id = _next_resource_id()
-			_sub_resources.append({
-				"id": panel_shader_id,
-				"type": "ShaderMaterial",
-				"properties": panel_shader_props,
-			})
+			var panel_shader_id = _writer.add_sub_resource("ShaderMaterial", panel_shader_props)
 			properties["material"] = 'SubResource("%d")' % panel_shader_id
 
 	# 处理文本
@@ -1062,7 +409,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		elif value is bool:
 			node_def += "%s = %s\n" % [key, "true" if value else "false"]
 
-	_nodes.append(node_def)
+	_writer.add_node_line(node_def)
 
 	# 递归处理子节点
 	var current_path: String
@@ -1100,7 +447,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 		for fill in fills:
 			match fill.get("type"):
 				"SOLID":
-					var color = _figma_color_to_godot(fill.get("color", {}))
+					var color = FigmaImporterUtils._figma_color_to_godot(fill.get("color", {}))
 					var style_id = _create_flat_style_ex(color, int(tl), int(tr), int(bl), int(br))
 					properties["theme_override_styles/panel"] = 'SubResource("%d")' % style_id
 
@@ -1151,24 +498,14 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 
 				"IMAGE":
 					var ref = fill.get("imageRef", "")
-					if ref and _image_cache.has(ref):
-						var res_id = _next_resource_id()
-						_ext_resources.append({
-							"id": res_id,
-							"type": "Texture2D",
-							"path": _image_cache[ref]
-						})
+					if ref and _assets.image_cache().has(ref):
+						var res_id = _writer.add_ext_resource("Texture2D", _assets.image_cache()[ref])
 						properties["texture"] = 'ExtResource("%d")' % res_id
 
 	# 处理矢量（TEXT 跳过：保持 Label；mask 跳过：Figma 中 mask 只裁剪、自身填充不渲染，
 	# 保持透明 Control 做裁剪容器，不赋 texture 以免被盖成 TextureRect 显示不存在的填充）
-	if not is_text and _vector_cache.has(node_id) and not node.get("_is_mask_clip", false):
-		var res_id = _next_resource_id()
-		_ext_resources.append({
-			"id": res_id,
-			"type": "Texture2D",
-			"path": _vector_cache[node_id]
-		})
+	if not is_text and _assets.vector_cache().has(node_id) and not node.get("_is_mask_clip", false):
+		var res_id = _writer.add_ext_resource("Texture2D", _assets.vector_cache()[node_id])
 		properties["texture"] = 'ExtResource("%d")' % res_id
 		properties["expand_mode"] = 1  # IGNORE_SIZE
 		# 细线型 Vector（只有 strokes 没有 fills，高度很小）使用 STRETCH，
@@ -1187,11 +524,11 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 	if not is_text and not strokes.is_empty() and stroke_weight > 0:
 		for stroke in strokes:
 			if stroke.get("type") == "SOLID":
-				var stroke_color = _figma_color_to_godot(stroke.get("color", {}))
+				var stroke_color = FigmaImporterUtils._figma_color_to_godot(stroke.get("color", {}))
 				var border_w = stroke_weight if stroke_weight >= 0.5 else 1
 				# 存储描边数据供 shader 使用
 				node["_stroke_data"] = {"color": stroke_color, "width": border_w}
-				# VECTOR 类型已有纹理，不需要 panel 样式
+				# VECTOR ��型已有纹理，不需要 panel 样式
 				if node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION" and not properties.has("theme_override_styles/panel"):
 					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
 
@@ -1221,12 +558,12 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 							"intensity": clampf(color.get("a", 1.0) * 2.0, 0.0, 1.0),
 						}
 				else:
-					# 普通投影：合并进节点 panel StyleBoxFlat（见 _apply_drop_shadow）
+					# 普通投影：合并进节点 panel StyleBoxFlat（见 _apply_drop_shadow��
 					_apply_drop_shadow(effect, properties)
 					has_drop_shadow = true
 					var _sc = effect.get("color", {})
 					node["_shadow_data"] = {
-						"color": _figma_color_to_godot(_sc),
+						"color": FigmaImporterUtils._figma_color_to_godot(_sc),
 						"size": effect.get("radius", 0),
 						"offset": "Vector2(%f, %f)" % [ox, oy],
 					}
@@ -1234,7 +571,7 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				var ic = effect.get("color", {})
 				var io = effect.get("offset", {})
 				node["_inner_shadow_data"] = {
-					"color": _figma_color_to_godot(ic),
+					"color": FigmaImporterUtils._figma_color_to_godot(ic),
 					"blur": effect.get("radius", 0),
 					"offset": "Vector2(%f, %f)" % [io.get("x", 0), io.get("y", 0)],
 				}
@@ -1248,19 +585,13 @@ func _create_flat_style(color: String, corner_radius: int) -> int:
 	return _create_flat_style_ex(color, corner_radius, corner_radius, corner_radius, corner_radius)
 
 func _create_flat_style_ex(color: String, tl: int, tr: int, bl: int, br: int) -> int:
-	var res_id = _next_resource_id()
-	_sub_resources.append({
-		"id": res_id,
-		"type": "StyleBoxFlat",
-		"properties": {
-			"bg_color": color,
-			"corner_radius_top_left": tl,
-			"corner_radius_top_right": tr,
-			"corner_radius_bottom_left": bl,
-			"corner_radius_bottom_right": br,
-		}
+	return _writer.add_sub_resource("StyleBoxFlat", {
+		"bg_color": color,
+		"corner_radius_top_left": tl,
+		"corner_radius_top_right": tr,
+		"corner_radius_bottom_left": bl,
+		"corner_radius_bottom_right": br,
 	})
-	return res_id
 
 func _create_gradient_style(fill: Dictionary, corner_radius: int) -> int:
 	return _create_gradient_style_ex(fill, corner_radius, corner_radius, corner_radius, corner_radius)
@@ -1280,41 +611,30 @@ func _create_gradient_style_ex(fill: Dictionary, tl: int, tr: int, bl: int, br: 
 			best_alpha = a
 			best_color = c
 
-	var style_id = _next_resource_id()
-	_sub_resources.append({
-		"id": style_id,
-		"type": "StyleBoxFlat",
-		"properties": {
-			"bg_color": _figma_color_to_godot(best_color),
-			"corner_radius_top_left": tl,
-			"corner_radius_top_right": tr,
-			"corner_radius_bottom_left": bl,
-			"corner_radius_bottom_right": br,
-		}
+	return _writer.add_sub_resource("StyleBoxFlat", {
+		"bg_color": FigmaImporterUtils._figma_color_to_godot(best_color),
+		"corner_radius_top_left": tl,
+		"corner_radius_top_right": tr,
+		"corner_radius_bottom_left": bl,
+		"corner_radius_bottom_right": br,
 	})
-	return style_id
 
 func _create_border_style(color: String, width, corner_radius) -> String:
 	return _create_border_style_ex(color, width, corner_radius, corner_radius, corner_radius, corner_radius)
 
 func _create_border_style_ex(color: String, width, tl: int, tr: int, bl: int, br: int) -> String:
 	var w = max(1, int(ceil(width)))
-	var res_id = _next_resource_id()
-	_sub_resources.append({
-		"id": res_id,
-		"type": "StyleBoxFlat",
-		"properties": {
-			"bg_color": "Color(0, 0, 0, 0)",
-			"border_width_left": w,
-			"border_width_right": w,
-			"border_width_top": w,
-			"border_width_bottom": w,
-			"border_color": color,
-			"corner_radius_top_left": tl,
-			"corner_radius_top_right": tr,
-			"corner_radius_bottom_left": bl,
-			"corner_radius_bottom_right": br,
-		}
+	var res_id = _writer.add_sub_resource("StyleBoxFlat", {
+		"bg_color": "Color(0, 0, 0, 0)",
+		"border_width_left": w,
+		"border_width_right": w,
+		"border_width_top": w,
+		"border_width_bottom": w,
+		"border_color": color,
+		"corner_radius_top_left": tl,
+		"corner_radius_top_right": tr,
+		"corner_radius_bottom_left": bl,
+		"corner_radius_bottom_right": br,
 	})
 	return 'SubResource("%d")' % res_id
 
@@ -1325,25 +645,17 @@ func _apply_drop_shadow(effect: Dictionary, properties: Dictionary) -> void:
 	# 若节点没有 panel 样式（纯 TextureRect/Label），则无法应用，跳过。
 	if not properties.has("theme_override_styles/panel"):
 		return
-	var style_id := _extract_sub_resource_id(str(properties["theme_override_styles/panel"]))
+	var style_id := FigmaImporterUtils._extract_sub_resource_id(str(properties["theme_override_styles/panel"]))
 	if style_id < 0:
 		return
-	for res in _sub_resources:
+	# get_sub_resources 返回内部数组引用，res 是其元素(Dictionary 引用)，原地改写生效
+	for res in _writer.get_sub_resources():
 		if int(res["id"]) == style_id:
 			var offset = effect.get("offset", {})
-			res["properties"]["shadow_color"] = _figma_color_to_godot(effect.get("color", {}))
+			res["properties"]["shadow_color"] = FigmaImporterUtils._figma_color_to_godot(effect.get("color", {}))
 			res["properties"]["shadow_size"] = effect.get("radius", 0)
 			res["properties"]["shadow_offset"] = "Vector2(%f, %f)" % [offset.get("x", 0), offset.get("y", 0)]
 			return
-
-func _extract_sub_resource_id(s: String) -> int:
-	# 从 'SubResource("5")' 形式的字符串中解析出资源 id
-	var regex = RegEx.new()
-	regex.compile('SubResource\\("(-?\\d+)"\\)')
-	var m = regex.search(s)
-	if m:
-		return int(m.get_string(1))
-	return -1
 
 func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var characters = node.get("characters", "")
@@ -1365,20 +677,15 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var font_weight = style.get("fontWeight", "")
 	if font_family and font_weight:
 		var font_key = "%s_%s" % [font_family, font_weight]
-		if _font_cache.has(font_key):
-			var font_path = _font_cache[font_key]
-			var res_id = _next_resource_id()
-			_ext_resources.append({
-				"id": res_id,
-				"type": "FontFile",
-				"path": font_path
-			})
+		if _fonts.lookup(font_key) != "":
+			var font_path = _fonts.lookup(font_key)
+			var res_id = _writer.add_ext_resource("FontFile", font_path)
 			properties["theme_override_fonts/font"] = 'ExtResource("%d")' % res_id
 
 	# 文本颜色（fills 中第一个 SOLID 填充）
 	for fill in node.get("fills", []):
 		if fill.get("type") == "SOLID":
-			var color = _figma_color_to_godot(fill.get("color", {}))
+			var color = FigmaImporterUtils._figma_color_to_godot(fill.get("color", {}))
 			properties["theme_override_colors/font_color"] = color
 			break
 
@@ -1459,8 +766,8 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 
 	# 尝试加载字体获取精确 ascent+descent
 	var _font_key = "%s_%s" % [font_family, font_weight]
-	if _font_cache.has(_font_key):
-		var _font_res_path = _font_cache[_font_key]
+	if _fonts.lookup(_font_key) != "":
+		var _font_res_path = _fonts.lookup(_font_key)
 		var _abs_path = ProjectSettings.globalize_path(_font_res_path)
 		if FileAccess.file_exists(_abs_path):
 			var _f = FileAccess.open(_abs_path, FileAccess.READ)
@@ -1487,123 +794,3 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 			properties["clip_text"] = true
 			properties["text_overrun"] = 3  # ELLipsis
 		# WIDTH_AND_HEIGHT / HEIGHT / NONE: offset 已修正，保持不变
-
-func _figma_color_to_godot(color: Dictionary) -> String:
-	var r = color.get("r", 0.0)
-	var g = color.get("g", 0.0)
-	var b = color.get("b", 0.0)
-	var a = color.get("a", 1.0)
-	return "Color(%f, %f, %f, %f)" % [r, g, b, a]
-
-func _next_resource_id() -> int:
-	_resource_id_counter += 1
-	return _resource_id_counter
-
-func _get_unique_name(name: String, parent_path: String) -> String:
-	var key = "%s/%s" % [parent_path, name]
-	if not _name_counter.has(key):
-		_name_counter[key] = 0
-		return name
-	_name_counter[key] += 1
-	return "%s_%d" % [name, _name_counter[key]]
-
-func _sanitize_name(name: String) -> String:
-	# Godot 节点名不允许 / . : [ ] 及空白；保留中文等 Unicode 字符（原实现会把中文全替成 _）
-	var regex = RegEx.new()
-	regex.compile("[/.\\[\\]\\s:]")
-	var result = regex.sub(name, "_", true)
-	return result if result.length() > 0 else "Node"
-
-func _format_sub_resource(res: Dictionary) -> String:
-	var content = '[sub_resource type="%s" id="%d"]\n' % [res["type"], res["id"]]
-	for key in res["properties"]:
-		content += "%s = %s\n" % [key, str(res["properties"][key])]
-	content += "\n"
-	return content
-
-func _is_solid_black_fill(node: Dictionary) -> bool:
-	# 检查节点是否只有纯黑色 SOLID 填充
-	var fills = node.get("fills", [])
-	if fills.size() != 1:
-		return false
-	var fill = fills[0]
-	if fill.get("type") != "SOLID":
-		return false
-	var color = fill.get("color", {})
-	var r = color.get("r", 0)
-	var g = color.get("g", 0)
-	var b = color.get("b", 0)
-	var a = color.get("a", 1)
-	# 检查是否为纯黑色（r=0, g=0, b=0, a=1）
-	return r == 0 and g == 0 and b == 0 and a == 1
-
-func _find_last_vector(nodes: Array) -> Dictionary:
-	# 递归查找最后一个 VECTOR 类型的节点（ring 总是排在 SVG 组最后）
-	var result = {}
-	for node in nodes:
-		if node.get("type", "") == "VECTOR":
-			result = node
-		var children = node.get("children", [])
-		if children.size() > 0:
-			var found = _find_last_vector(children)
-			if not found.is_empty():
-				result = found
-	return result
-
-# 取节点第一个 IMAGE 填充的 imageRef（位图填充 vector 判定）
-func _get_image_fill_ref(node: Dictionary) -> String:
-	var fills = node.get("fills", [])
-	if fills is Array:
-		for f in fills:
-			if f is Dictionary and f.get("type", "") == "IMAGE":
-				var ref = f.get("imageRef", "")
-				if ref != "":
-					return ref
-	return ""
-
-# 位图填充 vector：原始位图 + 圆角 alpha mask → PNG（Godot SVG 栅格化不支持 pattern+image 位图填充）
-func _rasterize_image_fill_vector(ref: String, out_png: String, width: float, height: float, corner: float) -> bool:
-	if not _image_cache.has(ref):
-		return false
-	var img := Image.new()
-	if img.load(_image_cache[ref]) != OK:
-		push_warning("[FigmaImporter] 位图填充加载失败: %s" % ref)
-		return false
-	img.convert(Image.FORMAT_RGBA8)
-	var SCALE := 3.0
-	var tw := int(round(width * SCALE))
-	var th := int(round(height * SCALE))
-	if tw < 1: tw = 1
-	if th < 1: th = 1
-	img.resize(tw, th, Image.INTERPOLATE_LANCZOS)
-	if corner > 0.0:
-		var r := corner * SCALE
-		var hw := tw / 2.0
-		var hh := th / 2.0
-		var hx := hw - r
-		var hy := hh - r
-		if hx < 0.0: hx = 0.0
-		if hy < 0.0: hy = 0.0
-		var data := img.get_data()
-		var i := 0
-		for y in range(th):
-			var ay: float = abs(float(y) - hh)
-			var qy: float = ay - hy
-			if qy < 0.0: qy = 0.0
-			for x in range(tw):
-				var ax: float = abs(float(x) - hw)
-				var qx: float = ax - hx
-				if qx < 0.0: qx = 0.0
-				var dist := sqrt(qx * qx + qy * qy) - r
-				var cov := 0.5 - dist
-				if cov <= 0.0:
-					data[i + 3] = 0
-				elif cov < 1.0:
-					var na := int(round(data[i + 3] * cov))
-					if na < 0: na = 0
-					elif na > 255: na = 255
-					data[i + 3] = na
-				i += 4
-		img = Image.create_from_data(tw, th, false, Image.FORMAT_RGBA8, data)
-	img.save_png(out_png)
-	return true

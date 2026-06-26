@@ -664,14 +664,17 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	node["_rel_x"] = abs_x - _p_abs_x
 	node["_rel_y"] = abs_y - _p_abs_y
 
-	# 存储父节点的裁剪信息和尺寸
-	var parent_clips = parent_pos.get("clips_content", false)
-	var parent_corner = parent_pos.get("corner_radius", 0)
-	node["_parent_clips_content"] = parent_clips
-	node["_parent_corner_radius"] = parent_corner if (parent_clips and parent_pos.get("rotation", 0.0) == 0.0) else 0
-	node["_parent_size"] = parent_pos.get("size", Vector2.ZERO)
-	# 记录节点在父节点中的偏移（用于 shader 中父节点圆角裁剪）
-	node["_offset_in_parent"] = Vector2(abs_x - _p_abs_x, abs_y - _p_abs_y)
+	# 直接父是否 clipsContent（矩形裁边界判断，保留原语义）
+	node["_parent_clips_content"] = parent_pos.get("clips_content", false)
+	# 圆角裁剪祖先：沿树向上最近的 clipsContent+圆角>0 祖先（跳过无圆角中间层）。
+	# Figma clipsContent+cornerRadius 按圆角形状裁所有后代；Godot clip_contents 仅矩形裁，
+	# 故后代用 shader 的 parent_corner_radius 自我裁剪到祖先圆角（如工具栏贴 HMI 圆角边）。
+	# clip_anc_base_offset = 父相对(父的裁剪祖先)的偏移；本节点相对裁剪祖先 = _rel + base_offset。
+	var _anc_radius = parent_pos.get("clip_anc_radius", 0)
+	var _anc_base = parent_pos.get("clip_anc_base_offset", Vector2.ZERO)
+	node["_parent_corner_radius"] = _anc_radius
+	node["_parent_size"] = parent_pos.get("clip_anc_size", Vector2.ZERO)
+	node["_offset_in_parent"] = Vector2(node["_rel_x"], node["_rel_y"]) + _anc_base
 
 	# 处理 auto-layout 负间距：重新计算子节点位置，避免重叠
 	# Figma 导出的 x/y 已包含 itemSpacing 效果，负间距会导致子节点重叠
@@ -735,6 +738,11 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 	# 注意：Figma Plugin API 对 GROUP 内子节点的 absoluteY 有已知 bug
 	#（与 GROUP 完全重叠的子节点 absoluteY 会多加 GROUP 的高度），
 	# 但这是 API 层面的问题，导出插件无法修复。
+	# 本节点是否为新的圆角裁剪边界（clipsContent+圆角>0+无旋转）；否则子继承本���点的裁剪祖先
+	var _self_is_anc = current_clips and current_corner > 0 and node.get("rotation", 0.0) == 0.0
+	var _anc_radius_c = float(current_corner) if _self_is_anc else float(node["_parent_corner_radius"])
+	var _anc_size_c = current_size if _self_is_anc else node["_parent_size"]
+	var _anc_base_c = Vector2.ZERO if _self_is_anc else node["_offset_in_parent"]
 	var current_pos = {
 		"abs_x": abs_x,
 		"abs_y": abs_y,
@@ -742,7 +750,10 @@ func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionary, offs
 		"clips_content": current_clips,
 		"size": current_size,
 		"visible": node.get("visible", true),
-		"rotation": node.get("rotation", 0.0)
+		"rotation": node.get("rotation", 0.0),
+		"clip_anc_radius": _anc_radius_c,
+		"clip_anc_size": _anc_size_c,
+		"clip_anc_base_offset": _anc_base_c,
 	}
 	for child in children:
 		_preprocess_parent_positions(child, current_pos, offset_x, offset_y, depth + 1, root_width, root_height)

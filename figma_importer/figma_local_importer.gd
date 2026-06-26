@@ -230,13 +230,25 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			#   offset_top  = y - (w/2)sinθ + (h/2)(cosθ-1)
 			var _erot = node.get("rotation", 0.0)
 			if _erot != 0.0:
-				var _th = deg_to_rad(_erot)
-				var _cs = cos(_th)
-				var _sn = sin(_th)
 				var _hw = width / 2.0
 				var _hh = height / 2.0
-				properties["offset_left"] = x + _hw * (_cs - 1.0) + _hh * _sn
-				properties["offset_top"] = y - _hw * _sn + _hh * (_cs - 1.0)
+				var _cx: float
+				var _cy: float
+				if node.has("relativeTransform") and node["relativeTransform"] != null:
+					# 几何中心相对父 = 左上相对父(x,y=_rel) + M·(hw,hh)。M 取自 relativeTransform
+					# 线性部分(含旋转+反射)；_rel=子origin-父absX 已含父 GROUP 包围盒补偿，故直接用 x,y。
+					# 标量 cos/sin 假设纯旋转，对反射(det<0) b 符号反 → 必须用矩阵 M。
+					var _m = node["relativeTransform"]
+					var _r0 = _m[0]
+					var _r1 = _m[1]
+					_cx = x + float(_r0[0]) * _hw + float(_r0[1]) * _hh
+					_cy = y + float(_r1[0]) * _hw + float(_r1[1]) * _hh
+				else:
+					var _th = deg_to_rad(_erot)
+					_cx = x + _hw * cos(_th) + _hh * sin(_th)
+					_cy = y - _hw * sin(_th) + _hh * cos(_th)
+				properties["offset_left"] = _cx - _hw
+				properties["offset_top"] = _cy - _hh
 				properties["offset_right"] = properties["offset_left"] + width
 				properties["offset_bottom"] = properties["offset_top"] + height
 			else:
@@ -267,7 +279,20 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	var rot = node.get("rotation", 0.0)
 	if rot != 0.0 and node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION":
 		properties["pivot_offset"] = "Vector2(%f, %f)" % [width / 2.0, height / 2.0]
-		properties["rotation"] = -deg_to_rad(rot)
+		# 检测反射(det<0)：Figma "旋转"可含翻转，M=[[-cosφ,sinφ],[sinφ,cosφ]] det=-1。
+		# Godot 用 scale.x=-1 表翻转，rotation 仅存纯旋转角(-atan2(c,d))；det>0 直接 -deg_to_rad。
+		# 仅非 GROUP 叶子：GROUP 是逻辑容器，反射由子节点各自体现；在 GROUP 上设 scale 会与
+		# 子节点双重翻转。GROUP 保持 rotation=-deg_to_rad(原行为，不在此处理反射)。
+		if node_type != "GROUP" and node.has("relativeTransform") and node["relativeTransform"] != null:
+			var _rt = node["relativeTransform"]
+			var _det = float(_rt[0][0]) * float(_rt[1][1]) - float(_rt[0][1]) * float(_rt[1][0])
+			if _det < 0:
+				properties["scale"] = "Vector2(-1, 1)"
+				properties["rotation"] = -atan2(float(_rt[1][0]), float(_rt[1][1]))
+			else:
+				properties["rotation"] = -deg_to_rad(rot)
+		else:
+			properties["rotation"] = -deg_to_rad(rot)
 
 	# 处理样式
 	_apply_styles(node, properties, node_id)

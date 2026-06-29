@@ -31,6 +31,7 @@ var _fonts := FigmaFontLoader.new()
 func import_from_file(json_path: String, output_path: String) -> Error:
 	# 读取 JSON 文件
 	progress_changed.emit("读取文件...", 0.1)
+	await RenderingServer.frame_post_draw
 	var file = FileAccess.open(json_path, FileAccess.READ)
 	if not file:
 		push_error("无法打开文件: %s" % json_path)
@@ -41,6 +42,7 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 
 	# 解析 JSON
 	progress_changed.emit("解析 JSON...", 0.2)
+	await RenderingServer.frame_post_draw
 	var json = JSON.new()
 	var error = json.parse(json_text)
 	if error != OK:
@@ -54,6 +56,7 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 
 	# 提取资源（根据输出路径生成对应的资源目录）
 	progress_changed.emit("提取资源...", 0.3)
+	await RenderingServer.frame_post_draw
 	var scene_name = output_path.get_file().get_basename()
 	# 去掉末尾的数字后缀，统一用 figma_export_assets
 	var base_name = scene_name.rstrip("0123456789")
@@ -66,12 +69,14 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 
 	# 查找字体资源
 	progress_changed.emit("查找字体...", 0.5)
+	await RenderingServer.frame_post_draw
 	var fonts = data.get("fonts", {})
 	if not fonts.is_empty():
 		_fonts.find_fonts(fonts, assets_dir)
-
+	
 	# 生成场景
 	progress_changed.emit("生成场景...", 0.6)
+	await RenderingServer.frame_post_draw
 	var nodes = data.get("nodes", [])
 	if nodes.is_empty():
 		push_error("没有找到节点数据")
@@ -83,6 +88,7 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 
 	# 保存文件
 	progress_changed.emit("保存文件...", 0.9)
+	await RenderingServer.frame_post_draw
 	var dir = DirAccess.open("res://")
 	if dir:
 		var output_dir = output_path.get_base_dir()
@@ -98,6 +104,7 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 	out_file.close()
 
 	progress_changed.emit("导入完成！", 1.0)
+	await RenderingServer.frame_post_draw
 	return OK
 
 func _generate_scene(root_node: Dictionary) -> String:

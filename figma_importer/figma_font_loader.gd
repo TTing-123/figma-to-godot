@@ -61,7 +61,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	var _deadline := Time.get_ticks_msec() + 15000
+	var _deadline := Time.get_ticks_msec() + 3000
 	while http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -77,7 +77,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	_deadline = Time.get_ticks_msec() + 15000
+	_deadline = Time.get_ticks_msec() + 3000
 	while http.get_status() == HTTPClient.STATUS_REQUESTING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -87,7 +87,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	# 读取 CSS 响应
 	var response_body = PackedByteArray()
 	if http.has_response():
-		var _body_deadline := Time.get_ticks_msec() + 15000
+		var _body_deadline := Time.get_ticks_msec() + 3000
 		while http.get_status() == HTTPClient.STATUS_BODY:
 			if Time.get_ticks_msec() > _body_deadline:
 				return ""
@@ -119,7 +119,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	_deadline = Time.get_ticks_msec() + 15000
+	_deadline = Time.get_ticks_msec() + 3000
 	while font_http.get_status() == HTTPClient.STATUS_CONNECTING or font_http.get_status() == HTTPClient.STATUS_RESOLVING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -133,7 +133,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 	if err != OK:
 		return ""
 
-	_deadline = Time.get_ticks_msec() + 15000
+	_deadline = Time.get_ticks_msec() + 3000
 	while font_http.get_status() == HTTPClient.STATUS_REQUESTING:
 		if Time.get_ticks_msec() > _deadline:
 			return ""
@@ -142,7 +142,7 @@ func _download_font_from_google(family: String, style: String, target_dir: Strin
 
 	var font_data = PackedByteArray()
 	if font_http.has_response():
-		var _body_deadline := Time.get_ticks_msec() + 15000
+		var _body_deadline := Time.get_ticks_msec() + 3000
 		while font_http.get_status() == HTTPClient.STATUS_BODY:
 			if Time.get_ticks_msec() > _body_deadline:
 				push_warning("[FigmaImporter] 字体文件下载超时")

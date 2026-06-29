@@ -73,7 +73,9 @@ func extract(data: Dictionary, assets_dir: String) -> void:
 		# 改用原始位图 + 圆角 alpha mask 生成 PNG（保留圆角，下游 texture/size/位置复用 vector 路径）。
 		var _n: Dictionary = _node_by_id.get(node_id, {})
 		var _iref = FigmaImporterUtils._get_image_fill_ref(_n)
-		if _iref != "" and _image_cache.has(_iref):
+		# 位图填充且导出端已烘焙 PNG(含形状+描边+阴影)时跳过此重建，交由下方 PNG 分支用烘焙结果；
+		# 否则只用原始位图+圆角 mask 会丢矢量形状(如六边形切角)与描边。
+		if _iref != "" and _image_cache.has(_iref) and not svg_text.begins_with("PNG:"):
 			var _vw = float(_n.get("width", 0.0))
 			var _vh = float(_n.get("height", 0.0))
 			var _vcr = float(_n.get("cornerRadius", 0))

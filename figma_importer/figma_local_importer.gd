@@ -84,7 +84,7 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 
 	# 使用第一个选中的节点作为根节点
 	var root_node = nodes[0]
-	var scene_content = _generate_scene(root_node)
+	var scene_content = _generate_scene(root_node, data.get("maskRenderBounds", {}))
 
 	# 保存文件
 	progress_changed.emit("保存文件...", 0.9)
@@ -107,7 +107,7 @@ func import_from_file(json_path: String, output_path: String) -> Error:
 	await RenderingServer.frame_post_draw
 	return OK
 
-func _generate_scene(root_node: Dictionary) -> String:
+func _generate_scene(root_node: Dictionary, mask_rb_map: Dictionary = {}) -> String:
 	_writer.reset()
 
 	# 计算所有节点的边界框
@@ -119,7 +119,8 @@ func _generate_scene(root_node: Dictionary) -> String:
 	var root_width = root_node.get("width", 0)
 	var root_height = root_node.get("height", 0)
 
-	# 重组 mask 蒙版：mask 吸收后续兄弟为子节点 + clipsContent，坐标由 abs 差值自动修正
+	# 挂载 mask renderBounds 到 mask 节点，再重组 mask 蒙版（mask 吸收后续兄弟 + clipsContent）
+	FigmaImporterUtils._attach_mask_render_bounds(root_node, mask_rb_map)
 	FigmaImporterUtils._apply_mask_groups(root_node)
 	# 预处理：计算每个节点的父节点绝对坐标
 	FigmaImporterUtils._preprocess_parent_positions(root_node, {}, offset_x, offset_y, 0, root_width, root_height)
@@ -318,7 +319,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 		var shader_radius = max(effective_radius, parent_radius)
 		# 只有父节点有clipsContent时才应用shader裁剪
 		var parent_clips = node.get("_parent_clips_content", false)
-		if (not node.get("_bitmap_corner_baked", false) and shader_radius > 0 and (parent_clips or (effective_radius > 0 and not node.get("_effects_baked_in_texture", false)))) or (node.has("_shadow_data") and not node.get("_effects_baked_in_texture", false)):
+		if (not node.get("_bitmap_corner_baked", false) and shader_radius > 0 and (parent_clips or (effective_radius > 0 and not node.get("_effects_baked_in_texture", false)))) or (node.has("_shadow_data") and not node.get("_effects_baked_in_texture", false)) or (node.has("_inner_shadow_data") and not node.get("_effects_baked_in_texture", false)):
 			# 使用父节点大小作为目标大小（裁剪区域）
 
 
@@ -332,6 +333,14 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				"shader_parameter/use_texture": true,
 			})
 			properties["material"] = 'SubResource("%d")' % shader_id
+			# 内阴影：material 已���建，叠加 inner shadow 参数（位于 322 shader 分支内，与外阴影独立）
+			if node.has("_inner_shadow_data"):
+				var _isd = node["_inner_shadow_data"]
+				var _isr = _writer.get_sub_resources()[-1]
+				_isr["properties"]["shader_parameter/use_inner_shadow"] = true
+				_isr["properties"]["shader_parameter/inner_shadow_color"] = _isd["color"]
+				_isr["properties"]["shader_parameter/inner_shadow_blur"] = _isd["blur"]
+				_isr["properties"]["shader_parameter/inner_shadow_offset"] = _isd["offset"]
 			# 保持节点自身的大小，不改变尺寸
 			if node.has("_shadow_data"):
 				var _sd = node["_shadow_data"]
@@ -359,6 +368,28 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				"shader_parameter/glow_intensity": gd2["intensity"],
 			})
 			properties["material"] = 'SubResource("%d")' % shader_id
+		# material 已创建：补图片填充模式 + 色彩调整 (Figma ImageFilters)，
+		# _texture_fill_mode/_image_filters 由 _apply_styles 的 IMAGE 分支暂存
+		if properties.has("material") and (node.has("_texture_fill_mode") or node.has("_image_filters")):
+			# shader 接管纹理映射(cover/contain/tile)且算 pixel_pos=UV*target_size，须 UV 严格 0..1 覆盖全 rect。
+			# CENTERED(5) 缩小居中→shader 困在缩小区；COVERED(6) 保持纹理比例，纹理比例≠rect 时 UV 偏离 0..1
+			# → pixel_pos 错位、mask 偏。SCALE(0) UV 严格 0..1 且绘制全 rect，shader 完全接管纹理映射。
+			properties["stretch_mode"] = 0  # SCALE
+			var _msr = _writer.get_sub_resources()[-1]
+			if node.has("_texture_fill_mode"):
+				_msr["properties"]["shader_parameter/texture_fill_mode"] = node["_texture_fill_mode"]
+				if node.has("_tile_scale"):
+					_msr["properties"]["shader_parameter/tile_scale"] = node["_tile_scale"]
+			var _flt = node.get("_image_filters", {})
+			if _flt is Dictionary and _flt.size() > 0:
+				_msr["properties"]["shader_parameter/use_image_adjust"] = true
+				_msr["properties"]["shader_parameter/img_exposure"] = float(_flt.get("exposure", 0.0))
+				_msr["properties"]["shader_parameter/img_contrast"] = float(_flt.get("contrast", 0.0))
+				_msr["properties"]["shader_parameter/img_saturation"] = float(_flt.get("saturation", 0.0))
+				_msr["properties"]["shader_parameter/img_temperature"] = float(_flt.get("temperature", 0.0))
+				_msr["properties"]["shader_parameter/img_tint"] = float(_flt.get("tint", 0.0))
+				_msr["properties"]["shader_parameter/img_highlights"] = float(_flt.get("highlights", 0.0))
+				_msr["properties"]["shader_parameter/img_shadows"] = float(_flt.get("shadows", 0.0))
 	elif properties.has("theme_override_styles/panel"):
 		# 有样式（填充/描边）→ Panel
 		if godot_type == "Control":
@@ -418,6 +449,8 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	# 处理文本
 	if node_type == "TEXT":
 		_apply_text_properties(node, properties)
+	# mask alpha 蒙版（统一：TextureRect/Panel/Label 等任何被遮罩节点都挂 mask shader，覆盖整个子树）
+	_apply_mask_alpha(node, properties, width, height)
 
 	# 生成节点定义
 	var node_def: String
@@ -455,6 +488,68 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	if node_type != "BOOLEAN_OPERATION" or node.get("_is_mask_clip", false):
 		for child in node.get("children", []):
 			_process_node(child, current_path, depth + 1)
+
+# mask alpha 蒙版（Figma mask 不规则形状裁剪被遮罩节点）：给当前节点挂/叠加 rounded_rect shader 的 use_mask，
+# 用 mask 形状 PNG(renderBounds alpha)裁剪。mask_offset=mask renderBounds 左上 - 节点 absoluteXY（节点像素空间）。
+func _apply_mask_alpha(node: Dictionary, properties: Dictionary, width: float, height: float) -> void:
+	if not node.has("_mask_alpha"):
+		return
+	var _ma = node["_mask_alpha"]
+	var _mask_png = _assets.vector_cache().get(_ma.get("id", ""), "")
+	if _mask_png == "":
+		return
+	var _mtex_id = _writer.add_ext_resource("Texture2D", _mask_png)
+	var _msr: Dictionary
+	if properties.has("material"):
+		_msr = _writer.get_sub_resources()[-1]
+	else:
+		var _mid = _writer.add_sub_resource("ShaderMaterial", {
+			"shader": 'ExtResource("shader_rounded")',
+			"shader_parameter/corner_radius": 0.0,
+			"shader_parameter/corner_radiuses": "Vector4(0.0, 0.0, 0.0, 0.0)",
+			"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
+			"shader_parameter/parent_corner_radius": 0.0,
+			"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],
+			"shader_parameter/offset_in_parent": "Vector2(0.0, 0.0)",
+			"shader_parameter/use_texture": properties.has("texture"),
+		})
+		properties["material"] = 'SubResource("%d")' % _mid
+		_msr = _writer.get_sub_resources()[-1]
+		# 新建 mask material 且节点有纹理(TextureRect)：shader use_texture 接管纹理映射，TextureRect 须
+		# stretch_mode=0(SCALE)：UV 严格 0..1 覆盖全 rect，pixel_pos=UV*target_size 不被比例扭曲(COVERED=6 在
+		# 纹理比例≠rect 时 UV 偏→mask 错位)。并补 texture_fill_mode(FIT/FILL/TILE)，否则 shader 默认 cover。
+		if properties.has("texture"):
+			properties["stretch_mode"] = 0  # SCALE
+			if node.has("_texture_fill_mode"):
+				_msr["properties"]["shader_parameter/texture_fill_mode"] = node["_texture_fill_mode"]
+				if node.has("_tile_scale"):
+					_msr["properties"]["shader_parameter/tile_scale"] = node["_tile_scale"]
+	var _nx = float(node.get("absoluteX", node.get("x", 0.0)))
+	var _ny = float(node.get("absoluteY", node.get("y", 0.0)))
+	var _dx = float(_ma.get("mx", 0.0)) - _nx
+	var _dy = float(_ma.get("my", 0.0)) - _ny
+	var _mhw = float(_ma.get("mw", 0.0)) * 0.5
+	var _mhh = float(_ma.get("mh", 0.0)) * 0.5
+	# shader pixel_pos 是 Control 本地坐标(原点=本地(0,0)=absoluteXY 画布，本地轴随 Godot rotation 旋转)。
+	# mask 形状画布固定，节点旋转 → mask 在节点本地系是旋转的；圆形 mask 旋转对称，只需圆心对齐：
+	# mask_offset = R⁻¹·(mask圆心画布位移) - mask_size/2，R=[[cos,-sin],[sin,cos]](θ=properties rotation)。
+	# (非圆 mask 旋转仍需 shader 旋转采样，此处圆心对齐近似；非旋转节点退化为 (dx,dy)。) 反射(scale.x=-1)跳过。
+	var _cx = _dx + _mhw
+	var _cy = _dy + _mhh
+	var _lcx = _cx
+	var _lcy = _cy
+	if properties.get("rotation", 0.0) != 0.0 and not properties.has("scale"):
+		var _th = float(properties["rotation"])
+		var _c = cos(_th)
+		var _s = sin(_th)
+		_lcx = _c * _cx + _s * _cy
+		_lcy = -_s * _cx + _c * _cy
+	var _mox = _lcx - _mhw
+	var _moy = _lcy - _mhh
+	_msr["properties"]["shader_parameter/use_mask"] = true
+	_msr["properties"]["shader_parameter/mask_texture"] = 'ExtResource("%d")' % _mtex_id
+	_msr["properties"]["shader_parameter/mask_offset"] = "Vector2(%f, %f)" % [_mox, _moy]
+	_msr["properties"]["shader_parameter/mask_size"] = "Vector2(%f, %f)" % [float(_ma.get("mw", 0.0)), float(_ma.get("mh", 0.0))]
 
 func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) -> void:
 	var fills = node.get("fills", [])
@@ -533,6 +628,19 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 					if ref and _assets.image_cache().has(ref):
 						var res_id = _writer.add_ext_resource("Texture2D", _assets.image_cache()[ref])
 						properties["texture"] = 'ExtResource("%d")' % res_id
+						# 图片填充模式 + 色彩调整：material 在 _apply_styles 之后才创建，
+						# 此处先暂存到 node，待 TextureRect material 创建后再写入 shader_parameter
+						var _sm = fill.get("scaleMode", "FILL")
+						if _sm == "TILE":
+							node["_texture_fill_mode"] = 2
+							node["_tile_scale"] = float(fill.get("scalingFactor", 1.0))
+						elif _sm == "FIT":
+							node["_texture_fill_mode"] = 0
+						else:
+							node["_texture_fill_mode"] = 1
+						var _flt = fill.get("filters", {})
+						if _flt is Dictionary and _flt.size() > 0:
+							node["_image_filters"] = _flt
 
 	# 处理矢量（TEXT 跳过：保持 Label；mask 跳过：Figma 中 mask 只裁剪、自身填充不渲染，
 	# 保持透明 Control 做裁剪容器，不赋 texture 以免被盖成 TextureRect 显示不存在的填充）

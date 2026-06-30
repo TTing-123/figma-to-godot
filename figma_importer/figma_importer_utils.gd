@@ -226,12 +226,54 @@ static func _apply_mask_groups(node: Dictionary) -> void:
 			while j < children.size() and not (children[j] is Dictionary and children[j].get("isMask", false)):
 				masked.append(children[j])
 				j += 1
+			# mask 形状几何用 renderBounds(PNG 范围，含描边/效果外扩)：mask 节点已由 _attach_mask_render_bounds
+			# 挂 _mask_rb=[x,y,w,h](绝对画布坐标)。无 _mask_rb 时回退 bounding box。被遮罩节点各自在场景生成时
+			# 用自己的 absoluteX/Y 算 UV，故此处只存 mask 绝对几何，由 _propagate_mask_alpha 传到整个子树。
+			var _mid = c.get("id", "")
+			var _mrb = c.get("_mask_rb", null)
+			var _mx: float
+			var _my: float
+			var _mw: float
+			var _mh: float
+			if _mrb is Array and _mrb.size() >= 4:
+				_mx = float(_mrb[0])
+				_my = float(_mrb[1])
+				_mw = float(_mrb[2])
+				_mh = float(_mrb[3])
+			else:
+				_mx = float(c.get("absoluteX", c.get("x", 0.0)))
+				_my = float(c.get("absoluteY", c.get("y", 0.0)))
+				_mw = float(c.get("width", 0.0))
+				_mh = float(c.get("height", 0.0))
+			var _ma := {"id": _mid, "mx": _mx, "my": _my, "mw": _mw, "mh": _mh}
+			for _mc in masked:
+				if _mc is Dictionary and not _mc.get("_is_mask_clip", false):
+					_mc["_mask_alpha"] = _ma
+					_propagate_mask_alpha(_mc, _ma)
 			c["children"] = masked
 			i = j
 		else:
 			new_children.append(c)
 			i += 1
 	node["children"] = new_children
+
+# 把导出端的 maskRenderBounds(绝对坐标)挂到对应 mask 节点 _mask_rb，供 _apply_mask_groups 读取。
+static func _attach_mask_render_bounds(node: Dictionary, mask_rb_map: Dictionary) -> void:
+	if node.get("isMask", false) == true:
+		var _id = node.get("id", "")
+		if mask_rb_map.has(_id):
+			node["_mask_rb"] = mask_rb_map[_id]
+	for _c in node.get("children", []):
+		if _c is Dictionary:
+			_attach_mask_render_bounds(_c, mask_rb_map)
+
+# 递归传播 _mask_alpha 到被遮罩节点的整个子树（每个后代场景生成时用自己的绝对坐标算 UV）。
+# 遇到嵌套 mask 阻断：嵌套 mask 的子树由其自身 _apply_mask_groups 处理。
+static func _propagate_mask_alpha(node: Dictionary, mask_alpha: Dictionary) -> void:
+	for _c in node.get("children", []):
+		if _c is Dictionary and not _c.get("isMask", false) and not _c.has("_mask_alpha"):
+			_c["_mask_alpha"] = mask_alpha
+			_propagate_mask_alpha(_c, mask_alpha)
 
 # 预处理：计算每个节点相对父节点的坐标、圆角裁剪祖先、荧光传递等。注入 _rel_x/_rel_y/
 # _parent_corner_radius/_offset_in_parent/_glow_data 等下划线字段，供 _process_node 只读消费。

@@ -204,23 +204,25 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	else:
 		# 子节点：相对父节点的坐标
 		if _is_svg_vector and _assets.vector_size_cache().has(node_id):
-			# PNG(SVG 栅格化)已烘焙旋转+翻转(矢量→位图，含描边)，Godot 不再设 rotation。
-			# 几何中心 C = 本地原点(x,y) + M·(原始w/2,原始h/2)，M 取自完整 relativeTransform 线性部分。
-			# 翻转是反射(det<0)，rotation 标量(atan2)无法与纯旋转区分，故必须用矩阵；无矩阵时回退 rotation。
-			var _ow = node.get("width", 0.0)
-			var _oh = node.get("height", 0.0)
-			var _cx = x + _ow / 2.0
-			var _cy = y + _oh / 2.0
-			if node.has("relativeTransform") and node["relativeTransform"] != null:
+			# PNG(SVG 栅格化/烘焙)已烘焙旋转+翻转，Godot 不再设 rotation。
+			# 本体几何中心用导出端 absoluteBoundingBox.center(全局真实路径 bbox，含定义框内偏移)：
+			#   _cx = x + (absCx - node.absoluteX)，x=_rel 已含父 GROUP bbox 补偿。
+			# 数学：本地路径中心经 relativeTransform M 到父本地 = x + M·M⁻¹·(absC - absOrigin) = x+(absC-absOrigin)，
+			# M 抵消，对反射(det<0)同样成立。旧方案用 node/content 尺寸推算均错：反射 VECTOR node 尺寸是
+			# "定义框"≠路径 bbox，且路径在定义框内偏移每节点不同(2:704 路径10×9 在定义框10×15 内 y 偏移决定 _cy)。
+			var _cx: float = x + width / 2.0
+			var _cy: float = y + height / 2.0
+			if _assets.vector_body_abs_center_cache().has(node_id):
+				var _bac = _assets.vector_body_abs_center_cache()[node_id]
+				_cx = x + (_bac.x - node.get("absoluteX", x))
+				_cy = y + (_bac.y - node.get("absoluteY", y))
+			elif node.has("relativeTransform") and node["relativeTransform"] != null:
+				# 回退(无本体中心数据)：relativeTransform + content 尺寸(路径居中定义框假设，近似)
 				var _m = node["relativeTransform"]
 				var _r0 = _m[0]
 				var _r1 = _m[1]
-				_cx = x + float(_r0[0]) * (_ow / 2.0) + float(_r0[1]) * (_oh / 2.0)
-				_cy = y + float(_r1[0]) * (_ow / 2.0) + float(_r1[1]) * (_oh / 2.0)
-			else:
-				var _vth = deg_to_rad(node.get("rotation", 0.0))
-				_cx = x + (_ow / 2.0) * cos(_vth) + (_oh / 2.0) * sin(_vth)
-				_cy = y - (_ow / 2.0) * sin(_vth) + (_oh / 2.0) * cos(_vth)
+				_cx = x + float(_r0[0]) * (width / 2.0) + float(_r0[1]) * (height / 2.0)
+				_cy = y + float(_r1[0]) * (width / 2.0) + float(_r1[1]) * (height / 2.0)
 			# PNG 内容中心(像素÷3)对齐 C，而非 PNG 画布中心，修正 viewBox 留白不对称的内容偏移
 			var _ccx = width / 2.0
 			var _ccy = height / 2.0
@@ -285,7 +287,14 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 	# 处理旋转：Figma rotation 正=逆时针(视觉)，Godot rotation 正=顺时针，故取负。
 	# VECTOR/BOOLEAN_OPERATION 的 PNG 已烘焙旋转，不在此设 Godot rotation。
 	var rot = node.get("rotation", 0.0)
-	if rot != 0.0 and node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION":
+	# 反射 GROUP(det<0) 不设 Godot rotation：Figma GROUP 不引入坐标层，子的 relativeTransform 已
+	# 相对最近非 GROUP 祖先(含正确全局反射)；在 GROUP 上设 rotation=π 会把子节点错误 y 翻转。
+	var _skip_group_rot = false
+	if rot != 0.0 and node_type == "GROUP" and node.has("relativeTransform") and node["relativeTransform"] != null:
+		var _rt_g = node["relativeTransform"]
+		if float(_rt_g[0][0]) * float(_rt_g[1][1]) - float(_rt_g[0][1]) * float(_rt_g[1][0]) < 0:
+			_skip_group_rot = true
+	if rot != 0.0 and not _skip_group_rot and node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION":
 		properties["pivot_offset"] = "Vector2(%f, %f)" % [width / 2.0, height / 2.0]
 		# 检测反射(det<0)：Figma "旋转"可含翻转，M=[[-cosφ,sinφ],[sinφ,cosφ]] det=-1。
 		# Godot 用 scale.x=-1 表翻转，rotation 仅存纯旋转角(-atan2(c,d))；det>0 直接 -deg_to_rad。
@@ -300,7 +309,12 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			else:
 				properties["rotation"] = -deg_to_rad(rot)
 		else:
-			properties["rotation"] = -deg_to_rad(rot)
+			if rot == 0.0:
+				properties["rotation"] = 0.0
+			# 反射 GROUP(_skip_group_rot) 与 VECTOR/BOOLEAN_OPERATION 不设 Godot rotation：
+			# 前者子的 relativeTransform 已含全局反射，设 rotation=π 会绕 pivot(默认 0,0)翻转，
+			# 把子节点错误甩到上方/左侧(如 Group 5 rot=-180 -> 其下 Subtract 偏上)；
+			# 后者 SVG 路径 / PNG 纹理已烘焙反射，再设会二次旋转。
 
 	# 处理样式
 	_apply_styles(node, properties, node_id)

@@ -75,7 +75,7 @@ static func _scan_alpha_center(img: Image, threshold: int = 12):
 				if _cpy > _cmx_y: _cmx_y = _cpy
 			_ci += 4
 	if _cmx_x >= 0:
-		return Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
+		return Vector2((_cmn_x + _cmx_x + 1) / 2.0, (_cmn_y + _cmx_y + 1) / 2.0)  # +1: pixel-index (min+max)/2 is 0.5px less than geometric center (min+max+1)/2
 	return null
 
 # Figma 字重名 → Google Fonts wght 数字
@@ -309,8 +309,9 @@ static func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionar
 	#（FRAME 子节点的 x/y 是相对偏移，但 GROUP 子节点的 x/y = absoluteX/Y）
 	var _p_abs_x = parent_pos.get("abs_x", abs_x)
 	var _p_abs_y = parent_pos.get("abs_y", abs_y)
-	node["_rel_x"] = abs_x - _p_abs_x
-	node["_rel_y"] = abs_y - _p_abs_y
+	var _obo = parent_pos.get("origin_bbox_offset", Vector2.ZERO)
+	node["_rel_x"] = abs_x - _p_abs_x + _obo.x
+	node["_rel_y"] = abs_y - _p_abs_y + _obo.y
 
 	# 直接父是否 clipsContent（矩形裁边界判断，保留原语义）
 	node["_parent_clips_content"] = parent_pos.get("clips_content", false)
@@ -377,6 +378,16 @@ static func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionar
 	# 递归处理子节点
 	# 注意：在Figma中，Group不改变子节点的坐标系统，只有Frame/Component改变
 	var is_group = (node_type == "GROUP")
+	# 反射节点(det<0)的 origin 落在 bbox 外(x 反射在右、y 反射在下)。下游 _rel=子origin-父origin 是相对父 origin，
+	# 但 Godot offset 空间原点=父 bbox 左上；反射父须补偿 origin→bbox左上，否则反射 GROUP 的子节点整体偏
+	# -(反射轴尺寸)(如 Mask_Group 子偏 -父width)。
+	var _rt_self = node.get("relativeTransform", null)
+	var _origin_bbox = Vector2.ZERO
+	if _rt_self != null and float(_rt_self[0][0]) * float(_rt_self[1][1]) - float(_rt_self[0][1]) * float(_rt_self[1][0]) < 0:
+		if float(_rt_self[0][0]) < 0:
+			_origin_bbox.x = node.get("width", 0.0)
+		if float(_rt_self[1][1]) < 0:
+			_origin_bbox.y = node.get("height", 0.0)
 	var current_corner = node.get("cornerRadius", 0)
 	var current_clips = node.get("clipsContent", false)
 	var current_size = Vector2(node.get("width", 0), node.get("height", 0))
@@ -403,6 +414,7 @@ static func _preprocess_parent_positions(node: Dictionary, parent_pos: Dictionar
 		"clip_anc_radius": _anc_radius_c,
 		"clip_anc_size": _anc_size_c,
 		"clip_anc_base_offset": _anc_base_c,
+		"origin_bbox_offset": _origin_bbox,
 	}
 	for child in children:
 		FigmaImporterUtils._preprocess_parent_positions(child, current_pos, offset_x, offset_y, depth + 1, root_width, root_height)

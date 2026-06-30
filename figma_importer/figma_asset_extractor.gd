@@ -10,6 +10,7 @@ var _image_cache: Dictionary = {}
 var _vector_cache: Dictionary = {}
 var _vector_size_cache: Dictionary = {}
 var _vector_content_center_cache: Dictionary = {}  # 内容几何中心(像素)：修正 PNG 画布留白不对称
+var _vector_body_abs_center_cache: Dictionary = {}  # 矢量本体几何中心(全局=absoluteBoundingBox.center)
 
 func image_cache() -> Dictionary:
 	return _image_cache
@@ -22,6 +23,9 @@ func vector_size_cache() -> Dictionary:
 
 func vector_content_center_cache() -> Dictionary:
 	return _vector_content_center_cache
+
+func vector_body_abs_center_cache() -> Dictionary:
+	return _vector_body_abs_center_cache
 
 func extract(data: Dictionary, assets_dir: String) -> void:
 	# 使用传入的资源目录
@@ -48,6 +52,12 @@ func extract(data: Dictionary, assets_dir: String) -> void:
 	var vectors = data.get("vectors", {})
 	# 导出端矢量本体几何中心(PNG @3x 像素)：含阴影/模糊外扩矢量用于精确对齐本体，替代 alpha 扫描
 	var _body_centers = data.get("vectorBodyCenter", {})
+	# 矢量本体几何中心(全局绝对坐标)：导入端据此精确定位本体中心，替代 relativeTransform+尺寸推算
+	var _body_abs_centers = data.get("vectorBodyAbsCenter", {})
+	for _bid in _body_abs_centers:
+		var _bac = _body_abs_centers[_bid]
+		if _bac is Array and _bac.size() >= 2:
+			_vector_body_abs_center_cache[_bid] = Vector2(float(_bac[0]), float(_bac[1]))
 	# 建 node_id → node 查找表（位图填充分流需 fills/cornerRadius/width/height）
 	var _node_by_id: Dictionary = {}
 	var _stk: Array = []
@@ -119,7 +129,7 @@ func extract(data: Dictionary, assets_dir: String) -> void:
 			img.save_png(png_path)
 			_vector_cache[node_id] = png_path
 			_vector_size_cache[node_id] = Vector2(img.get_width(), img.get_height())
-			# 内容几何中心(像素)：用于修正 SVG viewBox 留白/描边不对称导致的内容偏移
+			# 内容几何中心(像素)：用于修正 SVG viewBox 留白/描边不对称导致的内容偏移; +1 修正: alpha bbox 像素索引中心 (min+max)/2 比几何中心 (min+max+1)/2 偏小 0.5px, 否则 offset_left 偏大→rect 框偏右→路径跟随偏
 			img.convert(Image.FORMAT_RGBA8)
 			var _cdata = img.get_data()
 			var _cw = img.get_width()
@@ -138,7 +148,7 @@ func extract(data: Dictionary, assets_dir: String) -> void:
 						if _cpy > _cmx_y: _cmx_y = _cpy
 					_ci += 4
 			if _cmx_x >= 0:
-				_vector_content_center_cache[node_id] = Vector2((_cmn_x + _cmx_x) / 2.0, (_cmn_y + _cmx_y) / 2.0)
+				_vector_content_center_cache[node_id] = Vector2((_cmn_x + _cmx_x + 1) / 2.0, (_cmn_y + _cmx_y + 1) / 2.0)
 		else:
 			push_warning("[FigmaImporter] SVG 栅格化失败: %s" % node_id)
 

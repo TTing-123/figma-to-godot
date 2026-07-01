@@ -393,7 +393,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			properties["material"] = 'SubResource("%d")' % shader_id
 		# material 已创建：补图片填充模式 + 色彩调整 (Figma ImageFilters)，
 		# _texture_fill_mode/_image_filters 由 _apply_styles 的 IMAGE 分支暂存
-		if properties.has("material") and (node.has("_texture_fill_mode") or node.has("_image_filters")):
+		if properties.has("material") and (node.has("_texture_fill_mode") or node.has("_image_filters") or node.has("_stroke_data")):
 			# shader 接管纹理映射(cover/contain/tile)且算 pixel_pos=UV*target_size，须 UV 严格 0..1 覆盖全 rect。
 			# CENTERED(5) 缩小居中→shader 困在缩小区；COVERED(6) 保持纹理比例，纹理比例≠rect 时 UV 偏离 0..1
 			# → pixel_pos 错位、mask 偏。SCALE(0) UV 严格 0..1 且绘制全 rect，shader 完全接管纹理映射。
@@ -413,6 +413,27 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 				_msr["properties"]["shader_parameter/img_tint"] = float(_flt.get("tint", 0.0))
 				_msr["properties"]["shader_parameter/img_highlights"] = float(_flt.get("highlights", 0.0))
 				_msr["properties"]["shader_parameter/img_shadows"] = float(_flt.get("shadows", 0.0))
+			# 描边写入 material（IMAGE-fill 节点无 panel，border 由 shader 渲染；含纯色与渐变）
+			if node.has("_stroke_data"):
+				var _bsd = node["_stroke_data"]
+				var _bsr = _writer.get_sub_resources()[-1]
+				_bsr["properties"]["shader_parameter/border_width"] = _bsd["width"]
+				if _bsd.get("gradient", false):
+					var _bstops = _bsd["stops"]
+					_bsr["properties"]["shader_parameter/use_border_gradient"] = true
+					_bsr["properties"]["shader_parameter/border_grad_c1"] = FigmaImporterUtils._figma_color_to_godot(_bstops[0].get("color", {}))
+					_bsr["properties"]["shader_parameter/border_grad_c2"] = FigmaImporterUtils._figma_color_to_godot(_bstops[1].get("color", {}))
+					if _bstops.size() >= 3:
+						_bsr["properties"]["shader_parameter/border_grad_c3"] = FigmaImporterUtils._figma_color_to_godot(_bstops[2].get("color", {}))
+						_bsr["properties"]["shader_parameter/border_stop_count"] = 3
+						_bsr["properties"]["shader_parameter/border_stop2"] = float(_bstops[1].get("position", 0.5))
+						_bsr["properties"]["shader_parameter/border_stop3"] = float(_bstops[2].get("position", 1.0))
+					else:
+						_bsr["properties"]["shader_parameter/border_stop_count"] = 2
+					_bsr["properties"]["shader_parameter/border_grad_start"] = "Vector2(%f, %f)" % [_bsd["start"][0], _bsd["start"][1]]
+					_bsr["properties"]["shader_parameter/border_grad_end"] = "Vector2(%f, %f)" % [_bsd["end"][0], _bsd["end"][1]]
+				else:
+					_bsr["properties"]["shader_parameter/border_color"] = _bsd["color"]
 	elif properties.has("theme_override_styles/panel"):
 		# 有样式（填充/描边）→ Panel
 		if godot_type == "Control":
@@ -451,7 +472,22 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			if node.has("_stroke_data"):
 				var sd = node["_stroke_data"]
 				panel_shader_props["shader_parameter/border_width"] = sd["width"]
-				panel_shader_props["shader_parameter/border_color"] = sd["color"]
+				if sd.get("gradient", false):
+					var _pstops = sd["stops"]
+					panel_shader_props["shader_parameter/use_border_gradient"] = true
+					panel_shader_props["shader_parameter/border_grad_c1"] = FigmaImporterUtils._figma_color_to_godot(_pstops[0].get("color", {}))
+					panel_shader_props["shader_parameter/border_grad_c2"] = FigmaImporterUtils._figma_color_to_godot(_pstops[1].get("color", {}))
+					if _pstops.size() >= 3:
+						panel_shader_props["shader_parameter/border_grad_c3"] = FigmaImporterUtils._figma_color_to_godot(_pstops[2].get("color", {}))
+						panel_shader_props["shader_parameter/border_stop_count"] = 3
+						panel_shader_props["shader_parameter/border_stop2"] = float(_pstops[1].get("position", 0.5))
+						panel_shader_props["shader_parameter/border_stop3"] = float(_pstops[2].get("position", 1.0))
+					else:
+						panel_shader_props["shader_parameter/border_stop_count"] = 2
+					panel_shader_props["shader_parameter/border_grad_start"] = "Vector2(%f, %f)" % [sd["start"][0], sd["start"][1]]
+					panel_shader_props["shader_parameter/border_grad_end"] = "Vector2(%f, %f)" % [sd["end"][0], sd["end"][1]]
+				else:
+					panel_shader_props["shader_parameter/border_color"] = sd["color"]
 			# 外发光：传递到 shader
 			if node.has("_glow_data"):
 				var gd2 = node["_glow_data"]
@@ -694,6 +730,25 @@ func _apply_styles(node: Dictionary, properties: Dictionary, node_id: String) ->
 				# VECTOR ��型已有纹理，不需要 panel 样式
 				if node_type != "VECTOR" and node_type != "BOOLEAN_OPERATION" and not properties.has("theme_override_styles/panel"):
 					properties["theme_override_styles/panel"] = _create_border_style_ex(stroke_color, border_w, int(tl), int(tr), int(bl), int(br))
+			elif stroke.get("type", "").begins_with("GRADIENT_"):
+				var _gstops = stroke.get("gradientStops", [])
+				if _gstops.size() >= 2:
+					var _gt = stroke.get("gradientTransform", [[1, 0, 0], [0, 1, 0]])
+					var _sx = _gt[0][2]
+					var _sy = _gt[1][2]
+					var _ex = _gt[0][0] + _gt[0][2]
+					var _ey = _gt[1][0] + _gt[1][2]
+					if abs(_ey - _sy) > abs(_ex - _sx):
+						var _tx = _sx; var _ty = _sy
+						_sx = _ex; _sy = _ey; _ex = _tx; _ey = _ty
+					var _bw = stroke_weight if stroke_weight >= 0.5 else 1
+					node["_stroke_data"] = {
+						"gradient": true,
+						"stops": _gstops,
+						"start": [_sx, _sy],
+						"end": [_ex, _ey],
+						"width": _bw,
+					}
 
 	# 若有圆角但尚无 panel，先建透明背景 panel（供阴影合并 & 圆角渲染；TEXT 跳过）
 	if not is_text and (tl > 0 or tr > 0 or bl > 0 or br > 0) and not properties.has("theme_override_styles/panel"):

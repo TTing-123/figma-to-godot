@@ -239,7 +239,15 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			#   offset_left = x + (w/2)(cosθ-1) + (h/2)sinθ   (Figma y-down M=[[cos,sin],[-sin,cos]])
 			#   offset_top  = y - (w/2)sinθ + (h/2)(cosθ-1)
 			var _erot = node.get("rotation", 0.0)
-			if _erot != 0.0:
+			# 反射(rotation=0 但 det<0，如垂直镜像 GROUP)也走中心算法：反射轴上 origin≠bbox 左上，
+			# 而 _rel=absoluteX/Y 差=origin 差，直接用会让容器偏一个 size(Group_3_1 垂直反射 m11=-1，offset_top 偏下 height=25)。
+			# GROUP 不设 scale(避免双重翻转)，但 offset 必须经 M·(hw,hh) 由 origin 修正到 bbox 左上。
+			var _reflected = false
+			if node_type == "GROUP" and node.has("relativeTransform") and node["relativeTransform"] != null:
+				var _m = node["relativeTransform"]
+				if float(_m[0][0]) * float(_m[1][1]) - float(_m[0][1]) * float(_m[1][0]) < 0:
+					_reflected = true
+			if _erot != 0.0 or _reflected:
 				var _hw = width / 2.0
 				var _hh = height / 2.0
 				var _cx: float
@@ -826,21 +834,42 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 	var font_size = style.get("fontSize", 16)
 	properties["theme_override_font_sizes/font_size"] = font_size
 
-	# 字体
+	# 字体（含兜底：缺失精确 weight 时 fallback 到同 family 保证位置正确；完全缺失则标记 + 警告，不再静默用默认字体）
 	var font_family = style.get("fontFamily", "")
 	var font_weight = style.get("fontWeight", "")
 	if font_family and font_weight:
 		var font_key = "%s_%s" % [font_family, font_weight]
-		if _fonts.lookup(font_key) != "":
-			var font_path = _fonts.lookup(font_key)
+		var font_path = _fonts.lookup(font_key)
+		if font_path != "":
 			var res_id = _writer.add_ext_resource("FontFile", font_path)
 			properties["theme_override_fonts/font"] = 'ExtResource("%d")' % res_id
+			# fallback：已绑定（位置正确），但字形可能与 Figma 不一致，节点标记 + 警告
+			if _fonts.lookup_status(font_key) == "fallback":
+				properties["metadata/_figma_font_fallback"] = true
+				push_warning("[FigmaImporter] \"%s\" 字体 %s %s 缺失精确文件，已 fallback 到同 family（位置正确，字形可能不一致）" % [node.get("name", ""), font_family, font_weight])
+		else:
+			# 缺失：未绑定字体，位置/字形将与 Figma 不一致，节点标记 + 警告
+			properties["metadata/_figma_font_missing"] = true
+			push_warning("[FigmaImporter] \"%s\" 字体 %s %s 缺失，未绑定（请下载 .ttf 到 figma_export_assets/fonts/ 后重新导入）" % [node.get("name", ""), font_family, font_weight])
 
-	# 文本颜色（fills 中第一个 SOLID 填充）
+	# 文本颜色：SOLID 直接取；GRADIENT 取中点(position≈0.5)stop 色作单色近似
+	# （Godot Label font_color 仅单色，不支持渐变填充；丢失渐变但保留代表色，如 Kronor 金色）
 	for fill in node.get("fills", []):
-		if fill.get("type") == "SOLID":
-			var color = FigmaImporterUtils._figma_color_to_godot(fill.get("color", {}))
-			properties["theme_override_colors/font_color"] = color
+		var _ftype = fill.get("type", "")
+		if _ftype == "SOLID":
+			properties["theme_override_colors/font_color"] = FigmaImporterUtils._figma_color_to_godot(fill.get("color", {}))
+			break
+		elif _ftype.begins_with("GRADIENT"):
+			var _stops = fill.get("gradientStops", [])
+			if _stops.size() > 0:
+				var _best = _stops[0]
+				var _best_d = abs(float(_stops[0].get("position", 0)) - 0.5)
+				for _s in _stops:
+					var _d = abs(float(_s.get("position", 0)) - 0.5)
+					if _d < _best_d:
+						_best = _s
+						_best_d = _d
+				properties["theme_override_colors/font_color"] = FigmaImporterUtils._figma_color_to_godot(_best.get("color", {}))
 			break
 
 	# 行高
@@ -930,16 +959,25 @@ func _apply_text_properties(node: Dictionary, properties: Dictionary) -> void:
 				_f.close()
 				var _font = FontFile.new()
 				_font.data = _data
+				# 水平：字符实际推进宽度（figma 框宽 < 字符宽时，避免 Godot Label 被 minimum_size 撑大导致偏移）
+				_godot_rw = _font.get_string_size(_text, 0, -1, font_size).x
 				var _ascent = _font.get_ascent(font_size)
 				var _descent = _font.get_descent(font_size)
 				if _ascent > 0 and _descent > 0:
 					_godot_rh = _ascent + _descent
 
-	var ol = _ol + (_fw - _godot_rw) / 2.0
+	# 水平 offset：rect 宽=字符推进宽度 _godot_rw，按对齐让字符锚点对齐 Figma 框对应位置
+	# （字符宽 > Figma 框宽时，避免 Godot Label 被 minimum_size 撑大、offset_left 不变而整体偏移）
+	var _ha = int(properties.get("horizontal_alignment", 0))
+	var ol = _ol  # LEFT / JUSTIFIED：字符左边对齐 Figma 框左边
+	if _ha == 1:  # CENTER：字符中心对齐 Figma 框中心
+		ol = _ol + (_fw - _godot_rw) / 2.0
+	elif _ha == 2:  # RIGHT：字符右边对齐 Figma 框右边
+		ol = _ol + (_fw - _godot_rw)
 	var ot = _ot + (_fh - _godot_rh) / 2.0
 	properties["offset_left"] = ol
 	properties["offset_top"] = ot
-	properties["offset_right"] = ol + _fw
+	properties["offset_right"] = ol + _godot_rw
 	properties["offset_bottom"] = ot + _fh
 
 	# ── textAutoResize 控制尺寸行为 ──

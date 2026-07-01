@@ -123,13 +123,10 @@ static func _collect_fonts_recursive(dir_path: String, result: PackedStringArray
 # family 名比较前去除空格：导出端下载文件名去空格(如 "ElMessiri-Bold.ttf")，
 # 而 Figma family 带空格("El Messiri")，直接 contains 永远不命中 → 退回网络下载。
 # 归一后本地即可命中，加载不再依赖网络。
-static func _find_matching_font(family: String, style: String, available_fonts: PackedStringArray) -> String:
-	# 将字体名称转换为小写用于比较（family 去空格以匹配去空格的下载文件名）
-	var family_lower = family.to_lower().replace(" ", "")
-	var style_lower = style.to_lower()
 
-	# 常见的样式映射
-	var style_aliases = {
+# 样式别名映射（精确匹配/判断共用）：Figma weight 名 → 文件名常见后缀
+static func _font_style_aliases() -> Dictionary:
+	return {
 		"regular": ["regular", "normal", "book", "roman"],
 		"bold": ["bold", "heavy", "black"],
 		"italic": ["italic", "oblique", "slanted"],
@@ -137,6 +134,30 @@ static func _find_matching_font(family: String, style: String, available_fonts: 
 		"light": ["light", "thin", "hairline"],
 		"medium": ["medium", "semibold", "demi"],
 	}
+
+# 判断已匹配的字体文件是否精确对应请求的 style（含别名）。
+# Regular 特判：文件名不含任何 weight 后缀时视为 regular。
+# 用于区分"精确匹配"与"仅 family 级 fallback"，决定是否标记字形不一致。
+static func _is_font_style_match(font_path: String, style: String) -> bool:
+	var file_name = font_path.get_file().get_basename().to_lower().replace(" ", "")
+	var style_lower = style.to_lower()
+	if file_name.contains(style_lower):
+		return true
+	for alias in _font_style_aliases().get(style_lower, [style_lower]):
+		if file_name.contains(alias):
+			return true
+	if style_lower == "regular" or style_lower == "normal":
+		for s in ["bold", "italic", "light", "medium", "thin", "heavy", "semibold", "demi", "black"]:
+			if file_name.contains(s):
+				return false
+		return true
+	return false
+
+static func _find_matching_font(family: String, style: String, available_fonts: PackedStringArray) -> String:
+	# 将字体名称转换为小写用于比较（family 去空格以匹配去空格的下载文件名）
+	var family_lower = family.to_lower().replace(" ", "")
+	var style_lower = style.to_lower()
+	var style_aliases = _font_style_aliases()
 
 	# 第一轮：精确匹配（文件名包含 family + style）
 	for font_path in available_fonts:

@@ -348,6 +348,7 @@ func _process_node(node: Dictionary, parent_path: String, depth: int) -> void:
 			var shader_id = _writer.add_sub_resource("ShaderMaterial", {
 				"shader": 'ExtResource("shader_rounded")',
 				"shader_parameter/corner_radius": shader_radius,
+				"shader_parameter/corner_radiuses": "Vector4(%f, %f, %f, %f)" % [max(br, parent_radius), max(tr, parent_radius), max(bl, parent_radius), max(tl, parent_radius)],
 				"shader_parameter/target_size": "Vector2(%f, %f)" % [width, height],
 				"shader_parameter/parent_corner_radius": 0.0,
 				"shader_parameter/parent_size": "Vector2(%f, %f)" % [width, height],

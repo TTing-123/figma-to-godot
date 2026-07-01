@@ -234,7 +234,8 @@ void fragment() {
 		float lum = dot(c, vec3(0.299, 0.587, 0.114));
 		// 高光/阴影用乘法 gain（按比例），避免加法偏移把暗部 clamp 成死黑
 		c *= 1.0 + img_highlights * smoothstep(0.5, 1.0, lum) * 0.5;
-		c *= 1.0 + img_shadows * (1.0 - smoothstep(0.0, 0.5, lum)) * 0.5;
+		float shadowMask = 1.0 - smoothstep(0.4, 0.7, lum);
+		c *= 1.0 + img_shadows * shadowMask;
 		COLOR.rgb = clamp(c, 0.0, 1.0);
 	}
 	// 内阴影（移至纹理/色彩调整之后，确保叠加在图片之上；仅在形状内 d<0 绘制）
